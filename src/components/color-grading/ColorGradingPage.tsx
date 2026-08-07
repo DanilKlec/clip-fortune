@@ -169,7 +169,7 @@ export function ColorGradingPage() {
           until you generate.
         </p>
 
-        <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
           {/* Preview column */}
           <div className="glass min-w-0 rounded-2xl p-4 sm:p-5" style={{ boxShadow: "var(--shadow-card)" }}>
             <div
