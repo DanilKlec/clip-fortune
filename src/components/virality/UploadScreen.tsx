@@ -195,11 +195,9 @@ export function UploadScreen({ initialFile, usage }: Props) {
                   <div className="flex h-full w-full items-stretch justify-start gap-3 sm:gap-4 lg:justify-center">
                     {previewUrl ? (
                       <div
-                        className="pointer-events-none aspect-[9/16] h-full shrink-0 overflow-hidden rounded-xl border"
+                        className="pointer-events-none aspect-[9/16] h-full shrink-0 overflow-hidden rounded-xl border border-card-border bg-tile"
                         style={{
-                          borderColor: "var(--card-border)",
-                          boxShadow: "0 4px 14px rgba(0,0,0,0.10)",
-                          background: "var(--tile)",
+                          boxShadow: "var(--shadow-card)",
                           maxWidth: "45%",
                         }}
                       >

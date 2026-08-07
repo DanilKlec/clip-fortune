@@ -7,14 +7,14 @@ function ModelLogo({ model }: { model: NavMenuModel }) {
 
   if (!model.logo || errored) {
     return (
-      <div className="h-10 w-10 rounded-lg bg-white/[0.06] flex items-center justify-center shrink-0 text-sm font-bold text-foreground">
+      <div className="h-10 w-10 rounded-lg bg-tile flex items-center justify-center shrink-0 text-sm font-bold text-foreground">
         {model.provider.charAt(0).toUpperCase()}
       </div>
     );
   }
 
   return (
-    <div className="h-10 w-10 rounded-lg bg-white/[0.06] flex items-center justify-center shrink-0 p-2">
+    <div className="h-10 w-10 rounded-lg bg-tile flex items-center justify-center shrink-0 p-2">
       <img
         src={model.logo}
         alt={model.provider}
@@ -28,16 +28,16 @@ function ModelLogo({ model }: { model: NavMenuModel }) {
 
 function TagBadge({ tag }: { tag: string }) {
   return (
-    <div className="inline-flex items-center transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium border border-amber-500/26 bg-amber-500/12 text-amber-300 hover:bg-amber-500/16">
+    <span className="badge-sky">
       {tag}
-    </div>
+    </span>
   );
 }
 
 const sectionLabel =
   "text-[10px] font-bold text-muted-foreground uppercase tracking-[0.16em] mb-3 px-1";
 const rowClass =
-  "group flex items-center gap-3 p-3 rounded-lg border border-transparent hover:bg-white/5 hover:border-white/[0.08] transition-all duration-150";
+  "group flex items-center gap-3 p-3 rounded-lg border border-transparent hover:bg-surface-hover hover:border-card-border transition-all duration-150";
 const itemName = "text-sm font-semibold text-foreground line-clamp-1 font-display tracking-tight";
 const itemDesc = "text-xs text-muted-foreground line-clamp-2 mt-0.5 font-light";
 const seeAll =
@@ -47,7 +47,7 @@ export function NavMegaMenu({ verb, onNavigate }: { verb: NavVerb; onNavigate?: 
   const { models, modelsAllTo, label, subtitle, studioTo, studioLabel } = NAV_MENUS[verb];
 
   return (
-    <div className="w-[460px] p-5 bg-popover border border-white/[0.08] rounded-2xl shadow-[0_24px_64px_rgba(0,0,0,0.6)]">
+    <div className="w-[460px] p-5 bg-popover border border-card-border rounded-2xl shadow-[0_24px_64px_rgba(0,0,0,0.6)]">
       <div className="mb-3 px-1">
         <p className="font-display font-bold text-[1rem] text-foreground">{label}</p>
         <p className="text-xs text-muted-foreground font-light">{subtitle}</p>
