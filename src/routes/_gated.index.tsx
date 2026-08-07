@@ -1,22 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { UploadScreen } from "@/components/virality/UploadScreen";
+import { ColorGradingPage } from "@/components/color-grading/ColorGradingPage";
 import { RateLimitModal } from "@/components/virality/RateLimitModal";
 import { useViralitySession } from "@/lib/virality-session";
 
 export const Route = createFileRoute("/_gated/")({
   head: () => ({
     meta: [
-      { title: "Viral Potential Predictor — Robinzone" },
+      { title: "AI Color Grading — Robinzone" },
       {
         name: "description",
         content:
-          "Upload a short clip and get a modeled read on its hook strength, attention curve, and viral potential.",
+          "Upload your images and grade them in the browser: presets, live temperature, contrast, highlights and film grain, with before/after compare.",
       },
-      { property: "og:title", content: "Viral Potential Predictor — Robinzone" },
+      { property: "og:title", content: "AI Color Grading — Robinzone" },
       {
         property: "og:description",
         content:
-          "Predict how viral your video hook is before you post — hook strength, attention curve, brain signals.",
+          "Cinematic color grading for your stills — live presets, precise sliders, instant before/after and one-click download.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -26,10 +26,10 @@ export const Route = createFileRoute("/_gated/")({
 });
 
 function Index() {
-  const { file, usage, rateLimit, clearRateLimit } = useViralitySession();
+  const { rateLimit, clearRateLimit } = useViralitySession();
   return (
     <main className="min-h-screen">
-      <UploadScreen initialFile={file} usage={usage} />
+      <ColorGradingPage />
       <RateLimitModal
         open={rateLimit !== null}
         usage={rateLimit}
