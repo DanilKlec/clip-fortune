@@ -1,0 +1,750 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Robinzone design system.
+ * Dark near-black surfaces + chartreuse/lime primary + cyan secondary accents.
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  /* Core tokens mirror robinzone.ai exactly. */
+  --radius: 0.625rem;
+  --header-height: 64px;
+  --header-total: calc(var(--header-height) + env(safe-area-inset-top, 0px));
+
+  --background: hsl(232 18% 9%);
+  --foreground: hsl(228 55% 95%);
+  --card: hsl(232 16% 14%);
+  --card-foreground: hsl(228 55% 95%);
+  --popover: hsl(232 18% 12%);
+  --popover-foreground: hsl(228 55% 95%);
+
+  --primary: hsl(72 100% 50%);
+  --primary-foreground: hsl(84 100% 4%);
+
+  --secondary: hsl(232 14% 21%);
+  --secondary-foreground: hsl(228 55% 95%);
+  --muted: hsl(232 12% 26%);
+  --muted-foreground: hsl(228 18% 68%);
+  --accent: hsl(72 100% 50%);
+  --accent-foreground: hsl(84 100% 4%);
+
+  --destructive: hsl(4 100% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --success: hsl(150 100% 60%);
+  --success-foreground: hsl(150 100% 4%);
+
+  --border: hsl(230 20% 14%);
+  --input: hsl(232 18% 12%);
+  --ring: hsl(72 100% 50%);
+
+  --surface-elevated: hsl(232 16% 17%);
+  --surface-hover: hsl(232 14% 24%);
+
+  /* Brand tokens (retuned to Robinzone; keep names for backward-compat) */
+  --volt: #c8ff00;
+  --volt-h: #d8ff44;
+  --volt-dim: rgba(200, 255, 0, 0.10);
+  --volt-bdr: rgba(200, 255, 0, 0.22);
+  --volt-txt: #0a1100;
+  --sky: #00c2ff;
+  --sky-h: #33ceff;
+  --sky-dim: rgba(0, 194, 255, 0.10);
+  --sky-bdr: rgba(0, 194, 255, 0.22);
+  --sky-txt: #001a24;
+  --footer-bg: #03131a;
+  --brand-purple: #00c2ff;
+  --brand-pink: #c8ff00;
+  --brand-amber: #c8ff00;
+  --brand-ink: #ffffff;
+  --brand-lime: #c8ff00;
+  --brand-cyan: #00c2ff;
+  --gradient-brand: linear-gradient(135deg, #c8ff00 0%, #00c2ff 100%);
+  --gradient-hero: linear-gradient(180deg, var(--popover) 0%, var(--background) 70%);
+  --glow-brand: 0 0 32px rgba(200, 255, 0, 0.20), 0 0 80px rgba(200, 255, 0, 0.08);
+  --brand-pink-tint: rgba(200, 255, 0, 0.10);
+  --brand-purple-tint: rgba(0, 194, 255, 0.10);
+  --plasma: #9f6eff;
+  --plasma-h: #b389ff;
+  --plasma-dim: rgba(159, 110, 255, 0.10);
+  --plasma-bdr: rgba(159, 110, 255, 0.22);
+  --plasma-txt: #0f0820;
+  --coral: #ff4d3d;
+  --coral-dim: rgba(255, 77, 61, 0.10);
+  --coral-bdr: rgba(255, 77, 61, 0.22);
+  --lime: #39ff88;
+  --lime-dim: rgba(57, 255, 136, 0.10);
+  --lime-bdr: rgba(57, 255, 136, 0.22);
+  --violet: #9f6eff;
+  --violet-dim: rgba(159, 110, 255, 0.10);
+  --violet-bdr: rgba(159, 110, 255, 0.22);
+  --t0: #ffffff;
+  --t1: #e2e6f4;
+  --t2: #9098b8;
+  --t3: #5c6280;
+  --t4: #363d56;
+  --danger: hsl(4 100% 60%);
+  --danger-tint: rgba(255, 61, 41, 0.12);
+  --amber: #fbbf24;
+  --amber-tint: rgba(251, 191, 36, 0.12);
+  --success: hsl(150 100% 60%);
+  --text-secondary: hsl(228 18% 68%);
+  --text-tertiary: rgba(255, 255, 255, 0.35);
+  --tile: rgba(255, 255, 255, 0.04);
+  --card-bg: hsl(232 16% 14%);
+  --card-border: rgba(255, 255, 255, 0.10);
+  --shadow-card:
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 12px 32px rgba(0, 0, 0, 0.3);
+
+  --chart-1: #c8ff00;
+  --chart-2: #a6e838;
+  --chart-3: #00c2ff;
+  --chart-4: #fbbf24;
+  --chart-5: #ff5a4a;
+  --sidebar: hsl(232 20% 11%);
+  --sidebar-foreground: hsl(228 55% 95%);
+  --sidebar-primary: hsl(72 100% 50%);
+  --sidebar-primary-foreground: hsl(84 100% 4%);
+  --sidebar-accent: hsl(232 18% 12%);
+  --sidebar-accent-foreground: hsl(228 55% 95%);
+  --sidebar-border: hsl(230 20% 14%);
+  --sidebar-ring: hsl(72 100% 50%);
+}
+
+.dark {
+  --background: hsl(232 18% 9%);
+  --foreground: hsl(228 55% 95%);
+  --card: hsl(232 16% 14%);
+  --card-foreground: hsl(228 55% 95%);
+  --popover: hsl(232 18% 12%);
+  --popover-foreground: hsl(228 55% 95%);
+  --primary: hsl(72 100% 50%);
+  --primary-foreground: hsl(84 100% 4%);
+  --secondary: hsl(232 14% 21%);
+  --secondary-foreground: hsl(228 55% 95%);
+  --muted: hsl(232 12% 26%);
+  --muted-foreground: hsl(228 18% 68%);
+  --accent: hsl(72 100% 50%);
+  --accent-foreground: hsl(84 100% 4%);
+  --destructive: hsl(4 100% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(230 20% 14%);
+  --input: hsl(232 18% 12%);
+  --ring: hsl(72 100% 50%);
+  --sidebar: hsl(232 20% 11%);
+  --sidebar-foreground: hsl(228 55% 95%);
+  --sidebar-primary: hsl(72 100% 50%);
+  --sidebar-primary-foreground: hsl(84 100% 4%);
+  --sidebar-accent: hsl(232 18% 12%);
+  --sidebar-accent-foreground: hsl(228 55% 95%);
+  --sidebar-border: hsl(230 20% 14%);
+  --sidebar-ring: hsl(72 100% 50%);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    color-scheme: dark;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    touch-action: manipulation;
+  }
+
+  html,
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  body {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    min-height: min(100dvh, var(--vvh, 100dvh));
+    overflow-x: clip;
+    overscroll-behavior-x: none;
+    font-family:
+      "Plus Jakarta Sans",
+      system-ui,
+      -apple-system,
+      ui-sans-serif,
+      sans-serif;
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 1.55;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1,
+      "ss01" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  #root {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: clip;
+    isolation: isolate;
+  }
+
+  @supports not (overflow: clip) {
+    html,
+    body,
+    #root {
+      overflow-x: hidden;
+    }
+  }
+
+  /* Media — never wider than container. */
+  img, video, svg, canvas, iframe {
+    max-width: 100%;
+    display: block;
+  }
+  img, video, canvas, iframe {
+    height: auto;
+  }
+  /* Lucide / sized icons keep their explicit dimensions. */
+  svg.lucide,
+  svg[width][height],
+  [data-fixed-size] {
+    height: revert;
+    max-width: revert;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+    letter-spacing: -0.025em;
+    font-weight: 700;
+    line-height: 1.05;
+  }
+
+  h1 { font-weight: 800; }
+  h2 { font-weight: 700; }
+  h3 { font-weight: 700; }
+
+  .display,
+  .font-display { font-family: "Plus Jakarta Sans", system-ui, sans-serif; }
+  .font-body    { font-family: "Plus Jakarta Sans", system-ui, sans-serif; }
+
+  code, kbd, pre, samp {
+    font-family: "JetBrains Mono", monospace;
+  }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.10);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.18);
+  }
+
+  /* iOS Safari zooms in on focus if input font-size < 16px. */
+  @media (max-width: 767px), (pointer: coarse) {
+    html,
+    body,
+    #root {
+      inline-size: 100% !important;
+      min-inline-size: 0 !important;
+      max-inline-size: 100% !important;
+      overflow-x: hidden !important;
+    }
+
+    body {
+      margin-inline: 0 !important;
+      padding-inline: 0 !important;
+      transform: none !important;
+      overscroll-behavior-x: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Allow flex/grid children to shrink rather than overflow. */
+    *,
+    *::before,
+    *::after {
+      min-inline-size: 0;
+    }
+
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+    select,
+    textarea {
+      font-size: 16px;
+    }
+  }
+
+  /* Tap targets — only on coarse pointers (phones/tablets). Keeps desktop dense. */
+  @media (pointer: coarse) {
+    button,
+    a[role="button"],
+    [role="button"],
+    input[type="submit"],
+    input[type="button"] {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+
+  /* Keep dark inputs when browser autofill or autocomplete suggestions are applied */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  textarea:-webkit-autofill:active,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus,
+  select:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #0b0d10 inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+    caret-color: #ffffff !important;
+    color: #ffffff !important;
+    background-color: #0b0d10 !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+}
+
+/*
+ * Unlayered on purpose: in Tailwind v4 utilities live in a cascade layer, so a
+ * `.button-cta` rule inside `@layer base` would lose to `bg-primary`.
+ * Top-level rules win, matching the v3 behaviour on robinzone.ai.
+ */
+.button-cta {
+  background-color: #c8ff00;
+  color: #0a1100;
+  box-shadow:
+    0 0 20px rgba(200, 255, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+.button-cta:hover {
+  background-color: #d8ff44;
+  box-shadow:
+    0 0 28px rgba(200, 255, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+.button-cta:active {
+  transform: scale(0.97);
+}
+
+@theme inline {
+  --color-brand-purple: var(--brand-purple);
+  --color-volt: var(--volt);
+  --color-sky: var(--sky);
+  --color-plasma: var(--plasma);
+  --color-coral: var(--coral);
+  --color-lime: var(--lime);
+  --color-violet: var(--violet);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-hover: var(--surface-hover);
+  --color-brand-pink: var(--brand-pink);
+  --color-brand-amber: var(--brand-amber);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-lime: var(--brand-lime);
+  --color-brand-cyan: var(--brand-cyan);
+  --color-danger: var(--danger);
+  --color-tile: var(--tile);
+  --shadow-card-hover: 0 12px 40px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4);
+  --font-serif: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@utility shadow-glow-volt {
+  box-shadow:
+    0 0 0 1px rgba(200, 255, 0, 0.18),
+    0 6px 22px rgba(200, 255, 0, 0.22);
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@utility animate-scale-in {
+  animation: scale-in 0.2s ease-out;
+}
+
+/* ------------------------------------------------------------------ *
+ * Design-system utilities — mirrors robinzone.ai. See DESIGN_SYSTEM.md
+ * ------------------------------------------------------------------ */
+
+/* Layout */
+@utility page-shell {
+  width: 100%;
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+  @media (min-width: 640px) {
+    padding-left: max(1.5rem, env(safe-area-inset-left));
+    padding-right: max(1.5rem, env(safe-area-inset-right));
+  }
+  @media (min-width: 1024px) {
+    padding-left: max(2rem, env(safe-area-inset-left));
+    padding-right: max(2rem, env(safe-area-inset-right));
+  }
+  @media (min-width: 1280px) {
+    padding-left: max(2.5rem, env(safe-area-inset-left));
+    padding-right: max(2.5rem, env(safe-area-inset-right));
+  }
+  @media (min-width: 1536px) {
+    padding-left: max(3rem, env(safe-area-inset-left));
+    padding-right: max(3rem, env(safe-area-inset-right));
+  }
+}
+
+@utility section-card-stack {
+  position: relative;
+  z-index: 1;
+  & ~ & {
+    margin-top: -20px;
+    z-index: 2;
+  }
+  @media (min-width: 768px) {
+    & ~ & {
+      margin-top: -32px;
+    }
+  }
+}
+
+@utility h-screen-safe {
+  height: min(100dvh, var(--vvh, 100dvh));
+}
+@utility min-h-screen-safe {
+  min-height: min(100dvh, var(--vvh, 100dvh));
+}
+@utility scrollable {
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+@utility mobile-bottom-nav-space {
+  padding-bottom: calc(60px + env(safe-area-inset-bottom) + var(--vv-bottom, 0px));
+  @media (min-width: 768px) {
+    padding-bottom: 0;
+  }
+}
+
+/* Surfaces */
+@utility glass {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--card);
+}
+
+/* Glows */
+@utility glow-volt {
+  box-shadow:
+    0 0 20px rgba(200, 255, 0, 0.25),
+    0 0 60px rgba(200, 255, 0, 0.08);
+}
+@utility glow-volt-btn {
+  box-shadow:
+    0 0 20px rgba(200, 255, 0, 0.25),
+    0 0 60px rgba(200, 255, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+@utility glow-sky {
+  box-shadow:
+    0 0 18px rgba(0, 194, 255, 0.22),
+    0 0 60px rgba(0, 194, 255, 0.08);
+}
+@utility glow-plasma {
+  box-shadow:
+    0 0 20px rgba(159, 110, 255, 0.22),
+    0 0 60px rgba(159, 110, 255, 0.08);
+}
+
+/* Text gradients */
+@utility text-gradient {
+  background: linear-gradient(135deg, var(--volt) 0%, var(--plasma) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+@utility text-gradient-volt-sky {
+  background: linear-gradient(135deg, #c8ff00 0%, #00c2ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+@utility text-gradient-volt {
+  background: linear-gradient(135deg, #c8ff00, #d8ff44);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+@utility bg-gradient-brand {
+  background: var(--gradient-brand);
+}
+
+/* Animations */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes glow-volt-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 20px rgba(200, 255, 0, 0.25),
+      0 0 60px rgba(200, 255, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
+  50% {
+    box-shadow:
+      0 0 32px rgba(200, 255, 0, 0.42),
+      0 0 100px rgba(200, 255, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+}
+@keyframes blink-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@utility animate-fade-up {
+  animation: fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@utility animate-page-in {
+  animation: fade-up 0.3s ease-out both;
+}
+@utility animate-marquee {
+  animation: marquee-scroll 48s linear infinite;
+}
+@utility animate-glow-volt {
+  animation: glow-volt-pulse 2.5s ease-in-out infinite;
+}
+@utility animate-glow-volt-pulse {
+  animation: glow-volt-pulse 3s ease-in-out infinite;
+}
+@utility animate-blink {
+  animation: blink-dot 2s ease-in-out infinite;
+}
+
+/* Buttons & badges (unlayered on purpose — must beat Tailwind utilities) */
+.button-sky {
+  background-color: #00c2ff;
+  color: #001a24;
+  font-weight: 600;
+  box-shadow:
+    0 0 18px rgba(0, 194, 255, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+.button-sky:hover {
+  background-color: #33ceff;
+  transform: translateY(-1px);
+}
+.button-utility {
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--secondary);
+  color: var(--foreground);
+}
+.button-meta {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.badge-volt,
+.badge-sky,
+.badge-plasma,
+.badge-coral,
+.badge-lime,
+.badge-violet {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+}
+.badge-volt {
+  color: var(--volt);
+  background: var(--volt-dim);
+  border-color: var(--volt-bdr);
+}
+.badge-sky {
+  color: var(--sky);
+  background: var(--sky-dim);
+  border-color: var(--sky-bdr);
+}
+.badge-plasma {
+  color: var(--plasma);
+  background: var(--plasma-dim);
+  border-color: var(--plasma-bdr);
+}
+.badge-coral {
+  color: var(--coral);
+  background: var(--coral-dim);
+  border-color: var(--coral-bdr);
+}
+.badge-lime {
+  color: var(--lime);
+  background: var(--lime-dim);
+  border-color: var(--lime-bdr);
+}
+.badge-violet {
+  color: var(--violet);
+  background: var(--violet-dim);
+  border-color: var(--violet-bdr);
+}
+
+/* Legal page typography */
+.legal-prose h2 {
+  font-family: var(--font-display, inherit);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: hsl(0 0% 100%);
+  margin-top: 2.5rem;
+  margin-bottom: 0.85rem;
+}
+.legal-prose h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: hsl(0 0% 100% / 0.92);
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+.legal-prose p {
+  margin-bottom: 1rem;
+}
+.legal-prose ul,
+.legal-prose ol {
+  margin: 0.75rem 0 1.25rem 1.25rem;
+  padding-left: 0.25rem;
+}
+.legal-prose ul {
+  list-style: disc;
+}
+.legal-prose ol {
+  list-style: decimal;
+}
+.legal-prose li {
+  margin-bottom: 0.4rem;
+}
+.legal-prose a {
+  color: hsl(72 100% 50%);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.legal-prose a:hover {
+  color: hsl(72 100% 65%);
+}
+.legal-prose strong {
+  color: hsl(0 0% 100%);
+  font-weight: 600;
+}
+
+/* Accessibility: respect reduced motion globally */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
