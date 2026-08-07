@@ -213,7 +213,7 @@ export function LoginOverlay() {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-3 py-6"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-background/50 px-3 py-6"
       aria-modal="true"
       role="dialog"
     >
@@ -324,7 +324,7 @@ function EmailStep({
 
       <form onSubmit={onSubmit} className="mt-6 flex w-full max-w-[400px] flex-col gap-3">
         <div
-          className={`flex h-12 items-center gap-2 rounded-full border bg-secondary px-4 transition-colors ${email ? "border-primary" : "border-white/10"}`}
+          className={`flex h-12 items-center gap-2 rounded-full border bg-secondary px-4 transition-colors ${email ? "border-primary" : "border-card-border"}`}
         >
           <Mail size={18} className="text-muted-foreground" />
           <input
