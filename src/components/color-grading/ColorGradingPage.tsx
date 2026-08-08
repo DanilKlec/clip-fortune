@@ -169,9 +169,7 @@ export function ColorGradingPage() {
           aria-label="Breadcrumb"
           className="mb-4 flex items-center gap-2 text-[13px] font-medium text-muted-foreground sm:mb-6"
         >
-          <a href="#explore-apps" className="transition-colors hover:text-foreground">
-            Apps
-          </a>
+          <span className="transition-colors">Apps</span>
           <span aria-hidden>/</span>
           <span className="text-foreground">AI Color Grading</span>
         </nav>
@@ -290,8 +288,14 @@ export function ColorGradingPage() {
                     setActiveId(id);
                     invalidate();
                   }}
-                  onRemove={remove}
-                  onReplace={replace}
+                  onRemove={(id) => {
+                    invalidate();
+                    remove(id);
+                  }}
+                  onReplace={(id, file) => {
+                    invalidate();
+                    replace(id, file);
+                  }}
                   onAdd={acceptFiles}
                 />
               </div>

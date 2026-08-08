@@ -1,20 +1,26 @@
 import { ImagePlus, SlidersHorizontal, Download } from "lucide-react";
+import stepUpload from "@/assets/step-upload.jpg";
+import stepLook from "@/assets/step-look.jpg";
+import stepCompare from "@/assets/step-compare.jpg";
 
 const steps = [
   {
     icon: ImagePlus,
-    title: "Load your frames",
-    desc: "Drag in a single hero still or a whole batch. PNG, JPG and WebP all work, and the first image becomes your reference frame.",
+    image: stepUpload,
+    title: "Upload your images",
+    desc: "Drop one still or a whole batch — PNG, JPG or WebP. The first frame becomes your reference for the look.",
   },
   {
     icon: SlidersHorizontal,
-    title: "Shape the look",
-    desc: "Pick a starting preset, then push temperature, contrast, highlights and grain until the frame reads the way you want it to.",
+    image: stepLook,
+    title: "Build your look",
+    desc: "Start from a preset, then push temperature, contrast, highlights and grain until the frame reads right.",
   },
   {
     icon: Download,
-    title: "Render and keep it",
-    desc: "Generate the graded version, compare it against the original, and download the file ready for your edit or feed.",
+    image: stepCompare,
+    title: "Compare and download",
+    desc: "Drag the handle to check the grade against the original, then export the finished file in one click.",
   },
 ];
 
@@ -34,7 +40,17 @@ export function ThreeSteps() {
             className="glass rounded-2xl p-5"
             style={{ boxShadow: "var(--shadow-card)" }}
           >
-            <div className="flex items-center gap-3">
+            <div className="overflow-hidden rounded-xl border border-white/10">
+              <img
+                src={s.image}
+                alt=""
+                loading="lazy"
+                width={900}
+                height={640}
+                className="h-[150px] w-full object-cover sm:h-[170px]"
+              />
+            </div>
+            <div className="mt-4 flex items-center gap-3">
               <span
                 className="flex h-11 w-11 items-center justify-center rounded-full"
                 style={{ background: "var(--volt-dim)" }}
