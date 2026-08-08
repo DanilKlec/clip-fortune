@@ -1,11 +1,11 @@
 import { useState } from "react";
-import sampleImage from "@/assets/drop-visual-ref.png.asset.json";
+import sampleImage from "@/assets/grading-demo.jpg";
 import { BeforeAfter } from "../BeforeAfter";
 import { GradedImage } from "../GradedImage";
 import { NEUTRAL, PRESETS, type Preset } from "../grading";
 
 const showcase: Preset[] = PRESETS.filter((p) =>
-  ["warm-film", "cool-cinema", "teal-orange", "16mm", "faded-film"].includes(p.id),
+  ["natural", "split-tone", "soft-skin", "old-lens", "16mm"].includes(p.id),
 );
 
 export function SeeItInAction() {
@@ -31,7 +31,7 @@ export function SeeItInAction() {
           label="Sample before and after"
           before={
             <GradedImage
-              src={sampleImage.url}
+              src={sampleImage}
               alt="Untouched sample frame"
               adjustments={NEUTRAL}
               className="w-full"
@@ -40,7 +40,7 @@ export function SeeItInAction() {
           }
           after={
             <GradedImage
-              src={sampleImage.url}
+              src={sampleImage}
               alt={`Sample frame graded with ${preset.name}`}
               adjustments={preset.values}
               className="w-full"

@@ -54,19 +54,9 @@ const p = (v: Partial<Adjustments>): Adjustments => ({ ...NEUTRAL, ...v });
 export const PRESETS: Preset[] = [
   { id: "natural", name: "Natural", values: p({}) },
   {
-    id: "warm-film",
-    name: "Warm Film",
-    values: p({ temperature: 38, contrast: 12, saturation: 10, grain: 18 }),
-  },
-  {
-    id: "cool-cinema",
-    name: "Cool Cinema",
-    values: p({ temperature: -42, contrast: 20, saturation: -8, highlights: -14 }),
-  },
-  {
-    id: "teal-orange",
-    name: "Teal & Orange",
-    values: p({ temperature: 26, contrast: 26, saturation: 28, highlights: -10 }),
+    id: "split-tone",
+    name: "Split Tone",
+    values: p({ temperature: -22, contrast: 18, saturation: 16, highlights: 18 }),
   },
   {
     id: "soft-skin",
@@ -84,6 +74,21 @@ export const PRESETS: Preset[] = [
     values: p({ temperature: 10, contrast: 16, saturation: -10, grain: 55, sharpness: 20 }),
   },
   {
+    id: "warm-film",
+    name: "Warm Film",
+    values: p({ temperature: 38, contrast: 12, saturation: 10, grain: 18 }),
+  },
+  {
+    id: "cool-cinema",
+    name: "Cool Cinema",
+    values: p({ temperature: -42, contrast: 20, saturation: -8, highlights: -14 }),
+  },
+  {
+    id: "teal-orange",
+    name: "Teal & Orange",
+    values: p({ temperature: 26, contrast: 26, saturation: 28, highlights: -10 }),
+  },
+  {
     id: "faded-film",
     name: "Faded Film",
     values: p({ temperature: -6, contrast: -26, saturation: -18, highlights: 24, grain: 22 }),
@@ -93,7 +98,6 @@ export const PRESETS: Preset[] = [
     name: "High Contrast",
     values: p({ contrast: 52, saturation: 12, highlights: -18, sharpness: 34 }),
   },
-  { id: "custom", name: "Custom", values: p({ temperature: 8, contrast: 8, saturation: 8 }) },
 ];
 
 /** Tint colours are image-processing constants, not UI theme colours. */

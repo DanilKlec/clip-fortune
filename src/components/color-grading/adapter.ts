@@ -1,17 +1,21 @@
 import { buildLayers, type Adjustments } from "./grading";
 
-export interface GradeRequest {
-  imageUrl: string;
+/** Single integration point — swap the mock for Fal.ai without UI changes. */
+export interface ColorGradeRequest {
+  images: File[];
   prompt: string;
+  presetId: string | null;
   adjustments: Adjustments;
 }
 
-export interface GradeResult {
-  /** Object URL of the graded image — caller owns revoking it. */
-  url: string;
+export interface ColorGradeResult {
+  /** Object URL (or remote URL) of the graded image. */
+  imageUrl: string;
 }
 
-export type GradeAdapter = (req: GradeRequest) => Promise<GradeResult>;
+export type ColorGradeAdapter = (
+  req: ColorGradeRequest,
+) => Promise<ColorGradeResult>;
 
 function loadImage(src: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
@@ -28,11 +32,19 @@ function loadImage(src: string) {
  * adjustments onto a canvas and returns an object URL. Swapping this adapter
  * for a real API call requires no UI changes.
  */
-export const generateColorGradeMock: GradeAdapter = async ({
-  imageUrl,
+export const generateColorGradeMock: ColorGradeAdapter = async ({
+  images,
   adjustments,
 }) => {
-  const img = await loadImage(imageUrl);
+  const file = images[0];
+  if (!file) throw new Error("No image selected");
+  const src = URL.createObjectURL(file);
+  let img: HTMLImageElement;
+  try {
+    img = await loadImage(src);
+  } finally {
+    URL.revokeObjectURL(src);
+  }
   const maxSide = 1600;
   const scale = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
   const w = Math.max(1, Math.round(img.naturalWidth * scale));
@@ -82,5 +94,8 @@ export const generateColorGradeMock: GradeAdapter = async ({
     canvas.toBlob(resolve, "image/jpeg", 0.92),
   );
   if (!blob) throw new Error("Could not render the graded image");
-  return { url: URL.createObjectURL(blob) };
+  return { imageUrl: URL.createObjectURL(blob) };
 };
+
+/** UI calls only this. Point it at the real API later. */
+export const generateColorGrade: ColorGradeAdapter = generateColorGradeMock;

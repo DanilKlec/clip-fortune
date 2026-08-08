@@ -22,7 +22,7 @@ import { ImageTray } from "./ImageTray";
 import { AdjustmentPanel } from "./AdjustmentPanel";
 import { PresetPicker } from "./PresetPicker";
 import { ACCEPTED_LABEL, isAccepted, useImageLibrary } from "./useImageLibrary";
-import { generateColorGradeMock } from "./adapter";
+import { generateColorGrade } from "./adapter";
 import {
   NEUTRAL,
   PRESETS,
@@ -34,7 +34,7 @@ import {
 import { ThreeSteps } from "./sections/ThreeSteps";
 import { SeeItInAction } from "./sections/SeeItInAction";
 import { BuiltForCinematicLooks } from "./sections/BuiltForCinematicLooks";
-import { ExploreMoreApps } from "@/components/virality/landing/ExploreMoreApps";
+import demoPhoto from "@/assets/grading-demo.jpg";
 
 type Status = "idle" | "ready" | "generating" | "success" | "error";
 
@@ -51,6 +51,7 @@ export function ColorGradingPage() {
   const dropRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const resultRef = useRef<string | null>(null);
+  const runRef = useRef(0);
 
   const setResult = useCallback((url: string | null) => {
     if (resultRef.current) URL.revokeObjectURL(resultRef.current);
@@ -75,7 +76,15 @@ export function ColorGradingPage() {
     });
   }, [active]);
 
+  const invalidate = useCallback(() => {
+    runRef.current++;
+    setResult(null);
+    setError(null);
+    setStatus((s) => (s === "idle" || s === "generating" ? s : "ready"));
+  }, [setResult]);
+
   const acceptFiles = (list: FileList | null) => {
+    invalidate();
     if (!list || list.length === 0) return;
     const files = Array.from(list);
     const ok = files.filter(isAccepted);
@@ -92,6 +101,7 @@ export function ColorGradingPage() {
   };
 
   const updateAdjustment = (key: AdjustmentKey, value: number) => {
+    invalidate();
     setAdjustments((prev) => {
       const next = { ...prev, [key]: value };
       const match = PRESETS.find((p) => sameValues(p.values, next));
@@ -103,28 +113,37 @@ export function ColorGradingPage() {
   const resetKey = (key: AdjustmentKey) => updateAdjustment(key, NEUTRAL[key]);
 
   const resetAll = () => {
+    invalidate();
     setAdjustments({ ...NEUTRAL });
     setPresetId("natural");
   };
 
   const pickPreset = (preset: Preset) => {
+    invalidate();
     setAdjustments({ ...preset.values });
     setPresetId(preset.id);
   };
 
   const generate = async () => {
     if (!active) return;
+    const run = ++runRef.current;
     setStatus("generating");
     setError(null);
     try {
-      const res = await generateColorGradeMock({
-        imageUrl: active.url,
+      const res = await generateColorGrade({
+        images: [active.file],
         prompt,
+        presetId,
         adjustments,
       });
-      setResult(res.url);
+      if (run !== runRef.current) {
+        URL.revokeObjectURL(res.imageUrl);
+        return;
+      }
+      setResult(res.imageUrl);
       setStatus("success");
     } catch (err) {
+      if (run !== runRef.current) return;
       setResult(null);
       setError(
         err instanceof Error ? err.message : "Something went wrong while grading",
@@ -150,9 +169,7 @@ export function ColorGradingPage() {
           aria-label="Breadcrumb"
           className="mb-4 flex items-center gap-2 text-[13px] font-medium text-muted-foreground sm:mb-6"
         >
-          <a href="#explore-apps" className="transition-colors hover:text-foreground">
-            Apps
-          </a>
+          <span className="transition-colors">Apps</span>
           <span aria-hidden>/</span>
           <span className="text-foreground">AI Color Grading</span>
         </nav>
@@ -269,15 +286,28 @@ export function ColorGradingPage() {
                   activeId={activeId}
                   onSelect={(id) => {
                     setActiveId(id);
-                    setResult(null);
-                    setStatus("ready");
+                    invalidate();
                   }}
-                  onRemove={remove}
-                  onReplace={replace}
+                  onRemove={(id) => {
+                    invalidate();
+                    remove(id);
+                  }}
+                  onReplace={(id, file) => {
+                    invalidate();
+                    replace(id, file);
+                  }}
                   onAdd={acceptFiles}
                 />
               </div>
             )}
+
+            <div className="mt-5">
+              <PresetPicker
+                activeId={presetId}
+                onPick={pickPreset}
+                previewSrc={active?.url ?? demoPhoto}
+              />
+            </div>
 
             {status === "success" && (
               <div className="mt-4 flex flex-wrap gap-2">
@@ -326,31 +356,40 @@ export function ColorGradingPage() {
             className="glass min-w-0 space-y-6 rounded-2xl p-4 sm:p-5"
             style={{ boxShadow: "var(--shadow-card)" }}
           >
-            <PresetPicker activeId={presetId} onPick={pickPreset} />
+            <div>
+              <div className="flex items-center gap-2">
+                <label
+                  htmlFor="grade-prompt"
+                  className="font-display text-[13px] font-extrabold uppercase tracking-[0.16em] text-muted-foreground"
+                >
+                  Describe your look
+                </label>
+                <span className="badge-sky">AI</span>
+              </div>
+              <Textarea
+                id="grade-prompt"
+                value={prompt}
+                onChange={(e) => {
+                  invalidate();
+                  setPrompt(e.target.value);
+                }}
+                placeholder="Warm 35mm film, muted greens, soft highlights…"
+                rows={3}
+                className="mt-3 rounded-xl border text-[16px] sm:text-[15px]"
+                style={{ background: "var(--tile)", borderColor: "var(--card-border)" }}
+              />
+              <p className="mt-2 text-[12px] font-medium text-muted-foreground">
+                Optional. Your prompt is combined with the selected preset and
+                the manual settings below.
+              </p>
+            </div>
+
             <AdjustmentPanel
               values={adjustments}
               onChange={updateAdjustment}
               onResetKey={resetKey}
               onResetAll={resetAll}
             />
-
-            <div>
-              <label
-                htmlFor="grade-prompt"
-                className="font-display text-[13px] font-extrabold uppercase tracking-[0.16em] text-muted-foreground"
-              >
-                Prompt
-              </label>
-              <Textarea
-                id="grade-prompt"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Describe the color grade you want…"
-                rows={3}
-                className="mt-3 rounded-xl border text-[16px] sm:text-[15px]"
-                style={{ background: "var(--tile)", borderColor: "var(--card-border)" }}
-              />
-            </div>
 
             <div>
               <button
@@ -389,7 +428,6 @@ export function ColorGradingPage() {
           dropRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
         }
       />
-      <ExploreMoreApps />
     </div>
   );
 }
