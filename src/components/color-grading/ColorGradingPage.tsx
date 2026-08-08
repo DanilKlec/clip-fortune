@@ -77,7 +77,15 @@ export function ColorGradingPage() {
   }, [active]);
 
   const acceptFiles = (list: FileList | null) => {
+    invalidate();
     if (!list || list.length === 0) return;
+  const invalidate = useCallback(() => {
+    runRef.current++;
+    setResult(null);
+    setError(null);
+    setStatus((s) => (s === "idle" ? s : "ready"));
+  }, [setResult]);
+
     const files = Array.from(list);
     const ok = files.filter(isAccepted);
     if (ok.length < files.length) {
