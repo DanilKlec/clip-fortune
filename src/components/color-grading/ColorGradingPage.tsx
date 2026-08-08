@@ -288,8 +288,7 @@ export function ColorGradingPage() {
                   activeId={activeId}
                   onSelect={(id) => {
                     setActiveId(id);
-                    setResult(null);
-                    setStatus("ready");
+                    invalidate();
                   }}
                   onRemove={remove}
                   onReplace={replace}
@@ -297,6 +296,14 @@ export function ColorGradingPage() {
                 />
               </div>
             )}
+
+            <div className="mt-5">
+              <PresetPicker
+                activeId={presetId}
+                onPick={pickPreset}
+                previewSrc={active?.url ?? demoPhoto}
+              />
+            </div>
 
             {status === "success" && (
               <div className="mt-4 flex flex-wrap gap-2">
@@ -417,7 +424,6 @@ export function ColorGradingPage() {
           dropRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
         }
       />
-      <ExploreMoreApps />
     </div>
   );
 }
