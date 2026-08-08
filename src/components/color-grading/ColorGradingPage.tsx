@@ -22,7 +22,7 @@ import { ImageTray } from "./ImageTray";
 import { AdjustmentPanel } from "./AdjustmentPanel";
 import { PresetPicker } from "./PresetPicker";
 import { ACCEPTED_LABEL, isAccepted, useImageLibrary } from "./useImageLibrary";
-import { generateColorGradeMock } from "./adapter";
+import { generateColorGrade } from "./adapter";
 import {
   NEUTRAL,
   PRESETS,
@@ -34,7 +34,7 @@ import {
 import { ThreeSteps } from "./sections/ThreeSteps";
 import { SeeItInAction } from "./sections/SeeItInAction";
 import { BuiltForCinematicLooks } from "./sections/BuiltForCinematicLooks";
-import { ExploreMoreApps } from "@/components/virality/landing/ExploreMoreApps";
+import demoPhoto from "@/assets/grading-demo.jpg";
 
 type Status = "idle" | "ready" | "generating" | "success" | "error";
 
@@ -51,6 +51,7 @@ export function ColorGradingPage() {
   const dropRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const resultRef = useRef<string | null>(null);
+  const runRef = useRef(0);
 
   const setResult = useCallback((url: string | null) => {
     if (resultRef.current) URL.revokeObjectURL(resultRef.current);
@@ -92,6 +93,7 @@ export function ColorGradingPage() {
   };
 
   const updateAdjustment = (key: AdjustmentKey, value: number) => {
+    invalidate();
     setAdjustments((prev) => {
       const next = { ...prev, [key]: value };
       const match = PRESETS.find((p) => sameValues(p.values, next));
@@ -103,28 +105,37 @@ export function ColorGradingPage() {
   const resetKey = (key: AdjustmentKey) => updateAdjustment(key, NEUTRAL[key]);
 
   const resetAll = () => {
+    invalidate();
     setAdjustments({ ...NEUTRAL });
     setPresetId("natural");
   };
 
   const pickPreset = (preset: Preset) => {
+    invalidate();
     setAdjustments({ ...preset.values });
     setPresetId(preset.id);
   };
 
   const generate = async () => {
     if (!active) return;
+    const run = ++runRef.current;
     setStatus("generating");
     setError(null);
     try {
-      const res = await generateColorGradeMock({
-        imageUrl: active.url,
+      const res = await generateColorGrade({
+        images: [active.file],
         prompt,
+        presetId,
         adjustments,
       });
-      setResult(res.url);
+      if (run !== runRef.current) {
+        URL.revokeObjectURL(res.imageUrl);
+        return;
+      }
+      setResult(res.imageUrl);
       setStatus("success");
     } catch (err) {
+      if (run !== runRef.current) return;
       setResult(null);
       setError(
         err instanceof Error ? err.message : "Something went wrong while grading",
