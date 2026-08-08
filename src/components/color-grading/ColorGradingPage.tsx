@@ -345,31 +345,40 @@ export function ColorGradingPage() {
             className="glass min-w-0 space-y-6 rounded-2xl p-4 sm:p-5"
             style={{ boxShadow: "var(--shadow-card)" }}
           >
-            <PresetPicker activeId={presetId} onPick={pickPreset} />
+            <div>
+              <div className="flex items-center gap-2">
+                <label
+                  htmlFor="grade-prompt"
+                  className="font-display text-[13px] font-extrabold uppercase tracking-[0.16em] text-muted-foreground"
+                >
+                  Describe your look
+                </label>
+                <span className="badge-sky">AI</span>
+              </div>
+              <Textarea
+                id="grade-prompt"
+                value={prompt}
+                onChange={(e) => {
+                  invalidate();
+                  setPrompt(e.target.value);
+                }}
+                placeholder="Warm 35mm film, muted greens, soft highlights…"
+                rows={3}
+                className="mt-3 rounded-xl border text-[16px] sm:text-[15px]"
+                style={{ background: "var(--tile)", borderColor: "var(--card-border)" }}
+              />
+              <p className="mt-2 text-[12px] font-medium text-muted-foreground">
+                Optional. Your prompt is combined with the selected preset and
+                the manual settings below.
+              </p>
+            </div>
+
             <AdjustmentPanel
               values={adjustments}
               onChange={updateAdjustment}
               onResetKey={resetKey}
               onResetAll={resetAll}
             />
-
-            <div>
-              <label
-                htmlFor="grade-prompt"
-                className="font-display text-[13px] font-extrabold uppercase tracking-[0.16em] text-muted-foreground"
-              >
-                Prompt
-              </label>
-              <Textarea
-                id="grade-prompt"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Describe the color grade you want…"
-                rows={3}
-                className="mt-3 rounded-xl border text-[16px] sm:text-[15px]"
-                style={{ background: "var(--tile)", borderColor: "var(--card-border)" }}
-              />
-            </div>
 
             <div>
               <button
