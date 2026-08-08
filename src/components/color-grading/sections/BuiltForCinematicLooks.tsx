@@ -1,25 +1,20 @@
-import { Gauge, Layers, Palette, Sparkles } from "lucide-react";
+import { Gauge, Images, SlidersHorizontal, Sparkles } from "lucide-react";
 
 const features = [
   {
-    icon: Palette,
-    title: "Looks, not filters",
-    desc: "Every preset is a full tonal recipe — temperature, contrast, highlight roll-off and grain move together instead of one flat overlay.",
+    icon: SlidersHorizontal,
+    title: "Full grading controls",
+    desc: "Temperature, contrast, saturation, highlights, exposure, sharpness and grain — a full tonal recipe, not a flat filter.",
+  },
+  {
+    icon: Images,
+    title: "Works with any image",
+    desc: "Portraits, product shots, landscapes or film frames. PNG, JPG and WebP, one at a time or a whole batch.",
   },
   {
     icon: Gauge,
-    title: "Instant feedback",
-    desc: "The preview re-renders as you drag. No render queue between you and the decision you are trying to make.",
-  },
-  {
-    icon: Layers,
-    title: "Batch friendly",
-    desc: "Keep a set of frames loaded, switch between them, and check that one look holds up across the whole sequence.",
-  },
-  {
-    icon: Sparkles,
-    title: "Prompt on top",
-    desc: "Describe the mood in plain language and let it steer the grade beyond what the sliders alone would give you.",
+    title: "Instant cinematic output",
+    desc: "The preview re-renders as you drag, so the graded frame is ready the moment you stop moving the sliders.",
   },
 ];
 
@@ -54,7 +49,7 @@ export function BuiltForCinematicLooks({ onCTA }: Props) {
           </p>
         </div>
 
-        <div className="mx-auto mt-10 grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="mx-auto mt-10 grid max-w-5xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((f) => (
             <div key={f.title} className="glass rounded-xl p-5 text-left">
               <f.icon size={20} strokeWidth={1.75} className="text-volt" />
