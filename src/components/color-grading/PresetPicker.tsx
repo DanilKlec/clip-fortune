@@ -23,7 +23,7 @@ export function PresetPicker({ activeId, onPick, previewSrc, custom = false }: P
           </span>
         )}
       </div>
-      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-3">
+      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-2">
         {PRESETS.map((preset) => {
           const active = preset.id === activeId;
           return (
