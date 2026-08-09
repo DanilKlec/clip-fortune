@@ -259,12 +259,12 @@ export function ColorGradingPage() {
           {/* Left rail — uploaded images only */}
           <aside
             aria-label="Uploaded images"
-            className="order-1 min-w-0 overflow-hidden rounded-2xl p-2 sm:p-3 lg:order-none"
+            className="order-1 flex min-h-0 min-w-0 flex-col rounded-2xl p-2 sm:p-3 lg:order-none"
             style={{ background: "var(--tile)" }}
           >
             <h2 className="button-meta mb-2 hidden px-1 text-muted-foreground lg:block">Images</h2>
-            <div className="lg:hidden">{tray("horizontal")}</div>
-            <div className="hidden lg:block">{tray("vertical")}</div>
+            <div className="min-w-0 lg:hidden">{tray("horizontal")}</div>
+            <div className="hidden min-h-0 flex-1 lg:flex lg:flex-col">{tray("vertical")}</div>
           </aside>
 
           {/* Center workspace — preview / comparison only */}
