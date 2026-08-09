@@ -311,19 +311,22 @@ export function ColorGradingPage() {
                 </button>
               )}
 
-              {active && st && !(status === "success" && st.resultUrl) && (
-                <GradedImage
-                  src={active.url}
-                  alt={active.file.name}
-                  adjustments={effectiveAdjustments(st.adjustments, st.enabled)}
-                  className="flex h-full w-full min-w-0 items-center justify-center"
-                  imgClassName="mx-auto max-h-[280px] max-w-full object-contain sm:max-h-[420px] lg:max-h-[calc(100vh-14rem)]"
-                />
+              {active && st && !canCompare && (
+                <ImageStage ratio={ratio}>
+                  <GradedImage
+                    src={active.url}
+                    alt={active.file.name}
+                    adjustments={effective}
+                    className="absolute inset-0 h-full w-full"
+                    imgClassName="h-full w-full object-contain object-center"
+                  />
+                </ImageStage>
               )}
 
-              {active && st && status === "success" && st.resultUrl && (
+              {active && st && canCompare && (
                 <BeforeAfter
                   label="Compare original and graded image"
+                  ratio={ratio}
                   position={st.comparePos}
                   onPositionChange={(pos) =>
                     activeId && patchState(activeId, (s) => ({ ...s, comparePos: pos }))
@@ -332,15 +335,27 @@ export function ColorGradingPage() {
                     <img
                       src={active.url}
                       alt="Original"
-                      className="block h-[280px] w-full object-contain sm:h-[420px] lg:h-[620px]"
+                      draggable={false}
+                      className="absolute inset-0 h-full w-full object-contain object-center"
                     />
                   }
                   after={
-                    <img
-                      src={st.resultUrl}
-                      alt="Graded result"
-                      className="block h-[280px] w-full object-contain sm:h-[420px] lg:h-[620px]"
-                    />
+                    aiUrl ? (
+                      <img
+                        src={aiUrl}
+                        alt="Graded result"
+                        draggable={false}
+                        className="absolute inset-0 h-full w-full object-contain object-center"
+                      />
+                    ) : (
+                      <GradedImage
+                        src={active.url}
+                        alt="Local preview"
+                        adjustments={effective}
+                        className="absolute inset-0 h-full w-full"
+                        imgClassName="h-full w-full object-contain object-center"
+                      />
+                    )
                   }
                 />
               )}
