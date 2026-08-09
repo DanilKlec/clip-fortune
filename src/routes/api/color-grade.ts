@@ -91,15 +91,19 @@ export const Route = createFileRoute("/api/color-grade")({
           return Response.json({ imageUrl: url });
         } catch (e) {
           const status = (e as { status?: number })?.status;
+          const detail = `${(e as { body?: { detail?: unknown } })?.body?.detail ?? ""} ${(e as Error)?.message ?? ""}`.toLowerCase();
           console.error("color-grade generation failed", status ?? "unknown");
-          if (status === 401 || status === 403) {
-            return err("AI generation is not configured yet.", 503);
+          if (status === 402 || detail.includes("balance") || detail.includes("credit")) {
+            return err(
+              "The AI account is out of credits — top up the Fal.ai balance and try again.",
+              402,
+            );
           }
-          if (status === 429) {
+          if (status === 429 || detail.includes("rate limit")) {
             return err("Rate limit reached — please try again in a moment.", 429);
           }
-          if (status === 402) {
-            return err("The AI service is out of credits.", 402);
+          if (status === 401 || status === 403) {
+            return err("AI generation is not configured yet.", 503);
           }
           if (status && status >= 500) {
             return err("The AI service is temporarily unavailable.", 503);
