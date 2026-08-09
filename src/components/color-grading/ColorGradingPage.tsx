@@ -326,7 +326,7 @@ export function ColorGradingPage() {
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
                   type="button"
-                  onClick={download}
+                  onClick={() => void download()}
                   className="button-cta flex h-11 items-center gap-2 rounded-full px-5 text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <Download size={16} strokeWidth={2} />
