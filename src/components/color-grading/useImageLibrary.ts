@@ -1,11 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  DEFAULT_ENABLED,
-  NEUTRAL,
-  PRESETS,
-  type Adjustments,
-  type EffectToggles,
-} from "./grading";
+import { DEFAULT_ENABLED, NEUTRAL, PRESETS, type Adjustments, type EffectToggles } from "./grading";
 
 export interface GradingImage {
   id: string;
@@ -158,16 +152,13 @@ export function useImageLibrary() {
   }, []);
 
   /** Update one image's editor state without touching any other image. */
-  const patchState = useCallback(
-    (id: string, update: (prev: ImageState) => ImageState) => {
-      setStates((prev) => {
-        const cur = prev[id];
-        if (!cur) return prev;
-        return { ...prev, [id]: update(cur) };
-      });
-    },
-    [],
-  );
+  const patchState = useCallback((id: string, update: (prev: ImageState) => ImageState) => {
+    setStates((prev) => {
+      const cur = prev[id];
+      if (!cur) return prev;
+      return { ...prev, [id]: update(cur) };
+    });
+  }, []);
 
   /** Replace an image's result URL, revoking the previous one. */
   const setResult = useCallback((id: string, url: string | null) => {

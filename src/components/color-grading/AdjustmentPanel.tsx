@@ -79,9 +79,7 @@ export function AdjustmentPanel({
                 )}
               </div>
               <div className="flex items-center gap-1">
-                <span className="button-meta text-muted-foreground">
-                  {on ? value : "off"}
-                </span>
+                <span className="button-meta text-muted-foreground">{on ? value : "off"}</span>
                 <button
                   type="button"
                   aria-label={`Reset ${spec.label}`}
