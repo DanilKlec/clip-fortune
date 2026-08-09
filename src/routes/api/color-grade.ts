@@ -38,8 +38,7 @@ export const Route = createFileRoute("/api/color-grade")({
 
       POST: async ({ request }) => {
         const key = process.env["FAL_KEY"];
-        console.log("FALDBG", Object.keys(process.env ?? {}).length, "SESSION:" + (process.env["SESSION_SECRET"] ? 1 : 0), "FAL:" + (process.env["FAL_KEY"] ? 1 : 0));
-        if (!key) return Response.json({ error: "AI generation is not configured yet.", dbg: { n: Object.keys(process.env ?? {}).length, s: !!process.env["SESSION_SECRET"], f: !!process.env["FAL_KEY"] } }, { status: 503 });
+        if (!key) return err("AI generation is not configured yet.", 503);
 
         let form: FormData;
         try {
@@ -92,16 +91,19 @@ export const Route = createFileRoute("/api/color-grade")({
           return Response.json({ imageUrl: url });
         } catch (e) {
           const status = (e as { status?: number })?.status;
+          const detail = `${(e as { body?: { detail?: unknown } })?.body?.detail ?? ""} ${(e as Error)?.message ?? ""}`.toLowerCase();
           console.error("color-grade generation failed", status ?? "unknown");
-          if (true) return Response.json({ error: String((e as Error)?.message).slice(0,300), status }, { status: 500 });
-          if (status === 401 || status === 403) {
-            return err("AI generation is not configured yet.", 503);
+          if (status === 402 || detail.includes("balance") || detail.includes("credit")) {
+            return err(
+              "The AI account is out of credits — top up the Fal.ai balance and try again.",
+              402,
+            );
           }
-          if (status === 429) {
+          if (status === 429 || detail.includes("rate limit")) {
             return err("Rate limit reached — please try again in a moment.", 429);
           }
-          if (status === 402) {
-            return err("The AI service is out of credits.", 402);
+          if (status === 401 || status === 403) {
+            return err("AI generation is not configured yet.", 503);
           }
           if (status && status >= 500) {
             return err("The AI service is temporarily unavailable.", 503);
