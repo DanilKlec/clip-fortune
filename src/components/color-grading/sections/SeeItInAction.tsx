@@ -29,13 +29,14 @@ export function SeeItInAction() {
       >
         <BeforeAfter
           label="Sample before and after"
+          ratio={16 / 9}
           before={
             <GradedImage
               src={sampleImage}
               alt="Untouched sample frame"
               adjustments={NEUTRAL}
-              className="w-full"
-              imgClassName="h-[240px] w-full object-cover sm:h-[360px] lg:h-[440px]"
+              className="absolute inset-0 h-full w-full"
+              imgClassName="h-full w-full object-contain object-center"
             />
           }
           after={
@@ -43,8 +44,8 @@ export function SeeItInAction() {
               src={sampleImage}
               alt={`Sample frame graded with ${preset.name}`}
               adjustments={preset.values}
-              className="w-full"
-              imgClassName="h-[240px] w-full object-cover sm:h-[360px] lg:h-[440px]"
+              className="absolute inset-0 h-full w-full"
+              imgClassName="h-full w-full object-contain object-center"
             />
           }
         />
