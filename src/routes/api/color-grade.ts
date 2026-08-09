@@ -93,6 +93,7 @@ export const Route = createFileRoute("/api/color-grade")({
         } catch (e) {
           const status = (e as { status?: number })?.status;
           console.error("color-grade generation failed", status ?? "unknown");
+          if (process.env["FAL_DEBUG"]) return Response.json({ error: String((e as Error)?.message).slice(0,300), status }, { status: 500 });
           if (status === 401 || status === 403) {
             return err("AI generation is not configured yet.", 503);
           }
