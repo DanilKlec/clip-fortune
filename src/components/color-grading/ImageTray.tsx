@@ -62,19 +62,19 @@ export function ImageTray({
               replacingId.current = img.id;
               replaceRef.current?.click();
             }}
-            className="flex h-6 w-6 items-center justify-center rounded-full border bg-background text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="cg-tray-btn flex h-[22px] w-[22px] items-center justify-center rounded-full border bg-background text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             style={{ borderColor: "var(--card-border)" }}
           >
-            <RefreshCw size={12} strokeWidth={2} />
+            <RefreshCw size={11} strokeWidth={2} />
           </button>
           <button
             type="button"
             aria-label={`Remove image ${i + 1}`}
             onClick={() => onRemove(img.id)}
-            className="flex h-6 w-6 items-center justify-center rounded-full border bg-background text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="cg-tray-btn flex h-[22px] w-[22px] items-center justify-center rounded-full border bg-background text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             style={{ borderColor: "var(--card-border)" }}
           >
-            <X size={12} strokeWidth={2} />
+            <X size={11} strokeWidth={2} />
           </button>
         </div>
       </div>
