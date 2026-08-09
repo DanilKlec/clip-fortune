@@ -256,7 +256,7 @@ export function ColorGradingPage() {
         </p>
 
         <div
-          className={`mt-6 grid w-full min-w-0 grid-cols-1 items-stretch gap-4 ${
+          className={`mt-6 grid w-full min-w-0 grid-cols-1 items-start gap-4 ${
             images.length > 0
               ? "lg:grid-cols-[120px_minmax(0,1fr)_320px] xl:grid-cols-[140px_minmax(0,1fr)_340px]"
               : "lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_340px]"
