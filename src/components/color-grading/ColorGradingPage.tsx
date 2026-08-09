@@ -4,6 +4,7 @@ import { AlertTriangle, Download, ImagePlus, Loader2, RefreshCw, Sparkles } from
 import { Textarea } from "@/components/ui/textarea";
 import { GradedImage } from "./GradedImage";
 import { BeforeAfter } from "./BeforeAfter";
+import { ImageStage, useImageAspect } from "./ImageStage";
 import { ImageTray } from "./ImageTray";
 import { AdjustmentPanel } from "./AdjustmentPanel";
 import { PresetPicker } from "./PresetPicker";
@@ -24,6 +25,7 @@ import {
   PRESETS,
   allEnabled,
   effectiveAdjustments,
+  isNeutral,
   sameValues,
   type AdjustmentKey,
   type Preset,
@@ -61,6 +63,12 @@ export function ColorGradingPage() {
   const status = st?.status ?? "ready";
   const busy = status === "generating";
   const custom = st ? !allEnabled(st.enabled) : false;
+
+  const ratio = useImageAspect(active?.url);
+  const effective = st ? effectiveAdjustments(st.adjustments, st.enabled) : NEUTRAL;
+  /** Priority: AI result for this image, else the live local grade, else none. */
+  const aiUrl = st && st.status === "success" ? st.resultUrl : null;
+  const canCompare = Boolean(aiUrl) || !isNeutral(effective);
 
   /** Any input change invalidates the current result for the active image only. */
   const editActive = (patch: (s: ImageState) => Partial<ImageState>) => {
@@ -251,12 +259,12 @@ export function ColorGradingPage() {
           {/* Left rail — uploaded images only */}
           <aside
             aria-label="Uploaded images"
-            className="order-1 min-w-0 overflow-hidden rounded-2xl p-2 sm:p-3 lg:order-none"
+            className="order-1 flex min-h-0 min-w-0 flex-col rounded-2xl p-2 sm:p-3 lg:order-none"
             style={{ background: "var(--tile)" }}
           >
             <h2 className="button-meta mb-2 hidden px-1 text-muted-foreground lg:block">Images</h2>
-            <div className="lg:hidden">{tray("horizontal")}</div>
-            <div className="hidden lg:block">{tray("vertical")}</div>
+            <div className="min-w-0 lg:hidden">{tray("horizontal")}</div>
+            <div className="hidden min-h-0 flex-1 lg:flex lg:flex-col">{tray("vertical")}</div>
           </aside>
 
           {/* Center workspace — preview / comparison only */}
@@ -311,19 +319,22 @@ export function ColorGradingPage() {
                 </button>
               )}
 
-              {active && st && !(status === "success" && st.resultUrl) && (
-                <GradedImage
-                  src={active.url}
-                  alt={active.file.name}
-                  adjustments={effectiveAdjustments(st.adjustments, st.enabled)}
-                  className="flex h-full w-full min-w-0 items-center justify-center"
-                  imgClassName="mx-auto max-h-[280px] max-w-full object-contain sm:max-h-[420px] lg:max-h-[calc(100vh-14rem)]"
-                />
+              {active && st && !canCompare && (
+                <ImageStage ratio={ratio}>
+                  <GradedImage
+                    src={active.url}
+                    alt={active.file.name}
+                    adjustments={effective}
+                    className="absolute inset-0 h-full w-full"
+                    imgClassName="h-full w-full object-contain object-center"
+                  />
+                </ImageStage>
               )}
 
-              {active && st && status === "success" && st.resultUrl && (
+              {active && st && canCompare && (
                 <BeforeAfter
                   label="Compare original and graded image"
+                  ratio={ratio}
                   position={st.comparePos}
                   onPositionChange={(pos) =>
                     activeId && patchState(activeId, (s) => ({ ...s, comparePos: pos }))
@@ -332,15 +343,27 @@ export function ColorGradingPage() {
                     <img
                       src={active.url}
                       alt="Original"
-                      className="block h-[280px] w-full object-contain sm:h-[420px] lg:h-[620px]"
+                      draggable={false}
+                      className="absolute inset-0 h-full w-full object-contain object-center"
                     />
                   }
                   after={
-                    <img
-                      src={st.resultUrl}
-                      alt="Graded result"
-                      className="block h-[280px] w-full object-contain sm:h-[420px] lg:h-[620px]"
-                    />
+                    aiUrl ? (
+                      <img
+                        src={aiUrl}
+                        alt="Graded result"
+                        draggable={false}
+                        className="absolute inset-0 h-full w-full object-contain object-center"
+                      />
+                    ) : (
+                      <GradedImage
+                        src={active.url}
+                        alt="Local preview"
+                        adjustments={effective}
+                        className="absolute inset-0 h-full w-full"
+                        imgClassName="h-full w-full object-contain object-center"
+                      />
+                    )
                   }
                 />
               )}

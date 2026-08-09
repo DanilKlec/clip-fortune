@@ -17,6 +17,7 @@ export function GradedImage({ src, alt, adjustments, className, imgClassName }: 
         src={src}
         alt={alt}
         loading="lazy"
+        draggable={false}
         className={imgClassName ?? "h-full w-full object-contain"}
         style={{ filter: layers.filter }}
       />

@@ -32,15 +32,9 @@ export function ImageTray({
     e.target.value = "";
   };
 
-  return (
-    <div
-      className={
-        orientation === "vertical"
-          ? "flex max-h-[520px] flex-col items-center gap-3 overflow-y-auto overflow-x-hidden px-1 py-1"
-          : "scrollbar-hide -mx-1 flex gap-2 overflow-x-auto px-1 py-1"
-      }
-    >
-      {images.map((img, i) => {
+  const vertical = orientation === "vertical";
+
+  const thumbs = images.map((img, i) => {
         const active = img.id === activeId;
         return (
           <div key={img.id} className="relative h-[72px] w-[72px] shrink-0 sm:h-20 sm:w-20">
@@ -85,8 +79,9 @@ export function ImageTray({
             </div>
           </div>
         );
-      })}
+  });
 
+  const addButton = (
       <button
         type="button"
         aria-label="Add images"
@@ -96,7 +91,10 @@ export function ImageTray({
       >
         <Plus size={20} strokeWidth={1.75} />
       </button>
+  );
 
+  const inputs = (
+    <>
       <input
         ref={addRef}
         type="file"
@@ -115,6 +113,26 @@ export function ImageTray({
         className="hidden"
         onChange={onReplacePicked}
       />
+    </>
+  );
+
+  if (vertical) {
+    return (
+      <div className="box-border flex min-h-0 flex-1 flex-col items-center gap-3">
+        <div className="flex w-full min-h-0 flex-[0_1_auto] flex-col items-center gap-3 overflow-y-auto overflow-x-hidden px-1 py-1">
+          {thumbs}
+        </div>
+        <div className="flex-none pb-1">{addButton}</div>
+        {inputs}
+      </div>
+    );
+  }
+
+  return (
+    <div className="scrollbar-hide -mx-1 flex gap-2 overflow-x-auto px-1 py-1">
+      {thumbs}
+      {addButton}
+      {inputs}
     </div>
   );
 }

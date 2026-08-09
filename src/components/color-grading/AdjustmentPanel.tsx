@@ -1,3 +1,4 @@
+import type React from "react";
 import { Info, RotateCcw } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
@@ -50,8 +51,16 @@ export function AdjustmentPanel({
         const changed = value !== NEUTRAL[spec.key];
         const on = enabled[spec.key];
         const bipolar = spec.min < 0;
+        const pct = ((value - spec.min) / (spec.max - spec.min)) * 100;
+        const originPct = bipolar ? 50 : 0;
+        const fillLeft = Math.min(originPct, pct);
+        const fillWidth = Math.abs(pct - originPct);
         return (
-          <div key={spec.key}>
+          <div
+            key={spec.key}
+            className="rounded-xl border p-3"
+            style={{ borderColor: "var(--card-border)", background: "var(--tile)" }}
+          >
             <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
               <div className="flex min-w-0 items-center gap-2">
                 <Switch
@@ -91,28 +100,32 @@ export function AdjustmentPanel({
                 </button>
               </div>
             </div>
-            {on && (
-              <div className="relative">
+            <div className="relative mt-1">
                 {bipolar && (
                   <span
                     aria-hidden
-                    className="pointer-events-none absolute left-1/2 top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-foreground/25"
+                    className="pointer-events-none absolute left-1/2 top-1/2 z-10 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-foreground/35"
                   />
                 )}
                 <Slider
                   id={`adj-${spec.key}`}
                   aria-label={spec.label}
                   aria-valuetext={`${value}`}
-                  disabled={disabled}
+                  disabled={disabled || !on}
                   min={spec.min}
                   max={spec.max}
                   step={spec.step}
                   value={[value]}
                   onValueChange={(v) => onChange(spec.key, v[0])}
-                  className="mt-1 py-3"
+                  className="cg-slider py-3"
+                  style={
+                    {
+                      "--cg-fill-left": `${fillLeft}%`,
+                      "--cg-fill-width": `${fillWidth}%`,
+                    } as React.CSSProperties
+                  }
                 />
-              </div>
-            )}
+            </div>
           </div>
         );
       })}
