@@ -56,76 +56,74 @@ export function AdjustmentPanel({
         const fillLeft = Math.min(originPct, pct);
         const fillWidth = Math.abs(pct - originPct);
         return (
-          <div
-            key={spec.key}
-            className="rounded-xl border p-3"
-            style={{ borderColor: "var(--card-border)", background: "var(--tile)" }}
-          >
-            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
-              <div className="flex min-w-0 items-center gap-2">
-                <Switch
-                  checked={on}
-                  disabled={disabled}
-                  onCheckedChange={(next) => onToggle(spec.key, next)}
-                  aria-label={`${on ? "Disable" : "Enable"} ${spec.label}`}
+          <div key={spec.key} className="flex items-center gap-2">
+            <Switch
+              checked={on}
+              disabled={disabled}
+              onCheckedChange={(next) => onToggle(spec.key, next)}
+              aria-label={`${on ? "Disable" : "Enable"} ${spec.label}`}
+              className="cg-switch"
+            />
+            <div
+              className={`relative h-12 min-w-0 flex-1 overflow-hidden rounded-xl border sm:h-11 ${on ? "" : "opacity-60"}`}
+              style={{ borderColor: "var(--card-border)", background: "var(--tile)" }}
+            >
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-y-0"
+                style={{
+                  left: `${fillLeft}%`,
+                  width: `${fillWidth}%`,
+                  background: on ? "var(--volt-dim)" : "var(--card-border)",
+                }}
+              />
+              {bipolar && (
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-y-1 left-1/2 w-px -translate-x-1/2 bg-foreground/20"
                 />
-                <label
-                  htmlFor={`adj-${spec.key}`}
-                  className={`truncate text-[13px] font-semibold ${on ? "text-foreground" : "text-muted-foreground"}`}
+              )}
+              <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-between gap-2 px-3">
+                <span
+                  className={`flex min-w-0 items-center gap-1.5 truncate text-[13px] font-semibold ${on ? "text-foreground" : "text-muted-foreground"}`}
                 >
-                  {spec.label}
-                </label>
-                {spec.hint && (
-                  <span
-                    tabIndex={0}
-                    role="note"
-                    title={spec.hint}
-                    aria-label={`${spec.label}: ${spec.hint}`}
-                    className="shrink-0 text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <Info size={12} strokeWidth={2} />
-                  </span>
-                )}
+                  <span className="truncate">{spec.label}</span>
+                  {spec.hint && (
+                    <span
+                      title={spec.hint}
+                      aria-hidden
+                      className="shrink-0 text-muted-foreground"
+                    >
+                      <Info size={12} strokeWidth={2} />
+                    </span>
+                  )}
+                </span>
+                <span className="shrink-0 text-[12px] font-bold tabular-nums text-muted-foreground">
+                  {on ? value : "off"}
+                </span>
               </div>
-              <div className="flex items-center gap-1">
-                <span className="button-meta text-muted-foreground">{on ? value : "off"}</span>
-                <button
-                  type="button"
-                  aria-label={`Reset ${spec.label}`}
-                  onClick={() => onResetKey(spec.key)}
-                  disabled={disabled || !changed}
-                  className="flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <RotateCcw size={13} strokeWidth={2} />
-                </button>
-              </div>
+              <Slider
+                id={`adj-${spec.key}`}
+                aria-label={`${spec.label}${spec.hint ? `: ${spec.hint}` : ""}`}
+                aria-valuetext={`${value}`}
+                disabled={disabled || !on}
+                min={spec.min}
+                max={spec.max}
+                step={spec.step}
+                value={[value]}
+                onValueChange={(v) => onChange(spec.key, v[0])}
+                className="cg-slider"
+              />
             </div>
-            <div className="relative mt-1">
-                {bipolar && (
-                  <span
-                    aria-hidden
-                    className="pointer-events-none absolute left-1/2 top-1/2 z-10 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-foreground/35"
-                  />
-                )}
-                <Slider
-                  id={`adj-${spec.key}`}
-                  aria-label={spec.label}
-                  aria-valuetext={`${value}`}
-                  disabled={disabled || !on}
-                  min={spec.min}
-                  max={spec.max}
-                  step={spec.step}
-                  value={[value]}
-                  onValueChange={(v) => onChange(spec.key, v[0])}
-                  className="cg-slider py-3"
-                  style={
-                    {
-                      "--cg-fill-left": `${fillLeft}%`,
-                      "--cg-fill-width": `${fillWidth}%`,
-                    } as React.CSSProperties
-                  }
-                />
-            </div>
+            <button
+              type="button"
+              aria-label={`Reset ${spec.label}`}
+              onClick={() => onResetKey(spec.key)}
+              disabled={disabled || !changed}
+              className="flex h-11 w-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <RotateCcw size={13} strokeWidth={2} />
+            </button>
           </div>
         );
       })}
