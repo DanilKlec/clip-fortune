@@ -108,8 +108,8 @@ export function BeforeAfter({
           ⇆
         </div>
 
-        <span className="badge-volt pointer-events-none absolute left-3 top-3 z-30">Before</span>
-        <span className="badge-sky pointer-events-none absolute right-3 top-3 z-30">After</span>
+        <span className="badge-sky pointer-events-none absolute left-3 top-3 z-30">After</span>
+        <span className="badge-volt pointer-events-none absolute right-3 top-3 z-30">Before</span>
       </div>
     </ImageStage>
   );
