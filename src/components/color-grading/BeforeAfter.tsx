@@ -5,11 +5,26 @@ interface Props {
   before: ReactNode;
   after: ReactNode;
   label?: string;
+  /** Optional controlled handle position (0-100) so it can persist per image. */
+  position?: number;
+  onPositionChange?: (pos: number) => void;
 }
 
 /** Draggable before/after comparison. Keyboard accessible via the slider role. */
-export function BeforeAfter({ before, after, label = "Before and after" }: Props) {
-  const [pos, setPos] = useState(50);
+export function BeforeAfter({
+  before,
+  after,
+  label = "Before and after",
+  position,
+  onPositionChange,
+}: Props) {
+  const [internal, setInternal] = useState(position ?? 50);
+  const pos = position ?? internal;
+  const setPos = (next: number | ((v: number) => number)) => {
+    const value = typeof next === "function" ? next(pos) : next;
+    setInternal(value);
+    onPositionChange?.(value);
+  };
   const boxRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
 
