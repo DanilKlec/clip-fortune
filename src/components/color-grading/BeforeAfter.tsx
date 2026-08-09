@@ -76,12 +76,12 @@ export function BeforeAfter({
         onLostPointerCapture={() => (dragging.current = false)}
         className="absolute inset-0 touch-none select-none"
       >
-        {/* bottom layer — original, always fully visible */}
+        {/* bottom layer — original (Before), always fully visible */}
         {before}
-        {/* top layer — revealed by clipping only, never resized */}
+        {/* top layer — After, revealed by clipping from the right */}
         <div
           className="absolute inset-0 overflow-hidden"
-          style={{ clipPath: `inset(0 calc(100% - ${pos}%) 0 0)` }}
+          style={{ clipPath: `inset(0 0 0 ${pos}%)` }}
         >
           {after}
         </div>
@@ -108,8 +108,8 @@ export function BeforeAfter({
           ⇆
         </div>
 
-        <span className="badge-sky pointer-events-none absolute left-3 top-3 z-30">After</span>
-        <span className="badge-volt pointer-events-none absolute right-3 top-3 z-30">Before</span>
+        <span className="badge-sky pointer-events-none absolute left-3 top-3 z-30">Before</span>
+        <span className="badge-volt pointer-events-none absolute right-3 top-3 z-30">After</span>
       </div>
     </ImageStage>
   );
