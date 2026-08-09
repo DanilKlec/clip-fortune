@@ -152,12 +152,25 @@ export function ColorGradingPage() {
     }
   };
 
-  const download = () => {
+  const download = async () => {
     if (!resultUrl) return;
+    let href = resultUrl;
+    let temp: string | null = null;
+    if (!resultUrl.startsWith("blob:")) {
+      try {
+        const blob = await (await fetch(resultUrl)).blob();
+        temp = URL.createObjectURL(blob);
+        href = temp;
+      } catch {
+        toast.error("Could not download the image");
+        return;
+      }
+    }
     const a = document.createElement("a");
-    a.href = resultUrl;
+    a.href = href;
     a.download = `color-grade-${Date.now()}.jpg`;
     a.click();
+    if (temp) setTimeout(() => URL.revokeObjectURL(temp), 4000);
   };
 
   const busy = status === "generating";
