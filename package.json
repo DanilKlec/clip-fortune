@@ -12,6 +12,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@fal-ai/client": "^1.10.1",
     "@hookform/resolvers": "^5.2.2",
     "@lovable.dev/email-js": "^0.1.0",
     "@lovable.dev/webhooks-js": "^0.0.1",
