@@ -13,9 +13,7 @@ export const MAX_BYTES = 20 * 1024 * 1024;
 export const MAX_IMAGES = 9;
 
 export function isAccepted(file: File) {
-  return (
-    ACCEPTED_TYPES.includes(file.type) || /\.(png|jpe?g|webp)$/i.test(file.name)
-  );
+  return ACCEPTED_TYPES.includes(file.type) || /\.(png|jpe?g|webp)$/i.test(file.name);
 }
 
 /** Identity used to detect the same file being picked twice. */

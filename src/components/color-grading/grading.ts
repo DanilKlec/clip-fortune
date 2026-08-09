@@ -143,7 +143,7 @@ export function buildLayers(a: Adjustments): RenderLayers {
       3,
     )}) saturate(${saturate.toFixed(3)})`,
     overlays,
-    grainOpacity: a.grain / 100 * 0.35,
+    grainOpacity: (a.grain / 100) * 0.35,
   };
 }
 

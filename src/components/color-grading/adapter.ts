@@ -14,9 +14,7 @@ export interface ColorGradeResult {
   imageUrl: string;
 }
 
-export type ColorGradeAdapter = (
-  req: ColorGradeRequest,
-) => Promise<ColorGradeResult>;
+export type ColorGradeAdapter = (req: ColorGradeRequest) => Promise<ColorGradeResult>;
 
 function loadImage(src: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
@@ -33,10 +31,7 @@ function loadImage(src: string) {
  * adjustments onto a canvas and returns an object URL. Swapping this adapter
  * for a real API call requires no UI changes.
  */
-export const generateColorGradeMock: ColorGradeAdapter = async ({
-  images,
-  adjustments,
-}) => {
+export const generateColorGradeMock: ColorGradeAdapter = async ({ images, adjustments }) => {
   const file = images[0];
   if (!file) throw new Error("No image selected");
   const src = URL.createObjectURL(file);
@@ -145,9 +140,7 @@ export const generateColorGradeFal: ColorGradeAdapter = async ({
 
   // Fetch through the same-origin proxy so Download saves a real file.
   try {
-    const img = await fetch(
-      `/api/color-grade?url=${encodeURIComponent(payload.imageUrl)}`,
-    );
+    const img = await fetch(`/api/color-grade?url=${encodeURIComponent(payload.imageUrl)}`);
     if (img.ok) {
       const blob = await img.blob();
       return { imageUrl: URL.createObjectURL(blob) };

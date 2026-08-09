@@ -44,8 +44,8 @@ export function BuiltForCinematicLooks({ onCTA }: Props) {
             </span>
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-[14px] font-medium text-muted-foreground sm:text-[15px]">
-            Grading tools that behave like a colourist's panel, running right in
-            the browser on your own frames.
+            Grading tools that behave like a colourist's panel, running right in the browser on your
+            own frames.
           </p>
         </div>
 
@@ -53,12 +53,8 @@ export function BuiltForCinematicLooks({ onCTA }: Props) {
           {features.map((f) => (
             <div key={f.title} className="glass rounded-xl p-5 text-left">
               <f.icon size={20} strokeWidth={1.75} className="text-volt" />
-              <h3 className="mt-4 text-[16px] font-bold text-foreground">
-                {f.title}
-              </h3>
-              <p className="mt-2 text-[14px] font-medium text-muted-foreground">
-                {f.desc}
-              </p>
+              <h3 className="mt-4 text-[16px] font-bold text-foreground">{f.title}</h3>
+              <p className="mt-2 text-[14px] font-medium text-muted-foreground">{f.desc}</p>
             </div>
           ))}
         </div>
