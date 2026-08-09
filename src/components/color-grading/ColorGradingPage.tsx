@@ -4,6 +4,7 @@ import { AlertTriangle, Download, ImagePlus, Loader2, RefreshCw, Sparkles } from
 import { Textarea } from "@/components/ui/textarea";
 import { GradedImage } from "./GradedImage";
 import { BeforeAfter } from "./BeforeAfter";
+import { ImageStage, useImageAspect } from "./ImageStage";
 import { ImageTray } from "./ImageTray";
 import { AdjustmentPanel } from "./AdjustmentPanel";
 import { PresetPicker } from "./PresetPicker";
@@ -24,6 +25,7 @@ import {
   PRESETS,
   allEnabled,
   effectiveAdjustments,
+  isNeutral,
   sameValues,
   type AdjustmentKey,
   type Preset,
@@ -61,6 +63,12 @@ export function ColorGradingPage() {
   const status = st?.status ?? "ready";
   const busy = status === "generating";
   const custom = st ? !allEnabled(st.enabled) : false;
+
+  const ratio = useImageAspect(active?.url);
+  const effective = st ? effectiveAdjustments(st.adjustments, st.enabled) : NEUTRAL;
+  /** Priority: AI result for this image, else the live local grade, else none. */
+  const aiUrl = st && st.status === "success" ? st.resultUrl : null;
+  const canCompare = Boolean(aiUrl) || !isNeutral(effective);
 
   /** Any input change invalidates the current result for the active image only. */
   const editActive = (patch: (s: ImageState) => Partial<ImageState>) => {
