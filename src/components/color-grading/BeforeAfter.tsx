@@ -22,7 +22,11 @@ export function BeforeAfter({ before, after, label = "Before and after" }: Props
 
   const onDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     dragging.current = true;
-    e.currentTarget.setPointerCapture(e.pointerId);
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      /* capture unsupported — pointer events still bubble */
+    }
     move(e.clientX);
   };
 
@@ -33,6 +37,7 @@ export function BeforeAfter({ before, after, label = "Before and after" }: Props
       onPointerMove={(e) => dragging.current && move(e.clientX)}
       onPointerUp={() => (dragging.current = false)}
       onPointerCancel={() => (dragging.current = false)}
+      onLostPointerCapture={() => (dragging.current = false)}
       className="relative w-full touch-none select-none overflow-hidden rounded-xl"
     >
       <div className="[&_img]:pointer-events-none">{after}</div>

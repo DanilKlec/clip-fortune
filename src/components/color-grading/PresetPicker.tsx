@@ -11,9 +11,16 @@ interface Props {
 export function PresetPicker({ activeId, onPick, previewSrc }: Props) {
   return (
     <div>
-      <h3 className="font-display text-[13px] font-extrabold uppercase tracking-[0.16em] text-muted-foreground">
-        Presets
-      </h3>
+      <div className="flex items-center gap-2">
+        <h3 className="font-display text-[13px] font-extrabold uppercase tracking-[0.16em] text-muted-foreground">
+          Presets
+        </h3>
+        {activeId === null && (
+          <span className="badge-volt" aria-live="polite">
+            Custom
+          </span>
+        )}
+      </div>
       <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {PRESETS.map((preset) => {
           const active = preset.id === activeId;
