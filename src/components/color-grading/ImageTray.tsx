@@ -9,9 +9,19 @@ interface Props {
   onRemove: (id: string) => void;
   onReplace: (id: string, file: File) => void;
   onAdd: (files: FileList | null) => void;
+  /** Horizontal strip (mobile/tablet) or vertical rail (desktop sidebar). */
+  orientation?: "horizontal" | "vertical";
 }
 
-export function ImageTray({ images, activeId, onSelect, onRemove, onReplace, onAdd }: Props) {
+export function ImageTray({
+  images,
+  activeId,
+  onSelect,
+  onRemove,
+  onReplace,
+  onAdd,
+  orientation = "horizontal",
+}: Props) {
   const addRef = useRef<HTMLInputElement>(null);
   const replaceRef = useRef<HTMLInputElement>(null);
   const replacingId = useRef<string | null>(null);
@@ -23,7 +33,13 @@ export function ImageTray({ images, activeId, onSelect, onRemove, onReplace, onA
   };
 
   return (
-    <div className="scrollbar-hide -mx-1 flex gap-2 overflow-x-auto px-1 py-1">
+    <div
+      className={
+        orientation === "vertical"
+          ? "flex max-h-[520px] flex-col items-center gap-3 overflow-y-auto overflow-x-hidden px-1 py-1"
+          : "scrollbar-hide -mx-1 flex gap-2 overflow-x-auto px-1 py-1"
+      }
+    >
       {images.map((img, i) => {
         const active = img.id === activeId;
         return (
