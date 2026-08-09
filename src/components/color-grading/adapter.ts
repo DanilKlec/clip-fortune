@@ -1,4 +1,5 @@
 import { buildLayers, type Adjustments } from "./grading";
+import { buildGradePrompt } from "./prompt";
 
 /** Single integration point — swap the mock for Fal.ai without UI changes. */
 export interface ColorGradeRequest {

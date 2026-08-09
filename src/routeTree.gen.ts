@@ -14,6 +14,7 @@ import { Route as CancelSubscriptionRouteImport } from './routes/cancel-subscrip
 import { Route as GatedRouteImport } from './routes/_gated'
 import { Route as GatedIndexRouteImport } from './routes/_gated.index'
 import { Route as LegalSlugRouteImport } from './routes/legal.$slug'
+import { Route as ApiColorGradeRouteImport } from './routes/api/color-grade'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminErrorsRouteImport } from './routes/admin.errors'
 import { Route as AdminEmailsRouteImport } from './routes/admin.emails'
@@ -46,6 +47,11 @@ const GatedIndexRoute = GatedIndexRouteImport.update({
 const LegalSlugRoute = LegalSlugRouteImport.update({
   id: '/legal/$slug',
   path: '/legal/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiColorGradeRoute = ApiColorGradeRouteImport.update({
+  id: '/api/color-grade',
+  path: '/api/color-grade',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
@@ -104,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/admin/emails': typeof AdminEmailsRoute
   '/admin/errors': typeof AdminErrorsRoute
   '/admin/login': typeof AdminLoginRoute
+  '/api/color-grade': typeof ApiColorGradeRoute
   '/legal/$slug': typeof LegalSlugRoute
   '/api/public/errors/report': typeof ApiPublicErrorsReportRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -118,6 +125,7 @@ export interface FileRoutesByTo {
   '/admin/emails': typeof AdminEmailsRoute
   '/admin/errors': typeof AdminErrorsRoute
   '/admin/login': typeof AdminLoginRoute
+  '/api/color-grade': typeof ApiColorGradeRoute
   '/legal/$slug': typeof LegalSlugRoute
   '/': typeof GatedIndexRoute
   '/api/public/errors/report': typeof ApiPublicErrorsReportRoute
@@ -135,6 +143,7 @@ export interface FileRoutesById {
   '/admin/emails': typeof AdminEmailsRoute
   '/admin/errors': typeof AdminErrorsRoute
   '/admin/login': typeof AdminLoginRoute
+  '/api/color-grade': typeof ApiColorGradeRoute
   '/legal/$slug': typeof LegalSlugRoute
   '/_gated/': typeof GatedIndexRoute
   '/api/public/errors/report': typeof ApiPublicErrorsReportRoute
@@ -153,6 +162,7 @@ export interface FileRouteTypes {
     | '/admin/emails'
     | '/admin/errors'
     | '/admin/login'
+    | '/api/color-grade'
     | '/legal/$slug'
     | '/api/public/errors/report'
     | '/lovable/email/auth/preview'
@@ -167,6 +177,7 @@ export interface FileRouteTypes {
     | '/admin/emails'
     | '/admin/errors'
     | '/admin/login'
+    | '/api/color-grade'
     | '/legal/$slug'
     | '/'
     | '/api/public/errors/report'
@@ -183,6 +194,7 @@ export interface FileRouteTypes {
     | '/admin/emails'
     | '/admin/errors'
     | '/admin/login'
+    | '/api/color-grade'
     | '/legal/$slug'
     | '/_gated/'
     | '/api/public/errors/report'
@@ -198,6 +210,7 @@ export interface RootRouteChildren {
   AdminEmailsRoute: typeof AdminEmailsRoute
   AdminErrorsRoute: typeof AdminErrorsRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  ApiColorGradeRoute: typeof ApiColorGradeRoute
   LegalSlugRoute: typeof LegalSlugRoute
   ApiPublicErrorsReportRoute: typeof ApiPublicErrorsReportRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -240,6 +253,13 @@ declare module '@tanstack/react-router' {
       path: '/legal/$slug'
       fullPath: '/legal/$slug'
       preLoaderRoute: typeof LegalSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/color-grade': {
+      id: '/api/color-grade'
+      path: '/api/color-grade'
+      fullPath: '/api/color-grade'
+      preLoaderRoute: typeof ApiColorGradeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/login': {
@@ -329,6 +349,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminEmailsRoute: AdminEmailsRoute,
   AdminErrorsRoute: AdminErrorsRoute,
   AdminLoginRoute: AdminLoginRoute,
+  ApiColorGradeRoute: ApiColorGradeRoute,
   LegalSlugRoute: LegalSlugRoute,
   ApiPublicErrorsReportRoute: ApiPublicErrorsReportRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
@@ -338,13 +359,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
