@@ -1,4 +1,3 @@
-import type React from "react";
 import { Info, RotateCcw } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
