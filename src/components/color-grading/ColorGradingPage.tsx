@@ -264,15 +264,17 @@ export function ColorGradingPage() {
         >
           {/* Left rail — uploaded images only (hidden until something is uploaded) */}
           {images.length > 0 && (
-          <aside
-            aria-label="Uploaded images"
-            className="order-1 flex min-h-0 min-w-0 flex-col rounded-2xl p-2 sm:p-3 lg:order-none"
-            style={{ background: "var(--tile)" }}
-          >
-            <h2 className="button-meta mb-2 hidden px-1 text-muted-foreground lg:block">Images</h2>
-            <div className="min-w-0 lg:hidden">{tray("horizontal")}</div>
-            <div className="hidden min-h-0 flex-1 lg:flex lg:flex-col">{tray("vertical")}</div>
-          </aside>
+            <aside
+              aria-label="Uploaded images"
+              className="order-1 flex min-h-0 min-w-0 flex-col rounded-2xl p-2 sm:p-3 lg:order-none"
+              style={{ background: "var(--tile)" }}
+            >
+              <h2 className="button-meta mb-2 hidden px-1 text-muted-foreground lg:block">
+                Images
+              </h2>
+              <div className="min-w-0 lg:hidden">{tray("horizontal")}</div>
+              <div className="hidden min-h-0 flex-1 lg:flex lg:flex-col">{tray("vertical")}</div>
+            </aside>
           )}
 
           {/* Center workspace — preview / comparison only */}

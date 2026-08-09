@@ -28,28 +28,28 @@ export function SeeItInAction() {
         style={{ boxShadow: "var(--shadow-card)" }}
       >
         <div className="h-[240px] w-full sm:h-[360px] lg:h-[440px]">
-        <BeforeAfter
-          label="Sample before and after"
-          ratio={16 / 9}
-          before={
-            <GradedImage
-              src={sampleImage}
-              alt="Untouched sample frame"
-              adjustments={NEUTRAL}
-              className="absolute inset-0 h-full w-full"
-              imgClassName="h-full w-full object-contain object-center"
-            />
-          }
-          after={
-            <GradedImage
-              src={sampleImage}
-              alt={`Sample frame graded with ${preset.name}`}
-              adjustments={preset.values}
-              className="absolute inset-0 h-full w-full"
-              imgClassName="h-full w-full object-contain object-center"
-            />
-          }
-        />
+          <BeforeAfter
+            label="Sample before and after"
+            ratio={16 / 9}
+            before={
+              <GradedImage
+                src={sampleImage}
+                alt="Untouched sample frame"
+                adjustments={NEUTRAL}
+                className="absolute inset-0 h-full w-full"
+                imgClassName="h-full w-full object-contain object-center"
+              />
+            }
+            after={
+              <GradedImage
+                src={sampleImage}
+                alt={`Sample frame graded with ${preset.name}`}
+                adjustments={preset.values}
+                className="absolute inset-0 h-full w-full"
+                imgClassName="h-full w-full object-contain object-center"
+              />
+            }
+          />
         </div>
 
         <div className="scrollbar-hide mt-4 flex gap-2 overflow-x-auto">

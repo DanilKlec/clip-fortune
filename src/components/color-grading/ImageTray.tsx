@@ -35,62 +35,62 @@ export function ImageTray({
   const vertical = orientation === "vertical";
 
   const thumbs = images.map((img, i) => {
-        const active = img.id === activeId;
-        return (
-          <div key={img.id} className="relative h-[72px] w-[72px] shrink-0 sm:h-20 sm:w-20">
-            <button
-              type="button"
-              onClick={() => onSelect(img.id)}
-              aria-label={`Select image ${i + 1}`}
-              aria-pressed={active}
-              className="h-full w-full overflow-hidden rounded-xl border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              style={{
-                borderColor: active ? "var(--volt)" : "var(--card-border)",
-                background: "var(--tile)",
-              }}
-            >
-              <img src={img.url} alt={img.file.name} className="h-full w-full object-cover" />
-            </button>
-            {active && (
-              <span className="badge-volt pointer-events-none absolute -top-1 left-1">Main</span>
-            )}
-            <div className="absolute -bottom-1 right-0 flex gap-1">
-              <button
-                type="button"
-                aria-label={`Replace image ${i + 1}`}
-                onClick={() => {
-                  replacingId.current = img.id;
-                  replaceRef.current?.click();
-                }}
-                className="flex h-6 w-6 items-center justify-center rounded-full border bg-background text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                style={{ borderColor: "var(--card-border)" }}
-              >
-                <RefreshCw size={12} strokeWidth={2} />
-              </button>
-              <button
-                type="button"
-                aria-label={`Remove image ${i + 1}`}
-                onClick={() => onRemove(img.id)}
-                className="flex h-6 w-6 items-center justify-center rounded-full border bg-background text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                style={{ borderColor: "var(--card-border)" }}
-              >
-                <X size={12} strokeWidth={2} />
-              </button>
-            </div>
-          </div>
-        );
+    const active = img.id === activeId;
+    return (
+      <div key={img.id} className="relative h-[72px] w-[72px] shrink-0 sm:h-20 sm:w-20">
+        <button
+          type="button"
+          onClick={() => onSelect(img.id)}
+          aria-label={`Select image ${i + 1}`}
+          aria-pressed={active}
+          className="h-full w-full overflow-hidden rounded-xl border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          style={{
+            borderColor: active ? "var(--volt)" : "var(--card-border)",
+            background: "var(--tile)",
+          }}
+        >
+          <img src={img.url} alt={img.file.name} className="h-full w-full object-cover" />
+        </button>
+        {active && (
+          <span className="badge-volt pointer-events-none absolute -top-1 left-1">Main</span>
+        )}
+        <div className="absolute -bottom-1 right-0 flex gap-1">
+          <button
+            type="button"
+            aria-label={`Replace image ${i + 1}`}
+            onClick={() => {
+              replacingId.current = img.id;
+              replaceRef.current?.click();
+            }}
+            className="flex h-6 w-6 items-center justify-center rounded-full border bg-background text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            style={{ borderColor: "var(--card-border)" }}
+          >
+            <RefreshCw size={12} strokeWidth={2} />
+          </button>
+          <button
+            type="button"
+            aria-label={`Remove image ${i + 1}`}
+            onClick={() => onRemove(img.id)}
+            className="flex h-6 w-6 items-center justify-center rounded-full border bg-background text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            style={{ borderColor: "var(--card-border)" }}
+          >
+            <X size={12} strokeWidth={2} />
+          </button>
+        </div>
+      </div>
+    );
   });
 
   const addButton = (
-      <button
-        type="button"
-        aria-label="Add images"
-        onClick={() => addRef.current?.click()}
-        className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-xl border border-dashed text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-20 sm:w-20"
-        style={{ borderColor: "var(--card-border)", background: "var(--tile)" }}
-      >
-        <Plus size={20} strokeWidth={1.75} />
-      </button>
+    <button
+      type="button"
+      aria-label="Add images"
+      onClick={() => addRef.current?.click()}
+      className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-xl border border-dashed text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-20 sm:w-20"
+      style={{ borderColor: "var(--card-border)", background: "var(--tile)" }}
+    >
+      <Plus size={20} strokeWidth={1.75} />
+    </button>
   );
 
   const inputs = (

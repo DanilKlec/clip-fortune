@@ -88,11 +88,7 @@ export function AdjustmentPanel({
                 >
                   <span className="truncate">{spec.label}</span>
                   {spec.hint && (
-                    <span
-                      title={spec.hint}
-                      aria-hidden
-                      className="shrink-0 text-muted-foreground"
-                    >
+                    <span title={spec.hint} aria-hidden className="shrink-0 text-muted-foreground">
                       <Info size={12} strokeWidth={2} />
                     </span>
                   )}
