@@ -750,46 +750,54 @@
 }
 
 /* --- Color Grading adjustment sliders (scoped variant, not global) --- */
+/* Radix Switch renders a <button>; the coarse-pointer tap-target rule would
+   force it to 44x44 (a circle). Keep the Color Grading pills horizontal. */
+.cg-switch {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: 36px;
+  min-width: 36px;
+  height: 20px;
+  min-height: 20px;
+  aspect-ratio: 36 / 20;
+  border-radius: 9999px;
+}
+@media (pointer: coarse) {
+  button.cg-switch {
+    min-width: 36px;
+    min-height: 20px;
+  }
+}
+
+/* Filled block slider: the whole rounded rectangle is the control. */
 .cg-slider {
-  --cg-fill-left: 0%;
-  --cg-fill-width: 0%;
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
 }
 .cg-slider > span:first-of-type {
-  height: 6px;
-  background: var(--card-border);
-  border-radius: 9999px;
+  height: 100%;
+  background: transparent;
+  border-radius: inherit;
   overflow: visible;
 }
-/* Radix range is replaced by a center-aware fill. */
 .cg-slider > span:first-of-type > span {
   background: transparent;
 }
-.cg-slider > span:first-of-type::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: var(--cg-fill-left);
-  width: var(--cg-fill-width);
-  background: var(--volt);
-  border-radius: 9999px;
-  pointer-events: none;
-}
 .cg-slider span[role="slider"] {
-  height: 17px;
-  width: 17px;
-  border: 2px solid var(--volt);
-  background: var(--background);
-  box-shadow: 0 1px 4px rgb(0 0 0 / 0.45);
-  transition:
-    transform 0.12s ease,
-    box-shadow 0.12s ease;
+  height: 100%;
+  width: 3px;
+  border-radius: 9999px;
+  border: 0;
+  background: var(--volt);
+  box-shadow: none;
 }
-.cg-slider span[role="slider"]:hover,
 .cg-slider span[role="slider"]:focus-visible {
-  transform: scale(1.12);
-  box-shadow: 0 0 0 4px var(--volt-dim);
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
 }
-.cg-slider[data-disabled] {
-  opacity: 0.45;
+.cg-slider[data-disabled] span[role="slider"] {
+  opacity: 0.4;
 }
