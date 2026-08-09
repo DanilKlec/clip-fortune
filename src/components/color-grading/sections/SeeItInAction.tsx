@@ -2,6 +2,7 @@ import { useState } from "react";
 import sampleImage from "@/assets/grading-demo.jpg";
 import { BeforeAfter } from "../BeforeAfter";
 import { GradedImage } from "../GradedImage";
+import { useImageAspect } from "../ImageStage";
 import { NEUTRAL, PRESETS, type Preset } from "../grading";
 
 const showcase: Preset[] = PRESETS.filter((p) =>
@@ -10,6 +11,7 @@ const showcase: Preset[] = PRESETS.filter((p) =>
 
 export function SeeItInAction() {
   const [preset, setPreset] = useState<Preset>(showcase[0]);
+  const ratio = useImageAspect(sampleImage);
 
   return (
     <section className="page-shell mx-auto w-full max-w-6xl py-12 sm:py-16 md:py-20">
@@ -30,14 +32,14 @@ export function SeeItInAction() {
         <div className="h-[240px] w-full sm:h-[360px] lg:h-[440px]">
           <BeforeAfter
             label="Sample before and after"
-            ratio={16 / 9}
+            ratio={ratio}
             before={
               <GradedImage
                 src={sampleImage}
                 alt="Untouched sample frame"
                 adjustments={NEUTRAL}
                 className="absolute inset-0 h-full w-full"
-                imgClassName="h-full w-full object-contain object-center"
+                imgClassName="h-full w-full object-cover object-center"
               />
             }
             after={
@@ -46,7 +48,7 @@ export function SeeItInAction() {
                 alt={`Sample frame graded with ${preset.name}`}
                 adjustments={preset.values}
                 className="absolute inset-0 h-full w-full"
-                imgClassName="h-full w-full object-contain object-center"
+                imgClassName="h-full w-full object-cover object-center"
               />
             }
           />
