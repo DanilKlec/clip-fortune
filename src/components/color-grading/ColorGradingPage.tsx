@@ -247,25 +247,21 @@ export function ColorGradingPage() {
           change previews instantly — nothing is uploaded until you generate.
         </p>
 
-        <div className="mt-6 grid grid-cols-1 items-start gap-4 lg:grid-cols-[112px_minmax(0,1fr)_340px] xl:grid-cols-[124px_minmax(0,1fr)_368px]">
-          {/* Left rail — uploaded images */}
-          {images.length > 0 && (
-            <aside
-              aria-label="Uploaded images"
-              className="order-1 min-w-0 rounded-2xl p-2 sm:p-3 lg:order-none lg:row-span-2"
-              style={{ background: "var(--tile)" }}
-            >
-              <h2 className="button-meta mb-2 hidden px-1 text-muted-foreground lg:block">
-                Images
-              </h2>
-              <div className="lg:hidden">{tray("horizontal")}</div>
-              <div className="hidden lg:block">{tray("vertical")}</div>
-            </aside>
-          )}
+        <div className="mt-6 grid w-full min-w-0 grid-cols-1 items-stretch gap-4 lg:grid-cols-[120px_minmax(0,1fr)_320px] xl:grid-cols-[140px_minmax(0,1fr)_340px]">
+          {/* Left rail — uploaded images only */}
+          <aside
+            aria-label="Uploaded images"
+            className="order-1 min-w-0 overflow-hidden rounded-2xl p-2 sm:p-3 lg:order-none"
+            style={{ background: "var(--tile)" }}
+          >
+            <h2 className="button-meta mb-2 hidden px-1 text-muted-foreground lg:block">Images</h2>
+            <div className="lg:hidden">{tray("horizontal")}</div>
+            <div className="hidden lg:block">{tray("vertical")}</div>
+          </aside>
 
-          {/* Center workspace */}
+          {/* Center workspace — preview / comparison only */}
           <div
-            className="glass order-2 min-w-0 rounded-2xl p-4 sm:p-5 lg:order-none"
+            className="glass order-2 flex min-w-0 flex-col rounded-2xl p-3 sm:p-4 lg:order-none"
             style={{ boxShadow: "var(--shadow-card)" }}
           >
             <div
@@ -276,7 +272,7 @@ export function ColorGradingPage() {
               }}
               onDragLeave={() => setDragOver(false)}
               onDrop={onDrop}
-              className="relative flex min-h-[280px] items-center justify-center overflow-hidden rounded-xl sm:min-h-[420px] lg:min-h-[560px]"
+              className="relative flex min-h-[280px] w-full min-w-0 flex-1 items-center justify-center overflow-hidden rounded-xl sm:min-h-[420px] lg:min-h-[620px]"
               style={{
                 background: dragOver ? "var(--volt-dim)" : "var(--tile)",
                 border: `1.5px dashed ${dragOver ? "var(--volt)" : "var(--card-border)"}`,
@@ -298,7 +294,7 @@ export function ColorGradingPage() {
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  className="flex h-full w-full flex-col items-center justify-center gap-3 px-6 py-10 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 py-10 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <span
                     className="flex h-12 w-12 items-center justify-center rounded-full"
@@ -320,8 +316,8 @@ export function ColorGradingPage() {
                   src={active.url}
                   alt={active.file.name}
                   adjustments={effectiveAdjustments(st.adjustments, st.enabled)}
-                  className="flex h-full w-full items-center justify-center"
-                  imgClassName="max-h-[280px] w-full object-contain sm:max-h-[420px] lg:max-h-[560px]"
+                  className="flex h-full w-full min-w-0 items-center justify-center"
+                  imgClassName="mx-auto max-h-[280px] max-w-full object-contain sm:max-h-[420px] lg:max-h-[calc(100vh-14rem)]"
                 />
               )}
 
@@ -336,14 +332,14 @@ export function ColorGradingPage() {
                     <img
                       src={active.url}
                       alt="Original"
-                      className="block h-[280px] w-full object-contain sm:h-[420px] lg:h-[560px]"
+                      className="block h-[280px] w-full object-contain sm:h-[420px] lg:h-[620px]"
                     />
                   }
                   after={
                     <img
                       src={st.resultUrl}
                       alt="Graded result"
-                      className="block h-[280px] w-full object-contain sm:h-[420px] lg:h-[560px]"
+                      className="block h-[280px] w-full object-contain sm:h-[420px] lg:h-[620px]"
                     />
                   }
                 />
@@ -359,9 +355,14 @@ export function ColorGradingPage() {
                 </div>
               )}
             </div>
+          </div>
 
-            {/* Prompt + primary action, attached to the preview */}
-            <div className="mt-4">
+          {/* Right control panel — prompt, generate, presets, adjustments, actions */}
+          <aside
+            className="glass order-3 min-w-0 space-y-6 overflow-x-hidden rounded-2xl p-4 sm:p-5 lg:order-none lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto"
+            style={{ boxShadow: "var(--shadow-card)" }}
+          >
+            <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <label
                   htmlFor="grade-prompt"
@@ -377,40 +378,32 @@ export function ColorGradingPage() {
                 disabled={!active}
                 onChange={(e) => editActive(() => ({ prompt: e.target.value }))}
                 placeholder="Describe the color grade you want…"
-                rows={2}
-                className="mt-3 rounded-xl border text-[16px] sm:text-[15px]"
+                rows={3}
+                className="mt-3 w-full rounded-xl border text-[16px] sm:text-[15px]"
                 style={{ background: "var(--tile)", borderColor: "var(--card-border)" }}
               />
-              <div className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-                <p className="text-[12px] font-medium text-muted-foreground">
-                  {!active
-                    ? "Add an image to unlock grading."
-                    : status === "success"
-                      ? "Result ready — drag the handle to compare."
-                      : "Optional. Combined with your preset and the enabled adjustments."}
-                </p>
-                <button
-                  type="button"
-                  disabled={!active || busy}
-                  onClick={() => void generate(activeId)}
-                  className="button-cta flex h-12 w-full items-center justify-center gap-2 rounded-full text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-45 sm:w-auto sm:px-8"
-                >
-                  {busy ? (
-                    <Loader2 size={18} strokeWidth={2} className="animate-spin" />
-                  ) : (
-                    <Sparkles size={18} strokeWidth={2} />
-                  )}
-                  {busy ? "Generating…" : "Generate"}
-                </button>
-              </div>
+              <button
+                type="button"
+                disabled={!active || busy}
+                onClick={() => void generate(activeId)}
+                className="button-cta mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-full text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-45"
+              >
+                {busy ? (
+                  <Loader2 size={18} strokeWidth={2} className="animate-spin" />
+                ) : (
+                  <Sparkles size={18} strokeWidth={2} />
+                )}
+                {busy ? "Generating…" : "Generate"}
+              </button>
+              <p className="mt-2 text-[12px] font-medium text-muted-foreground">
+                {!active
+                  ? "Add an image to unlock grading."
+                  : status === "success"
+                    ? "Result ready — drag the handle to compare."
+                    : "Optional. Combined with your preset and the enabled adjustments."}
+              </p>
             </div>
-          </div>
 
-          {/* Right control panel */}
-          <aside
-            className="glass order-3 min-w-0 space-y-6 rounded-2xl p-4 sm:p-5 lg:order-none lg:row-span-2 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto"
-            style={{ boxShadow: "var(--shadow-card)" }}
-          >
             <PresetPicker
               activeId={st?.presetId ?? null}
               custom={custom}
@@ -427,53 +420,54 @@ export function ColorGradingPage() {
               onResetKey={resetKey}
               onResetAll={resetAll}
             />
-          </aside>
 
-          {/* Result / error actions */}
-          {(status === "success" || status === "error") && (
-            <div className="order-4 min-w-0 lg:col-start-2 lg:row-start-2 lg:order-none">
-              {status === "success" && (
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => void download()}
-                    className="button-cta flex h-11 items-center gap-2 rounded-full px-5 text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <Download size={16} strokeWidth={2} />
-                    Download
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => void generate(activeId, st?.lastRequest)}
-                    className="button-utility flex h-11 items-center gap-2 rounded-full px-5 text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <RefreshCw size={16} strokeWidth={2} />
-                    Generate again
-                  </button>
-                </div>
-              )}
-
-              {status === "error" && (
-                <div
-                  className="flex flex-wrap items-center gap-3 rounded-xl border p-3"
-                  style={{ borderColor: "var(--coral-bdr)", background: "var(--coral-dim)" }}
+            {status === "success" && (
+              <div className="grid min-w-0 gap-2">
+                <button
+                  type="button"
+                  onClick={() => void download()}
+                  className="button-cta flex h-11 w-full items-center justify-center gap-2 rounded-full px-5 text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                  <AlertTriangle size={16} strokeWidth={2} className="text-destructive" />
+                  <Download size={16} strokeWidth={2} />
+                  Download
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void generate(activeId, st?.lastRequest)}
+                  className="button-utility flex h-11 w-full items-center justify-center gap-2 rounded-full px-5 text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <RefreshCw size={16} strokeWidth={2} />
+                  Generate again
+                </button>
+              </div>
+            )}
+
+            {status === "error" && (
+              <div
+                className="grid min-w-0 gap-3 rounded-xl border p-3"
+                style={{ borderColor: "var(--coral-bdr)", background: "var(--coral-dim)" }}
+              >
+                <div className="flex min-w-0 items-start gap-2">
+                  <AlertTriangle
+                    size={16}
+                    strokeWidth={2}
+                    className="mt-0.5 shrink-0 text-destructive"
+                  />
                   <p className="min-w-0 flex-1 text-[13px] font-medium text-foreground">
                     {st?.error ?? "Generation failed"}
                   </p>
-                  <button
-                    type="button"
-                    onClick={() => void generate(activeId, st?.lastRequest)}
-                    className="button-utility flex h-11 items-center gap-2 rounded-full px-4 text-[13px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <RefreshCw size={15} strokeWidth={2} />
-                    Retry
-                  </button>
                 </div>
-              )}
-            </div>
-          )}
+                <button
+                  type="button"
+                  onClick={() => void generate(activeId, st?.lastRequest)}
+                  className="button-utility flex h-11 w-full items-center justify-center gap-2 rounded-full px-4 text-[13px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <RefreshCw size={15} strokeWidth={2} />
+                  Retry
+                </button>
+              </div>
+            )}
+          </aside>
         </div>
       </section>
 
