@@ -748,3 +748,48 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* --- Color Grading adjustment sliders (scoped variant, not global) --- */
+.cg-slider {
+  --cg-fill-left: 0%;
+  --cg-fill-width: 0%;
+}
+.cg-slider > span:first-of-type {
+  height: 6px;
+  background: var(--card-border);
+  border-radius: 9999px;
+  overflow: visible;
+}
+/* Radix range is replaced by a center-aware fill. */
+.cg-slider > span:first-of-type > span {
+  background: transparent;
+}
+.cg-slider > span:first-of-type::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--cg-fill-left);
+  width: var(--cg-fill-width);
+  background: var(--volt);
+  border-radius: 9999px;
+  pointer-events: none;
+}
+.cg-slider span[role="slider"] {
+  height: 17px;
+  width: 17px;
+  border: 2px solid var(--volt);
+  background: var(--bg, #0b0b0b);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.45);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.cg-slider span[role="slider"]:hover,
+.cg-slider span[role="slider"]:focus-visible {
+  transform: scale(1.12);
+  box-shadow: 0 0 0 4px var(--volt-dim);
+}
+.cg-slider[data-disabled] {
+  opacity: 0.45;
+}
