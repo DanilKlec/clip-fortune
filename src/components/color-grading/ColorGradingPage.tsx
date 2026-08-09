@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type DragEvent, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type DragEvent, type ChangeEvent } from "react";
 import { toast } from "sonner";
 import { AlertTriangle, Download, ImagePlus, Loader2, RefreshCw, Sparkles } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,14 +14,18 @@ import {
   fileKey,
   isAccepted,
   useImageLibrary,
+  type GradeRequestSnapshot,
+  type ImageState,
 } from "./useImageLibrary";
 import { generateColorGrade } from "./adapter";
 import {
+  DEFAULT_ENABLED,
   NEUTRAL,
   PRESETS,
+  allEnabled,
+  effectiveAdjustments,
   sameValues,
   type AdjustmentKey,
-  type Adjustments,
   type Preset,
 } from "./grading";
 import { ThreeSteps } from "./sections/ThreeSteps";
@@ -29,54 +33,51 @@ import { SeeItInAction } from "./sections/SeeItInAction";
 import { BuiltForCinematicLooks } from "./sections/BuiltForCinematicLooks";
 import demoPhoto from "@/assets/grading-demo.jpg";
 
-type Status = "idle" | "ready" | "generating" | "success" | "error";
-
 export function ColorGradingPage() {
-  const { images, active, activeId, setActiveId, add, remove, replace } = useImageLibrary();
-  const [adjustments, setAdjustments] = useState<Adjustments>({ ...NEUTRAL });
-  const [presetId, setPresetId] = useState<string | null>("natural");
-  const [prompt, setPrompt] = useState("");
-  const [status, setStatus] = useState<Status>("idle");
-  const [error, setError] = useState<string | null>(null);
-  const [resultUrl, setResultUrl] = useState<string | null>(null);
+  const {
+    images,
+    active,
+    activeId,
+    activeState,
+    states,
+    setActiveId,
+    add,
+    remove,
+    replace,
+    patchState,
+    setResult,
+  } = useImageLibrary();
+
   const [dragOver, setDragOver] = useState(false);
   const dropRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  const resultRef = useRef<string | null>(null);
-  const runRef = useRef(0);
-
-  const setResult = useCallback((url: string | null) => {
-    if (resultRef.current) URL.revokeObjectURL(resultRef.current);
-    resultRef.current = url;
-    setResultUrl(url);
-  }, []);
-
-  useEffect(
-    () => () => {
-      if (resultRef.current) URL.revokeObjectURL(resultRef.current);
-      resultRef.current = null;
-    },
-    [],
-  );
-
+  const runSeq = useRef(0);
+  const statesRef = useRef(states);
   useEffect(() => {
-    setStatus((s) => {
-      if (s === "generating") return s;
-      if (!active) return "idle";
-      if (s === "idle") return "ready";
-      return s;
-    });
-  }, [active]);
+    statesRef.current = states;
+  }, [states]);
 
-  const invalidate = useCallback(() => {
-    runRef.current++;
-    setResult(null);
-    setError(null);
-    setStatus((s) => (s === "idle" || s === "generating" ? s : "ready"));
-  }, [setResult]);
+  const st: ImageState | null = activeState;
+  const status = st?.status ?? "ready";
+  const busy = status === "generating";
+  const custom = st ? !allEnabled(st.enabled) : false;
+
+  /** Any input change invalidates the current result for the active image only. */
+  const editActive = (patch: (s: ImageState) => Partial<ImageState>) => {
+    if (!activeId) return;
+    const id = activeId;
+    const run = ++runSeq.current;
+    setResult(id, null);
+    patchState(id, (s) => ({
+      ...s,
+      ...patch(s),
+      run,
+      error: null,
+      status: "ready",
+    }));
+  };
 
   const acceptFiles = (list: FileList | null) => {
-    invalidate();
     if (!list || list.length === 0) return;
     const files = Array.from(list);
     const typed = files.filter(isAccepted);
@@ -116,64 +117,87 @@ export function ColorGradingPage() {
   };
 
   const updateAdjustment = (key: AdjustmentKey, value: number) => {
-    invalidate();
-    setAdjustments((prev) => {
-      const next = { ...prev, [key]: value };
-      const match = PRESETS.find((p) => sameValues(p.values, next));
-      setPresetId(match?.id ?? null);
-      return next;
+    editActive((s) => {
+      const adjustments = { ...s.adjustments, [key]: value };
+      const match = PRESETS.find((p) => sameValues(p.values, adjustments));
+      return { adjustments, presetId: match?.id ?? null };
     });
+  };
+
+  const toggleEffect = (key: AdjustmentKey, on: boolean) => {
+    editActive((s) => ({ enabled: { ...s.enabled, [key]: on } }));
   };
 
   const resetKey = (key: AdjustmentKey) => updateAdjustment(key, NEUTRAL[key]);
 
   const resetAll = () => {
-    invalidate();
-    setAdjustments({ ...NEUTRAL });
-    setPresetId("natural");
+    editActive(() => ({
+      adjustments: { ...NEUTRAL },
+      enabled: { ...DEFAULT_ENABLED },
+      presetId: PRESETS[0].id,
+    }));
   };
 
   const pickPreset = (preset: Preset) => {
-    invalidate();
-    setAdjustments({ ...preset.values });
-    setPresetId(preset.id);
+    editActive(() => ({ adjustments: { ...preset.values }, presetId: preset.id }));
   };
 
-  const generate = async () => {
-    if (!active) return;
-    const run = ++runRef.current;
-    setStatus("generating");
-    setError(null);
+  const generate = async (id: string | null, snapshot?: GradeRequestSnapshot | null) => {
+    if (!id) return;
+    const img = images.find((i) => i.id === id);
+    const current = statesRef.current[id];
+    if (!img || !current || current.status === "generating") return;
+
+    const snap: GradeRequestSnapshot = snapshot ?? {
+      prompt: current.prompt,
+      presetId: current.presetId,
+      adjustments: current.adjustments,
+      enabled: current.enabled,
+    };
+    const run = ++runSeq.current;
+    setResult(id, null);
+    patchState(id, (s) => ({
+      ...s,
+      status: "generating",
+      error: null,
+      run,
+      lastRequest: snap,
+    }));
+
     try {
-      // Active image first (primary), the rest act as references.
-      const ordered = [active.file, ...images.filter((i) => i.id !== active.id).map((i) => i.file)];
+      // The selected image is primary; the others travel as reference frames.
+      const ordered = [img.file, ...images.filter((i) => i.id !== id).map((i) => i.file)];
       const res = await generateColorGrade({
         images: ordered.slice(0, MAX_IMAGES),
-        prompt,
-        presetId,
-        adjustments,
+        prompt: snap.prompt,
+        presetId: snap.presetId,
+        adjustments: effectiveAdjustments(snap.adjustments, snap.enabled),
       });
-      if (run !== runRef.current) {
-        URL.revokeObjectURL(res.imageUrl);
+      // Discard responses that belong to a superseded request or a deleted image.
+      if (statesRef.current[id]?.run !== run) {
+        if (res.imageUrl.startsWith("blob:")) URL.revokeObjectURL(res.imageUrl);
         return;
       }
-      setResult(res.imageUrl);
-      setStatus("success");
+      setResult(id, res.imageUrl);
+      patchState(id, (s) =>
+        s.run === run ? { ...s, status: "success", error: null, comparePos: 50 } : s,
+      );
     } catch (err) {
-      if (run !== runRef.current) return;
-      setResult(null);
-      setError(err instanceof Error ? err.message : "Something went wrong while grading");
-      setStatus("error");
+      if (statesRef.current[id]?.run !== run) return;
+      setResult(id, null);
+      const message = err instanceof Error ? err.message : "Something went wrong while grading";
+      patchState(id, (s) => (s.run === run ? { ...s, status: "error", error: message } : s));
     }
   };
 
   const download = async () => {
-    if (!resultUrl) return;
-    let href = resultUrl;
+    const url = st?.resultUrl;
+    if (!url) return;
+    let href = url;
     let temp: string | null = null;
-    if (!resultUrl.startsWith("blob:")) {
+    if (!url.startsWith("blob:")) {
       try {
-        const blob = await (await fetch(resultUrl)).blob();
+        const blob = await (await fetch(url)).blob();
         temp = URL.createObjectURL(blob);
         href = temp;
       } catch {
@@ -188,11 +212,21 @@ export function ColorGradingPage() {
     if (temp) setTimeout(() => URL.revokeObjectURL(temp), 4000);
   };
 
-  const busy = status === "generating";
+  const tray = (orientation: "horizontal" | "vertical") => (
+    <ImageTray
+      orientation={orientation}
+      images={images}
+      activeId={activeId}
+      onSelect={setActiveId}
+      onRemove={remove}
+      onReplace={replace}
+      onAdd={acceptFiles}
+    />
+  );
 
   return (
     <div className="w-full">
-      <section className="page-shell mx-auto w-full max-w-6xl pt-6 sm:pt-8 md:pt-10">
+      <section className="page-shell mx-auto w-full max-w-[1600px] pt-6 sm:pt-8 md:pt-10">
         <nav
           aria-label="Breadcrumb"
           className="mb-4 flex items-center gap-2 text-[13px] font-medium text-muted-foreground sm:mb-6"
@@ -213,10 +247,25 @@ export function ColorGradingPage() {
           change previews instantly — nothing is uploaded until you generate.
         </p>
 
-        <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
-          {/* Preview column */}
+        <div className="mt-6 grid grid-cols-1 items-start gap-4 lg:grid-cols-[112px_minmax(0,1fr)_340px] xl:grid-cols-[124px_minmax(0,1fr)_368px]">
+          {/* Left rail — uploaded images */}
+          {images.length > 0 && (
+            <aside
+              aria-label="Uploaded images"
+              className="order-1 min-w-0 rounded-2xl p-2 sm:p-3 lg:order-none lg:row-span-2"
+              style={{ background: "var(--tile)" }}
+            >
+              <h2 className="button-meta mb-2 hidden px-1 text-muted-foreground lg:block">
+                Images
+              </h2>
+              <div className="lg:hidden">{tray("horizontal")}</div>
+              <div className="hidden lg:block">{tray("vertical")}</div>
+            </aside>
+          )}
+
+          {/* Center workspace */}
           <div
-            className="glass min-w-0 rounded-2xl p-4 sm:p-5"
+            className="glass order-2 min-w-0 rounded-2xl p-4 sm:p-5 lg:order-none"
             style={{ boxShadow: "var(--shadow-card)" }}
           >
             <div
@@ -227,7 +276,7 @@ export function ColorGradingPage() {
               }}
               onDragLeave={() => setDragOver(false)}
               onDrop={onDrop}
-              className="relative flex min-h-[280px] items-center justify-center overflow-hidden rounded-xl sm:min-h-[380px] lg:min-h-[460px]"
+              className="relative flex min-h-[280px] items-center justify-center overflow-hidden rounded-xl sm:min-h-[420px] lg:min-h-[560px]"
               style={{
                 background: dragOver ? "var(--volt-dim)" : "var(--tile)",
                 border: `1.5px dashed ${dragOver ? "var(--volt)" : "var(--card-border)"}`,
@@ -266,38 +315,42 @@ export function ColorGradingPage() {
                 </button>
               )}
 
-              {active && status !== "success" && (
+              {active && st && !(status === "success" && st.resultUrl) && (
                 <GradedImage
                   src={active.url}
                   alt={active.file.name}
-                  adjustments={adjustments}
-                  className="h-full w-full"
-                  imgClassName="max-h-[460px] w-full object-contain"
+                  adjustments={effectiveAdjustments(st.adjustments, st.enabled)}
+                  className="flex h-full w-full items-center justify-center"
+                  imgClassName="max-h-[280px] w-full object-contain sm:max-h-[420px] lg:max-h-[560px]"
                 />
               )}
 
-              {active && status === "success" && resultUrl && (
+              {active && st && status === "success" && st.resultUrl && (
                 <BeforeAfter
                   label="Compare original and graded image"
+                  position={st.comparePos}
+                  onPositionChange={(pos) =>
+                    activeId && patchState(activeId, (s) => ({ ...s, comparePos: pos }))
+                  }
                   before={
                     <img
                       src={active.url}
                       alt="Original"
-                      className="block h-[280px] w-full object-contain sm:h-[380px] lg:h-[460px]"
+                      className="block h-[280px] w-full object-contain sm:h-[420px] lg:h-[560px]"
                     />
                   }
                   after={
                     <img
-                      src={resultUrl}
+                      src={st.resultUrl}
                       alt="Graded result"
-                      className="block h-[280px] w-full object-contain sm:h-[380px] lg:h-[460px]"
+                      className="block h-[280px] w-full object-contain sm:h-[420px] lg:h-[560px]"
                     />
                   }
                 />
               )}
 
               {busy && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background/70 backdrop-blur-sm">
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background/70 px-6 text-center backdrop-blur-sm">
                   <Loader2 size={26} strokeWidth={2} className="animate-spin text-volt" />
                   <p className="text-[14px] font-semibold text-foreground">Applying your grade…</p>
                   <p className="text-[13px] font-medium text-muted-foreground">
@@ -307,84 +360,8 @@ export function ColorGradingPage() {
               )}
             </div>
 
-            {images.length > 0 && (
-              <div className="mt-4">
-                <ImageTray
-                  images={images}
-                  activeId={activeId}
-                  onSelect={(id) => {
-                    setActiveId(id);
-                    invalidate();
-                  }}
-                  onRemove={(id) => {
-                    invalidate();
-                    remove(id);
-                  }}
-                  onReplace={(id, file) => {
-                    invalidate();
-                    replace(id, file);
-                  }}
-                  onAdd={acceptFiles}
-                />
-              </div>
-            )}
-
-            <div className="mt-5">
-              <PresetPicker
-                activeId={presetId}
-                onPick={pickPreset}
-                previewSrc={active?.url ?? demoPhoto}
-              />
-            </div>
-
-            {status === "success" && (
-              <div className="mt-4 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => void download()}
-                  className="button-cta flex h-11 items-center gap-2 rounded-full px-5 text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <Download size={16} strokeWidth={2} />
-                  Download
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void generate()}
-                  className="button-utility flex h-11 items-center gap-2 rounded-full px-5 text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <RefreshCw size={16} strokeWidth={2} />
-                  Generate again
-                </button>
-              </div>
-            )}
-
-            {status === "error" && (
-              <div
-                className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border p-3"
-                style={{ borderColor: "var(--coral-bdr)", background: "var(--coral-dim)" }}
-              >
-                <AlertTriangle size={16} strokeWidth={2} className="text-destructive" />
-                <p className="min-w-0 flex-1 text-[13px] font-medium text-foreground">
-                  {error ?? "Generation failed"}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => void generate()}
-                  className="button-utility flex h-11 items-center gap-2 rounded-full px-4 text-[13px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <RefreshCw size={15} strokeWidth={2} />
-                  Retry
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Controls column */}
-          <div
-            className="glass min-w-0 space-y-6 rounded-2xl p-4 sm:p-5"
-            style={{ boxShadow: "var(--shadow-card)" }}
-          >
-            <div>
+            {/* Prompt + primary action, attached to the preview */}
+            <div className="mt-4">
               <div className="flex items-center gap-2">
                 <label
                   htmlFor="grade-prompt"
@@ -396,56 +373,107 @@ export function ColorGradingPage() {
               </div>
               <Textarea
                 id="grade-prompt"
-                value={prompt}
-                onChange={(e) => {
-                  invalidate();
-                  setPrompt(e.target.value);
-                }}
-                placeholder="Warm 35mm film, muted greens, soft highlights…"
-                rows={3}
+                value={st?.prompt ?? ""}
+                disabled={!active}
+                onChange={(e) => editActive(() => ({ prompt: e.target.value }))}
+                placeholder="Describe the color grade you want…"
+                rows={2}
                 className="mt-3 rounded-xl border text-[16px] sm:text-[15px]"
                 style={{ background: "var(--tile)", borderColor: "var(--card-border)" }}
               />
-              <p className="mt-2 text-[12px] font-medium text-muted-foreground">
-                Optional. Your prompt is combined with the selected preset and the manual settings
-                below.
-              </p>
+              <div className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                <p className="text-[12px] font-medium text-muted-foreground">
+                  {!active
+                    ? "Add an image to unlock grading."
+                    : status === "success"
+                      ? "Result ready — drag the handle to compare."
+                      : "Optional. Combined with your preset and the enabled adjustments."}
+                </p>
+                <button
+                  type="button"
+                  disabled={!active || busy}
+                  onClick={() => void generate(activeId)}
+                  className="button-cta flex h-12 w-full items-center justify-center gap-2 rounded-full text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-45 sm:w-auto sm:px-8"
+                >
+                  {busy ? (
+                    <Loader2 size={18} strokeWidth={2} className="animate-spin" />
+                  ) : (
+                    <Sparkles size={18} strokeWidth={2} />
+                  )}
+                  {busy ? "Generating…" : "Generate"}
+                </button>
+              </div>
             </div>
+          </div>
+
+          {/* Right control panel */}
+          <aside
+            className="glass order-3 min-w-0 space-y-6 rounded-2xl p-4 sm:p-5 lg:order-none lg:row-span-2 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto"
+            style={{ boxShadow: "var(--shadow-card)" }}
+          >
+            <PresetPicker
+              activeId={st?.presetId ?? null}
+              custom={custom}
+              onPick={pickPreset}
+              previewSrc={active?.url ?? demoPhoto}
+            />
 
             <AdjustmentPanel
-              values={adjustments}
+              values={st?.adjustments ?? NEUTRAL}
+              enabled={st?.enabled ?? DEFAULT_ENABLED}
+              disabled={!active}
               onChange={updateAdjustment}
+              onToggle={toggleEffect}
               onResetKey={resetKey}
               onResetAll={resetAll}
             />
+          </aside>
 
-            <div>
-              <button
-                type="button"
-                disabled={!active || busy}
-                onClick={() => void generate()}
-                className="button-cta flex h-12 w-full items-center justify-center gap-2 rounded-full text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                style={{
-                  opacity: !active || busy ? 0.45 : 1,
-                  cursor: !active || busy ? "not-allowed" : "pointer",
-                }}
-              >
-                {busy ? (
-                  <Loader2 size={18} strokeWidth={2} className="animate-spin" />
-                ) : (
-                  <Sparkles size={18} strokeWidth={2} />
-                )}
-                {busy ? "Generating…" : "Generate"}
-              </button>
-              <p className="mt-3 text-center text-[12px] font-medium text-muted-foreground">
-                {status === "idle"
-                  ? "Add an image to unlock grading."
-                  : status === "success"
-                    ? "Result ready — drag the handle to compare."
-                    : "Preview updates live as you adjust."}
-              </p>
+          {/* Result / error actions */}
+          {(status === "success" || status === "error") && (
+            <div className="order-4 min-w-0 lg:col-start-2 lg:row-start-2 lg:order-none">
+              {status === "success" && (
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => void download()}
+                    className="button-cta flex h-11 items-center gap-2 rounded-full px-5 text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <Download size={16} strokeWidth={2} />
+                    Download
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void generate(activeId, st?.lastRequest)}
+                    className="button-utility flex h-11 items-center gap-2 rounded-full px-5 text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <RefreshCw size={16} strokeWidth={2} />
+                    Generate again
+                  </button>
+                </div>
+              )}
+
+              {status === "error" && (
+                <div
+                  className="flex flex-wrap items-center gap-3 rounded-xl border p-3"
+                  style={{ borderColor: "var(--coral-bdr)", background: "var(--coral-dim)" }}
+                >
+                  <AlertTriangle size={16} strokeWidth={2} className="text-destructive" />
+                  <p className="min-w-0 flex-1 text-[13px] font-medium text-foreground">
+                    {st?.error ?? "Generation failed"}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => void generate(activeId, st?.lastRequest)}
+                    className="button-utility flex h-11 items-center gap-2 rounded-full px-4 text-[13px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <RefreshCw size={15} strokeWidth={2} />
+                    Retry
+                  </button>
+                </div>
+              )}
             </div>
-          </div>
+          )}
         </div>
       </section>
 

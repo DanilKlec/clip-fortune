@@ -14,22 +14,55 @@ export type AdjustmentKey =
 
 export type Adjustments = Record<AdjustmentKey, number>;
 
+/** Per-effect enable/disable flags. */
+export type EffectToggles = Record<AdjustmentKey, boolean>;
+
 export interface AdjustmentSpec {
   key: AdjustmentKey;
   label: string;
   min: number;
   max: number;
   step: number;
+  /** Short explanation for non-obvious effects. */
+  hint?: string;
 }
 
 export const ADJUSTMENTS: AdjustmentSpec[] = [
-  { key: "temperature", label: "Temperature", min: -100, max: 100, step: 1 },
+  {
+    key: "temperature",
+    label: "Temperature",
+    min: -100,
+    max: 100,
+    step: 1,
+    hint: "Negative cools the white balance, positive warms it.",
+  },
   { key: "contrast", label: "Contrast", min: -100, max: 100, step: 1 },
   { key: "saturation", label: "Saturation", min: -100, max: 100, step: 1 },
-  { key: "highlights", label: "Highlights", min: -100, max: 100, step: 1 },
+  {
+    key: "highlights",
+    label: "Highlights",
+    min: -100,
+    max: 100,
+    step: 1,
+    hint: "Lifts or rolls off the brightest parts of the image.",
+  },
   { key: "exposure", label: "Exposure", min: -100, max: 100, step: 1 },
-  { key: "sharpness", label: "Sharpness", min: 0, max: 100, step: 1 },
-  { key: "grain", label: "Film Grain", min: 0, max: 100, step: 1 },
+  {
+    key: "sharpness",
+    label: "Sharpness",
+    min: 0,
+    max: 100,
+    step: 1,
+    hint: "Local-contrast clarity — approximated in the live preview.",
+  },
+  {
+    key: "grain",
+    label: "Film Grain",
+    min: 0,
+    max: 100,
+    step: 1,
+    hint: "Adds analogue film noise on top of the grade.",
+  },
 ];
 
 export const NEUTRAL: Adjustments = {
@@ -41,6 +74,30 @@ export const NEUTRAL: Adjustments = {
   sharpness: 0,
   grain: 0,
 };
+
+/** Every effect is on by default; toggling one off is an explicit user action. */
+export const DEFAULT_ENABLED: EffectToggles = {
+  temperature: true,
+  contrast: true,
+  saturation: true,
+  highlights: true,
+  exposure: true,
+  sharpness: true,
+  grain: true,
+};
+
+/** Values actually applied: disabled effects fall back to their neutral value. */
+export function effectiveAdjustments(a: Adjustments, enabled: EffectToggles): Adjustments {
+  const out = { ...a };
+  for (const key of Object.keys(NEUTRAL) as AdjustmentKey[]) {
+    if (!enabled[key]) out[key] = NEUTRAL[key];
+  }
+  return out;
+}
+
+export function allEnabled(enabled: EffectToggles) {
+  return (Object.keys(NEUTRAL) as AdjustmentKey[]).every((k) => enabled[k]);
+}
 
 export interface Preset {
   id: string;

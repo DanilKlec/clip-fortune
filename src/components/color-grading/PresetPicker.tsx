@@ -6,22 +6,24 @@ interface Props {
   onPick: (preset: Preset) => void;
   /** Preview source: the active user image, or the local demo photo. */
   previewSrc: string;
+  /** Manual settings differ from the selected preset. */
+  custom?: boolean;
 }
 
-export function PresetPicker({ activeId, onPick, previewSrc }: Props) {
+export function PresetPicker({ activeId, onPick, previewSrc, custom = false }: Props) {
   return (
     <div>
       <div className="flex items-center gap-2">
         <h3 className="font-display text-[13px] font-extrabold uppercase tracking-[0.16em] text-muted-foreground">
           Presets
         </h3>
-        {activeId === null && (
+        {(custom || activeId === null) && (
           <span className="badge-volt" aria-live="polite">
             Custom
           </span>
         )}
       </div>
-      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-3">
         {PRESETS.map((preset) => {
           const active = preset.id === activeId;
           return (

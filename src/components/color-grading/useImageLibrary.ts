@@ -1,9 +1,51 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { DEFAULT_ENABLED, NEUTRAL, PRESETS, type Adjustments, type EffectToggles } from "./grading";
 
 export interface GradingImage {
   id: string;
   file: File;
   url: string;
+}
+
+export type GradingStatus = "ready" | "generating" | "success" | "error";
+
+export interface GradeRequestSnapshot {
+  prompt: string;
+  presetId: string | null;
+  adjustments: Adjustments;
+  enabled: EffectToggles;
+}
+
+/** Everything the editor remembers per uploaded image. */
+export interface ImageState {
+  prompt: string;
+  presetId: string | null;
+  adjustments: Adjustments;
+  enabled: EffectToggles;
+  status: GradingStatus;
+  error: string | null;
+  resultUrl: string | null;
+  comparePos: number;
+  lastRequest: GradeRequestSnapshot | null;
+  /** Monotonic token used to discard stale async responses. */
+  run: number;
+}
+
+export const DEFAULT_PRESET_ID = PRESETS[0].id;
+
+export function createImageState(): ImageState {
+  return {
+    prompt: "",
+    presetId: DEFAULT_PRESET_ID,
+    adjustments: { ...NEUTRAL },
+    enabled: { ...DEFAULT_ENABLED },
+    status: "ready",
+    error: null,
+    resultUrl: null,
+    comparePos: 50,
+    lastRequest: null,
+    run: 0,
+  };
 }
 
 export const ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/webp"];
@@ -24,10 +66,14 @@ export function fileKey(f: File) {
 let seq = 0;
 const nextId = () => `img-${++seq}-${Date.now()}`;
 
-/** Owns the image list and the lifecycle of every object URL it creates. */
+/**
+ * Owns the image list, the independent editor state of every image and the
+ * lifecycle of each object URL (source previews and generated results).
+ */
 export function useImageLibrary() {
   const [images, setImages] = useState<GradingImage[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [states, setStates] = useState<Record<string, ImageState>>({});
   const urls = useRef(new Set<string>());
 
   const track = (url: string) => {
@@ -54,6 +100,11 @@ export function useImageLibrary() {
       url: track(URL.createObjectURL(file)),
     }));
     setImages((prev) => [...prev, ...created]);
+    setStates((prev) => {
+      const next = { ...prev };
+      for (const img of created) next[img.id] = createImageState();
+      return next;
+    });
     setActiveId((prev) => prev ?? created[0].id);
   }, []);
 
@@ -63,6 +114,13 @@ export function useImageLibrary() {
       if (target) release(target.url);
       const next = prev.filter((i) => i.id !== id);
       setActiveId((cur) => (cur === id ? (next[0]?.id ?? null) : cur));
+      return next;
+    });
+    setStates((prev) => {
+      const st = prev[id];
+      if (st?.resultUrl) release(st.resultUrl);
+      const next = { ...prev };
+      delete next[id];
       return next;
     });
   }, []);
@@ -75,6 +133,10 @@ export function useImageLibrary() {
         return { ...i, file, url: track(URL.createObjectURL(file)) };
       }),
     );
+    setStates((prev) => {
+      if (prev[id]?.resultUrl) release(prev[id].resultUrl);
+      return { ...prev, [id]: createImageState() };
+    });
   }, []);
 
   const clearAll = useCallback(() => {
@@ -82,10 +144,51 @@ export function useImageLibrary() {
       prev.forEach((i) => release(i.url));
       return [];
     });
+    setStates((prev) => {
+      Object.values(prev).forEach((s) => s.resultUrl && release(s.resultUrl));
+      return {};
+    });
     setActiveId(null);
   }, []);
 
-  const active = images.find((i) => i.id === activeId) ?? null;
+  /** Update one image's editor state without touching any other image. */
+  const patchState = useCallback((id: string, update: (prev: ImageState) => ImageState) => {
+    setStates((prev) => {
+      const cur = prev[id];
+      if (!cur) return prev;
+      return { ...prev, [id]: update(cur) };
+    });
+  }, []);
 
-  return { images, active, activeId, setActiveId, add, remove, replace, clearAll };
+  /** Replace an image's result URL, revoking the previous one. */
+  const setResult = useCallback((id: string, url: string | null) => {
+    setStates((prev) => {
+      const cur = prev[id];
+      if (!cur) {
+        if (url) URL.revokeObjectURL(url);
+        return prev;
+      }
+      if (cur.resultUrl && cur.resultUrl !== url) release(cur.resultUrl);
+      if (url?.startsWith("blob:")) track(url);
+      return { ...prev, [id]: { ...cur, resultUrl: url } };
+    });
+  }, []);
+
+  const active = images.find((i) => i.id === activeId) ?? null;
+  const activeState = (activeId && states[activeId]) || null;
+
+  return {
+    images,
+    active,
+    activeId,
+    activeState,
+    states,
+    setActiveId,
+    add,
+    remove,
+    replace,
+    clearAll,
+    patchState,
+    setResult,
+  };
 }
