@@ -769,6 +769,23 @@
   }
 }
 
+/* Thumbnail action buttons (replace/remove): keep them small so they don't
+   cover the photo on touch devices (the coarse-pointer rule forces 44x44). */
+.cg-tray-btn {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: 22px;
+  min-width: 22px;
+  height: 22px;
+  min-height: 22px;
+}
+@media (pointer: coarse) {
+  button.cg-tray-btn {
+    min-width: 22px;
+    min-height: 22px;
+  }
+}
+
 /* Filled block slider: the whole rounded rectangle is the control. */
 .cg-slider {
   position: absolute;
