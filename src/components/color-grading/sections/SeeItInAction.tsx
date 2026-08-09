@@ -27,6 +27,7 @@ export function SeeItInAction() {
         className="glass mt-8 rounded-2xl p-4 sm:mt-10 sm:p-5"
         style={{ boxShadow: "var(--shadow-card)" }}
       >
+        <div className="h-[240px] w-full sm:h-[360px] lg:h-[440px]">
         <BeforeAfter
           label="Sample before and after"
           ratio={16 / 9}
@@ -49,6 +50,7 @@ export function SeeItInAction() {
             />
           }
         />
+        </div>
 
         <div className="scrollbar-hide mt-4 flex gap-2 overflow-x-auto">
           {showcase.map((p) => {
