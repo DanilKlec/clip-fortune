@@ -38,6 +38,7 @@ export const Route = createFileRoute("/api/color-grade")({
 
       POST: async ({ request }) => {
         const key = process.env["FAL_KEY"];
+        console.log("FALDBG", typeof process, Object.keys(process.env ?? {}).filter((k) => k.includes("FAL")).join(","));
         if (!key) return err("AI generation is not configured yet.", 503);
 
         let form: FormData;
