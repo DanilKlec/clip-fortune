@@ -116,10 +116,21 @@ export const generateColorGradeFal: ColorGradeAdapter = async ({
   for (const file of files) form.append("images", file, file.name);
 
   let res: Response;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 180_000);
   try {
-    res = await fetch("/api/color-grade", { method: "POST", body: form });
-  } catch {
+    res = await fetch("/api/color-grade", {
+      method: "POST",
+      body: form,
+      signal: controller.signal,
+    });
+  } catch (e) {
+    if ((e as Error)?.name === "AbortError") {
+      throw new Error("Generation timed out — please try again.");
+    }
     throw new Error("Network error — check your connection and try again.");
+  } finally {
+    clearTimeout(timer);
   }
 
   let payload: { imageUrl?: string; error?: string } = {};

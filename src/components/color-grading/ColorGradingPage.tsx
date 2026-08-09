@@ -21,7 +21,14 @@ import { BeforeAfter } from "./BeforeAfter";
 import { ImageTray } from "./ImageTray";
 import { AdjustmentPanel } from "./AdjustmentPanel";
 import { PresetPicker } from "./PresetPicker";
-import { ACCEPTED_LABEL, isAccepted, useImageLibrary } from "./useImageLibrary";
+import {
+  ACCEPTED_LABEL,
+  MAX_BYTES,
+  MAX_IMAGES,
+  fileKey,
+  isAccepted,
+  useImageLibrary,
+} from "./useImageLibrary";
 import { generateColorGrade } from "./adapter";
 import {
   NEUTRAL,
@@ -87,10 +94,33 @@ export function ColorGradingPage() {
     invalidate();
     if (!list || list.length === 0) return;
     const files = Array.from(list);
-    const ok = files.filter(isAccepted);
-    if (ok.length < files.length) {
+    const typed = files.filter(isAccepted);
+    if (typed.length < files.length) {
       toast.error(`Only ${ACCEPTED_LABEL} images are supported`);
     }
+    const sized = typed.filter((f) => f.size <= MAX_BYTES);
+    if (sized.length < typed.length) {
+      toast.error("Some files are larger than 20MB and were skipped");
+    }
+    const seen = new Set(images.map((i) => fileKey(i.file)));
+    const unique = sized.filter((f) => {
+      const k = fileKey(f);
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+    if (unique.length < sized.length) {
+      toast("Duplicate images were skipped");
+    }
+    const room = MAX_IMAGES - images.length;
+    if (room <= 0) {
+      toast.error(`You can work with up to ${MAX_IMAGES} images`);
+      return;
+    }
+    if (unique.length > room) {
+      toast.error(`Only ${MAX_IMAGES} images can be used — extras were skipped`);
+    }
+    const ok = unique.slice(0, room);
     if (ok.length > 0) add(ok);
   };
 
@@ -130,8 +160,10 @@ export function ColorGradingPage() {
     setStatus("generating");
     setError(null);
     try {
+      // Active image first (primary), the rest act as references.
+      const ordered = [active.file, ...images.filter((i) => i.id !== active.id).map((i) => i.file)];
       const res = await generateColorGrade({
-        images: [active.file],
+        images: ordered.slice(0, MAX_IMAGES),
         prompt,
         presetId,
         adjustments,
@@ -266,14 +298,14 @@ export function ColorGradingPage() {
                     <img
                       src={active.url}
                       alt="Original"
-                      className="max-h-[460px] w-full object-contain"
+                      className="block h-[280px] w-full object-contain sm:h-[380px] lg:h-[460px]"
                     />
                   }
                   after={
                     <img
                       src={resultUrl}
                       alt="Graded result"
-                      className="max-h-[460px] w-full object-contain"
+                      className="block h-[280px] w-full object-contain sm:h-[380px] lg:h-[460px]"
                     />
                   }
                 />

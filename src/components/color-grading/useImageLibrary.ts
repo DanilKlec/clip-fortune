@@ -8,11 +8,19 @@ export interface GradingImage {
 
 export const ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/webp"];
 export const ACCEPTED_LABEL = "PNG, JPG or WebP";
+/** Matches the server-side limit in /api/color-grade. */
+export const MAX_BYTES = 20 * 1024 * 1024;
+export const MAX_IMAGES = 9;
 
 export function isAccepted(file: File) {
   return (
     ACCEPTED_TYPES.includes(file.type) || /\.(png|jpe?g|webp)$/i.test(file.name)
   );
+}
+
+/** Identity used to detect the same file being picked twice. */
+export function fileKey(f: File) {
+  return `${f.name}:${f.size}:${f.lastModified}`;
 }
 
 let seq = 0;

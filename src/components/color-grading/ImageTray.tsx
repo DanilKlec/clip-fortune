@@ -55,7 +55,7 @@ export function ImageTray({
                 className="h-full w-full object-cover"
               />
             </button>
-            {i === 0 && (
+            {active && (
               <span className="badge-volt pointer-events-none absolute -top-1 left-1">
                 Main
               </span>
