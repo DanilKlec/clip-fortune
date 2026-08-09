@@ -50,12 +50,9 @@ export const Route = createFileRoute("/api/color-grade")({
         const prompt = String(form.get("prompt") ?? "").slice(0, 4000);
         if (!prompt) return err("Missing prompt.", 400);
 
-        const files = form
-          .getAll("images")
-          .filter((f): f is File => f instanceof File);
+        const files = form.getAll("images").filter((f): f is File => f instanceof File);
         if (files.length === 0) return err("No image selected.", 400);
-        if (files.length > MAX_FILES)
-          return err(`Up to ${MAX_FILES} images per request.`, 400);
+        if (files.length > MAX_FILES) return err(`Up to ${MAX_FILES} images per request.`, 400);
         for (const f of files) {
           if (!ACCEPTED.includes(f.type)) {
             return err("Only PNG, JPG and WebP images are supported.", 400);
@@ -84,14 +81,14 @@ export const Route = createFileRoute("/api/color-grade")({
             },
           });
 
-          const images = (result as { data?: { images?: { url?: string }[] } })
-            .data?.images;
+          const images = (result as { data?: { images?: { url?: string }[] } }).data?.images;
           const url = images?.[0]?.url;
           if (!url) return err("The generation finished without an image.", 502);
           return Response.json({ imageUrl: url });
         } catch (e) {
           const status = (e as { status?: number })?.status;
-          const detail = `${(e as { body?: { detail?: unknown } })?.body?.detail ?? ""} ${(e as Error)?.message ?? ""}`.toLowerCase();
+          const detail =
+            `${(e as { body?: { detail?: unknown } })?.body?.detail ?? ""} ${(e as Error)?.message ?? ""}`.toLowerCase();
           console.error("color-grade generation failed", status ?? "unknown");
           if (status === 402 || detail.includes("balance") || detail.includes("credit")) {
             return err(

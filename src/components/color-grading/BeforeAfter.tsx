@@ -33,7 +33,7 @@ export function BeforeAfter({ before, after, label = "Before and after" }: Props
       onPointerMove={(e) => dragging.current && move(e.clientX)}
       onPointerUp={() => (dragging.current = false)}
       onPointerCancel={() => (dragging.current = false)}
-      className="relative touch-none select-none overflow-hidden rounded-xl"
+      className="relative w-full touch-none select-none overflow-hidden rounded-xl"
     >
       <div className="[&_img]:pointer-events-none">{after}</div>
       <div

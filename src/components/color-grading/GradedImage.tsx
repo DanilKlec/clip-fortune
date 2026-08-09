@@ -9,13 +9,7 @@ interface Props {
 }
 
 /** Renders an image with the live grade applied (filter + tint + grain layers). */
-export function GradedImage({
-  src,
-  alt,
-  adjustments,
-  className,
-  imgClassName,
-}: Props) {
+export function GradedImage({ src, alt, adjustments, className, imgClassName }: Props) {
   const layers = buildLayers(adjustments);
   return (
     <div className={`relative overflow-hidden ${className ?? ""}`}>

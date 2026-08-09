@@ -1,11 +1,6 @@
 import { RotateCcw } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
-import {
-  ADJUSTMENTS,
-  NEUTRAL,
-  type AdjustmentKey,
-  type Adjustments,
-} from "./grading";
+import { ADJUSTMENTS, NEUTRAL, type AdjustmentKey, type Adjustments } from "./grading";
 
 interface Props {
   values: Adjustments;
@@ -14,12 +9,7 @@ interface Props {
   onResetAll: () => void;
 }
 
-export function AdjustmentPanel({
-  values,
-  onChange,
-  onResetKey,
-  onResetAll,
-}: Props) {
+export function AdjustmentPanel({ values, onChange, onResetKey, onResetAll }: Props) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">

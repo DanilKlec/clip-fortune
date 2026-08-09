@@ -1,27 +1,20 @@
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type DragEvent,
-  type ChangeEvent,
-} from "react";
+import { useCallback, useEffect, useRef, useState, type DragEvent, type ChangeEvent } from "react";
 import { toast } from "sonner";
-import {
-  AlertTriangle,
-  Download,
-  ImagePlus,
-  Loader2,
-  RefreshCw,
-  Sparkles,
-} from "lucide-react";
+import { AlertTriangle, Download, ImagePlus, Loader2, RefreshCw, Sparkles } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { GradedImage } from "./GradedImage";
 import { BeforeAfter } from "./BeforeAfter";
 import { ImageTray } from "./ImageTray";
 import { AdjustmentPanel } from "./AdjustmentPanel";
 import { PresetPicker } from "./PresetPicker";
-import { ACCEPTED_LABEL, isAccepted, useImageLibrary } from "./useImageLibrary";
+import {
+  ACCEPTED_LABEL,
+  MAX_BYTES,
+  MAX_IMAGES,
+  fileKey,
+  isAccepted,
+  useImageLibrary,
+} from "./useImageLibrary";
 import { generateColorGrade } from "./adapter";
 import {
   NEUTRAL,
@@ -39,8 +32,7 @@ import demoPhoto from "@/assets/grading-demo.jpg";
 type Status = "idle" | "ready" | "generating" | "success" | "error";
 
 export function ColorGradingPage() {
-  const { images, active, activeId, setActiveId, add, remove, replace } =
-    useImageLibrary();
+  const { images, active, activeId, setActiveId, add, remove, replace } = useImageLibrary();
   const [adjustments, setAdjustments] = useState<Adjustments>({ ...NEUTRAL });
   const [presetId, setPresetId] = useState<string | null>("natural");
   const [prompt, setPrompt] = useState("");
@@ -87,10 +79,33 @@ export function ColorGradingPage() {
     invalidate();
     if (!list || list.length === 0) return;
     const files = Array.from(list);
-    const ok = files.filter(isAccepted);
-    if (ok.length < files.length) {
+    const typed = files.filter(isAccepted);
+    if (typed.length < files.length) {
       toast.error(`Only ${ACCEPTED_LABEL} images are supported`);
     }
+    const sized = typed.filter((f) => f.size <= MAX_BYTES);
+    if (sized.length < typed.length) {
+      toast.error("Some files are larger than 20MB and were skipped");
+    }
+    const seen = new Set(images.map((i) => fileKey(i.file)));
+    const unique = sized.filter((f) => {
+      const k = fileKey(f);
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+    if (unique.length < sized.length) {
+      toast("Duplicate images were skipped");
+    }
+    const room = MAX_IMAGES - images.length;
+    if (room <= 0) {
+      toast.error(`You can work with up to ${MAX_IMAGES} images`);
+      return;
+    }
+    if (unique.length > room) {
+      toast.error(`Only ${MAX_IMAGES} images can be used — extras were skipped`);
+    }
+    const ok = unique.slice(0, room);
     if (ok.length > 0) add(ok);
   };
 
@@ -130,8 +145,10 @@ export function ColorGradingPage() {
     setStatus("generating");
     setError(null);
     try {
+      // Active image first (primary), the rest act as references.
+      const ordered = [active.file, ...images.filter((i) => i.id !== active.id).map((i) => i.file)];
       const res = await generateColorGrade({
-        images: [active.file],
+        images: ordered.slice(0, MAX_IMAGES),
         prompt,
         presetId,
         adjustments,
@@ -145,9 +162,7 @@ export function ColorGradingPage() {
     } catch (err) {
       if (run !== runRef.current) return;
       setResult(null);
-      setError(
-        err instanceof Error ? err.message : "Something went wrong while grading",
-      );
+      setError(err instanceof Error ? err.message : "Something went wrong while grading");
       setStatus("error");
     }
   };
@@ -194,14 +209,16 @@ export function ColorGradingPage() {
           </span>
         </h1>
         <p className="mt-3 max-w-2xl text-[14px] font-medium leading-relaxed text-muted-foreground sm:text-[15px]">
-          Drop your stills, dial in the look with live controls, and export a
-          cinematic grade. Every change previews instantly — nothing is uploaded
-          until you generate.
+          Drop your stills, dial in the look with live controls, and export a cinematic grade. Every
+          change previews instantly — nothing is uploaded until you generate.
         </p>
 
         <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
           {/* Preview column */}
-          <div className="glass min-w-0 rounded-2xl p-4 sm:p-5" style={{ boxShadow: "var(--shadow-card)" }}>
+          <div
+            className="glass min-w-0 rounded-2xl p-4 sm:p-5"
+            style={{ boxShadow: "var(--shadow-card)" }}
+          >
             <div
               ref={dropRef}
               onDragOver={(e) => {
@@ -266,14 +283,14 @@ export function ColorGradingPage() {
                     <img
                       src={active.url}
                       alt="Original"
-                      className="max-h-[460px] w-full object-contain"
+                      className="block h-[280px] w-full object-contain sm:h-[380px] lg:h-[460px]"
                     />
                   }
                   after={
                     <img
                       src={resultUrl}
                       alt="Graded result"
-                      className="max-h-[460px] w-full object-contain"
+                      className="block h-[280px] w-full object-contain sm:h-[380px] lg:h-[460px]"
                     />
                   }
                 />
@@ -282,9 +299,7 @@ export function ColorGradingPage() {
               {busy && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background/70 backdrop-blur-sm">
                   <Loader2 size={26} strokeWidth={2} className="animate-spin text-volt" />
-                  <p className="text-[14px] font-semibold text-foreground">
-                    Applying your grade…
-                  </p>
+                  <p className="text-[14px] font-semibold text-foreground">Applying your grade…</p>
                   <p className="text-[13px] font-medium text-muted-foreground">
                     Rendering tone, colour and grain. This takes a moment.
                   </p>
@@ -392,8 +407,8 @@ export function ColorGradingPage() {
                 style={{ background: "var(--tile)", borderColor: "var(--card-border)" }}
               />
               <p className="mt-2 text-[12px] font-medium text-muted-foreground">
-                Optional. Your prompt is combined with the selected preset and
-                the manual settings below.
+                Optional. Your prompt is combined with the selected preset and the manual settings
+                below.
               </p>
             </div>
 
@@ -437,9 +452,7 @@ export function ColorGradingPage() {
       <ThreeSteps />
       <SeeItInAction />
       <BuiltForCinematicLooks
-        onCTA={() =>
-          dropRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
-        }
+        onCTA={() => dropRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
       />
     </div>
   );

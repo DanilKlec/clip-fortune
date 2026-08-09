@@ -14,9 +14,7 @@ export interface ColorGradeResult {
   imageUrl: string;
 }
 
-export type ColorGradeAdapter = (
-  req: ColorGradeRequest,
-) => Promise<ColorGradeResult>;
+export type ColorGradeAdapter = (req: ColorGradeRequest) => Promise<ColorGradeResult>;
 
 function loadImage(src: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
@@ -33,10 +31,7 @@ function loadImage(src: string) {
  * adjustments onto a canvas and returns an object URL. Swapping this adapter
  * for a real API call requires no UI changes.
  */
-export const generateColorGradeMock: ColorGradeAdapter = async ({
-  images,
-  adjustments,
-}) => {
+export const generateColorGradeMock: ColorGradeAdapter = async ({ images, adjustments }) => {
   const file = images[0];
   if (!file) throw new Error("No image selected");
   const src = URL.createObjectURL(file);
@@ -116,10 +111,21 @@ export const generateColorGradeFal: ColorGradeAdapter = async ({
   for (const file of files) form.append("images", file, file.name);
 
   let res: Response;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 180_000);
   try {
-    res = await fetch("/api/color-grade", { method: "POST", body: form });
-  } catch {
+    res = await fetch("/api/color-grade", {
+      method: "POST",
+      body: form,
+      signal: controller.signal,
+    });
+  } catch (e) {
+    if ((e as Error)?.name === "AbortError") {
+      throw new Error("Generation timed out — please try again.");
+    }
     throw new Error("Network error — check your connection and try again.");
+  } finally {
+    clearTimeout(timer);
   }
 
   let payload: { imageUrl?: string; error?: string } = {};
@@ -134,9 +140,7 @@ export const generateColorGradeFal: ColorGradeAdapter = async ({
 
   // Fetch through the same-origin proxy so Download saves a real file.
   try {
-    const img = await fetch(
-      `/api/color-grade?url=${encodeURIComponent(payload.imageUrl)}`,
-    );
+    const img = await fetch(`/api/color-grade?url=${encodeURIComponent(payload.imageUrl)}`);
     if (img.ok) {
       const blob = await img.blob();
       return { imageUrl: URL.createObjectURL(blob) };

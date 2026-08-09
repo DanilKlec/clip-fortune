@@ -11,14 +11,7 @@ interface Props {
   onAdd: (files: FileList | null) => void;
 }
 
-export function ImageTray({
-  images,
-  activeId,
-  onSelect,
-  onRemove,
-  onReplace,
-  onAdd,
-}: Props) {
+export function ImageTray({ images, activeId, onSelect, onRemove, onReplace, onAdd }: Props) {
   const addRef = useRef<HTMLInputElement>(null);
   const replaceRef = useRef<HTMLInputElement>(null);
   const replacingId = useRef<string | null>(null);
@@ -34,10 +27,7 @@ export function ImageTray({
       {images.map((img, i) => {
         const active = img.id === activeId;
         return (
-          <div
-            key={img.id}
-            className="relative h-[72px] w-[72px] shrink-0 sm:h-20 sm:w-20"
-          >
+          <div key={img.id} className="relative h-[72px] w-[72px] shrink-0 sm:h-20 sm:w-20">
             <button
               type="button"
               onClick={() => onSelect(img.id)}
@@ -49,16 +39,10 @@ export function ImageTray({
                 background: "var(--tile)",
               }}
             >
-              <img
-                src={img.url}
-                alt={img.file.name}
-                className="h-full w-full object-cover"
-              />
+              <img src={img.url} alt={img.file.name} className="h-full w-full object-cover" />
             </button>
-            {i === 0 && (
-              <span className="badge-volt pointer-events-none absolute -top-1 left-1">
-                Main
-              </span>
+            {active && (
+              <span className="badge-volt pointer-events-none absolute -top-1 left-1">Main</span>
             )}
             <div className="absolute -bottom-1 right-0 flex gap-1">
               <button
