@@ -280,7 +280,7 @@ export function ColorGradingPage() {
               }}
               onDragLeave={() => setDragOver(false)}
               onDrop={onDrop}
-              className="relative flex min-h-[280px] w-full min-w-0 flex-1 items-center justify-center overflow-hidden rounded-xl sm:min-h-[420px] lg:min-h-[620px]"
+              className="relative flex min-h-[240px] w-full min-w-0 flex-1 items-center justify-center overflow-hidden rounded-xl sm:min-h-[320px] lg:min-h-[380px] lg:max-h-[760px]"
               style={{
                 background: dragOver ? "var(--volt-dim)" : "var(--tile)",
                 border: `1.5px dashed ${dragOver ? "var(--volt)" : "var(--card-border)"}`,
