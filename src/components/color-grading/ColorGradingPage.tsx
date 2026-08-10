@@ -23,6 +23,7 @@ import {
   ACCEPTED_LABEL,
   MAX_BYTES,
   MAX_IMAGES,
+  createImageState,
   fileKey,
   isAccepted,
   useImageLibrary,
@@ -45,6 +46,7 @@ import { ThreeSteps } from "./sections/ThreeSteps";
 import { SeeItInAction } from "./sections/SeeItInAction";
 import { BuiltForCinematicLooks } from "./sections/BuiltForCinematicLooks";
 import { ExploreMoreApps } from "@/components/virality/landing/ExploreMoreApps";
+import demoImage from "@/assets/grading-demo.jpg";
 
 export function ColorGradingPage() {
   const {
@@ -97,18 +99,20 @@ export function ColorGradingPage() {
     statesRef.current = states;
   }, [states]);
 
-  const st: ImageState | null = activeState;
-  const status = st?.status ?? "ready";
+  /** Settings are editable before any upload; they carry over to the first image. */
+  const [draft, setDraft] = useState<ImageState>(() => createImageState());
+  const st: ImageState = activeState ?? draft;
+  const status = activeState ? activeState.status : "ready";
   const busy = status === "generating";
-  const custom = st ? !allEnabled(st.enabled) : false;
+  const custom = !allEnabled(st.enabled);
 
   const ratio = useImageAspect(active?.url);
-  const effective = st ? effectiveAdjustments(st.adjustments, st.enabled) : NEUTRAL;
+  const effective = effectiveAdjustments(st.adjustments, st.enabled);
   /** Priority: AI result for this image, else the live local grade, else none. */
-  const aiUrl = st && st.status === "success" ? st.resultUrl : null;
+  const aiUrl = activeState && activeState.status === "success" ? activeState.resultUrl : null;
   const canCompare = Boolean(aiUrl) || !isNeutral(effective);
-  const showOriginal = st?.view === "original";
-  const compareOn = st?.compare ?? false;
+  const showOriginal = st.view === "original";
+  const compareOn = st.compare;
   const comparing = compareOn && canCompare && !showOriginal;
 
   /** View-only switches: they never touch the grade, result or Fal.ai. */
@@ -123,7 +127,10 @@ export function ColorGradingPage() {
 
   /** Any input change invalidates the current result for the active image only. */
   const editActive = (patch: (s: ImageState) => Partial<ImageState>) => {
-    if (!activeId) return;
+    if (!activeId) {
+      setDraft((s) => ({ ...s, ...patch(s), error: null, status: "ready" }));
+      return;
+    }
     const id = activeId;
     const run = ++runSeq.current;
     setResult(id, null);
@@ -166,7 +173,18 @@ export function ColorGradingPage() {
       toast.error(`Only ${MAX_IMAGES} images can be used — extras were skipped`);
     }
     const ok = unique.slice(0, room);
-    if (ok.length > 0) add(ok);
+    if (ok.length === 0) return;
+    add(
+      ok,
+      images.length === 0
+        ? {
+            prompt: draft.prompt,
+            presetId: draft.presetId,
+            adjustments: { ...draft.adjustments },
+            enabled: { ...draft.enabled },
+          }
+        : undefined,
+    );
   };
 
   const onDrop = (e: DragEvent<HTMLDivElement>) => {
