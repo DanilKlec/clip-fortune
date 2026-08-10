@@ -45,7 +45,7 @@ export function AdjustmentPanel({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-2">
       {ADJUSTMENTS.map((spec) => {
         const value = values[spec.key];
         const changed = value !== NEUTRAL[spec.key];
