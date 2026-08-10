@@ -75,6 +75,21 @@ export function ColorGradingPage() {
     return () => mql.removeEventListener("change", sync);
   }, []);
   const dropRef = useRef<HTMLDivElement>(null);
+  const centerRef = useRef<HTMLDivElement>(null);
+  const [centerH, setCenterH] = useState<number | null>(null);
+
+  useEffect(() => {
+    const el = centerRef.current;
+    if (!el || !isDesktop) {
+      setCenterH(null);
+      return;
+    }
+    const ro = new ResizeObserver(([entry]) => {
+      setCenterH(entry.contentRect.height + 2);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [isDesktop]);
   const fileRef = useRef<HTMLInputElement>(null);
   const runSeq = useRef(0);
   const statesRef = useRef(states);
