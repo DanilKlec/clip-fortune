@@ -23,7 +23,7 @@ export function PresetPicker({ activeId, onPick, previewSrc, custom = false }: P
           </span>
         )}
       </div>
-      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-2">
+      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-3">
         {PRESETS.map((preset) => {
           const active = preset.id === activeId;
           return (
@@ -43,10 +43,10 @@ export function PresetPicker({ activeId, onPick, previewSrc, custom = false }: P
                 alt={`${preset.name} preview`}
                 adjustments={preset.values}
                 className="w-full"
-                imgClassName="h-[74px] w-full object-cover sm:h-[84px]"
+                imgClassName="h-[62px] w-full object-cover sm:h-[68px]"
               />
               <span
-                className="block truncate px-2 py-2 text-[12px] font-semibold"
+                className="block truncate px-2 py-1.5 text-[11px] font-semibold"
                 style={{ color: active ? "var(--volt)" : undefined }}
               >
                 {preset.name}
