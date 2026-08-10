@@ -54,7 +54,7 @@ export function ImageTray({
         {active && (
           <span className="badge-volt pointer-events-none absolute -top-1 left-1">Main</span>
         )}
-        <div className="absolute -bottom-1 right-0 flex gap-1">
+        <div className="absolute -bottom-1 left-0 right-0 flex justify-between px-0.5">
           <button
             type="button"
             aria-label={`Replace image ${i + 1}`}
