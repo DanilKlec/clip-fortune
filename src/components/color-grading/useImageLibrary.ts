@@ -27,6 +27,10 @@ export interface ImageState {
   resultUrl: string | null;
   comparePos: number;
   lastRequest: GradeRequestSnapshot | null;
+  /** Which version the preview shows; independent from compare mode. */
+  view: "original" | "edited";
+  /** Split before/after comparison enabled for this image. */
+  compare: boolean;
   /** Monotonic token used to discard stale async responses. */
   run: number;
 }
@@ -44,6 +48,8 @@ export function createImageState(): ImageState {
     resultUrl: null,
     comparePos: 50,
     lastRequest: null,
+    view: "edited",
+    compare: false,
     run: 0,
   };
 }
