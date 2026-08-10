@@ -393,7 +393,7 @@ export function ColorGradingPage() {
 
           {/* Right control panel — prompt, generate, presets, adjustments, actions */}
           <aside
-            className="glass order-3 min-w-0 space-y-6 overflow-x-hidden rounded-2xl p-4 sm:p-5 lg:order-none lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto"
+            className="glass order-3 min-w-0 space-y-5 overflow-x-hidden rounded-2xl p-4 sm:p-5 lg:order-none"
             style={{ boxShadow: "var(--shadow-card)" }}
           >
             <div className="min-w-0">
