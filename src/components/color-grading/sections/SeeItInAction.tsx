@@ -5,9 +5,12 @@ import { GradedImage } from "../GradedImage";
 import { useImageAspect } from "../ImageStage";
 import { NEUTRAL, PRESETS, type Preset } from "../grading";
 
-const showcase: Preset[] = PRESETS.filter((p) =>
-  ["natural", "split-tone", "soft-skin", "old-lens", "16mm"].includes(p.id),
-);
+// "Natural" is the neutral preset — it would show no difference, so the
+// showcase starts on a look with a clearly visible grade.
+const order = ["warm-film", "cool-cinema", "teal-orange", "faded-film", "16mm"];
+const showcase: Preset[] = order
+  .map((id) => PRESETS.find((p) => p.id === id))
+  .filter((p): p is Preset => Boolean(p));
 
 export function SeeItInAction() {
   const [preset, setPreset] = useState<Preset>(showcase[0]);
