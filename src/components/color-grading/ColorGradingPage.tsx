@@ -347,19 +347,30 @@ export function ColorGradingPage() {
                 </button>
               )}
 
-              {active && st && !canCompare && (
+              {active && st && showOriginal && (
+                <ImageStage ratio={ratio} maxHeight="min(72vh, 740px)">
+                  <img
+                    src={active.url}
+                    alt="Original image"
+                    draggable={false}
+                    className="absolute inset-0 h-full w-full object-contain object-center"
+                  />
+                </ImageStage>
+              )}
+
+              {active && st && !showOriginal && !comparing && (
                 <ImageStage ratio={ratio} maxHeight="min(72vh, 740px)">
                   <GradedImage
-                    src={active.url}
+                    src={aiUrl ?? active.url}
                     alt={active.file.name}
-                    adjustments={effective}
+                    adjustments={aiUrl ? NEUTRAL : effective}
                     className="absolute inset-0 h-full w-full"
                     imgClassName="h-full w-full object-contain object-center"
                   />
                 </ImageStage>
               )}
 
-              {active && st && canCompare && (
+              {active && st && comparing && (
                 <BeforeAfter
                   label="Compare original and graded image"
                   ratio={ratio}
@@ -407,6 +418,43 @@ export function ColorGradingPage() {
                 </div>
               )}
             </div>
+
+            {active && (
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowOriginal((v) => !v)}
+                  aria-pressed={showOriginal}
+                  className="flex h-10 items-center gap-2 rounded-full border px-4 text-[13px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  style={{
+                    borderColor: showOriginal ? "var(--volt)" : "var(--card-border)",
+                    background: showOriginal ? "var(--volt-dim)" : "var(--tile)",
+                    color: showOriginal ? "var(--volt)" : undefined,
+                  }}
+                >
+                  <Eye size={15} strokeWidth={2} />
+                  Original
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowOriginal(false);
+                    setCompareOn((v) => !v);
+                  }}
+                  disabled={!canCompare}
+                  aria-pressed={comparing}
+                  className="flex h-10 items-center gap-2 rounded-full border px-4 text-[13px] font-semibold transition-colors disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  style={{
+                    borderColor: comparing ? "var(--volt)" : "var(--card-border)",
+                    background: comparing ? "var(--volt-dim)" : "var(--tile)",
+                    color: comparing ? "var(--volt)" : undefined,
+                  }}
+                >
+                  <Columns2 size={15} strokeWidth={2} />
+                  Compare
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Right control panel — prompt, generate, presets, adjustments, actions */}
