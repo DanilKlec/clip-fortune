@@ -53,7 +53,7 @@
 }
 
 :root {
-  /* Core tokens mirror robinzone.ai exactly. */
+  /* Core tokens mirror the design system exactly. */
   --radius: 0.625rem;
   --header-height: 64px;
   --header-total: calc(var(--header-height) + env(safe-area-inset-top, 0px));
@@ -367,7 +367,7 @@
 /*
  * Unlayered on purpose: in Tailwind v4 utilities live in a cascade layer, so a
  * `.button-cta` rule inside `@layer base` would lose to `bg-primary`.
- * Top-level rules win, matching the v3 behaviour on robinzone.ai.
+ * Top-level rules win, matching the v3 behaviour.
  */
 .button-cta {
   background-color: #c8ff00;
@@ -435,7 +435,7 @@
 }
 
 /* ------------------------------------------------------------------ *
- * Design-system utilities — mirrors robinzone.ai. See DESIGN_SYSTEM.md
+ * Design-system utilities — see DESIGN_SYSTEM.md
  * ------------------------------------------------------------------ */
 
 /* Layout */

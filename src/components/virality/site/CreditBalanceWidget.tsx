@@ -5,11 +5,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { SITE_LINKS } from "@/lib/site-links";
-
 /**
  * Visual parity with the main site's credit pill. Presentation-only:
- * balance data lives on robinzone.ai, so the pill links to pricing.
+ * the pill is informational and does not link anywhere.
  */
 export function CreditBalanceWidget({ compact = false }: { compact?: boolean }) {
   const balance = 0;
@@ -19,8 +17,8 @@ export function CreditBalanceWidget({ compact = false }: { compact?: boolean }) 
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <a
-            href={SITE_LINKS.pricing}
+          <span
+            aria-disabled="true"
             aria-label={`${balance} of ${allowance} credits remaining`}
             className={`relative inline-flex items-center rounded-full border border-white/[0.08] bg-[rgba(13,15,26,0.6)] backdrop-blur-xl hover:bg-white/[0.04] transition-colors ${
               compact ? "h-9 px-3 gap-2" : "h-11 px-5 gap-3"
@@ -44,7 +42,7 @@ export function CreditBalanceWidget({ compact = false }: { compact?: boolean }) 
                 </>
               )}
             </div>
-          </a>
+          </span>
         </TooltipTrigger>
         <TooltipContent>
           <p className="text-xs">

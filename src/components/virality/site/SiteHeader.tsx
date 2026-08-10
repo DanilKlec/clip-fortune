@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useRouter } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ChevronDown, History, LayoutDashboard, LogOut, Settings } from "lucide-react";
+import { ChevronDown, LayoutDashboard, LogOut, Settings } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { getAuthState, logout } from "@/lib/auth.functions";
-import { SITE_LINKS } from "@/lib/site-links";
 import { RobinzoneMark } from "./RobinzoneMark";
 import { FeedbackIcons } from "./FeedbackPopover";
 import { CreditBalanceWidget } from "./CreditBalanceWidget";
@@ -25,7 +24,7 @@ const triggerBase =
 const triggerInactive = "text-muted-foreground hover:text-foreground";
 const triggerActive = "text-foreground";
 
-// Matches robinzone.ai: transparent fill, only the outline is tinted, 26px tall.
+// Transparent fill, only the outline is tinted, 26px tall.
 const badgeClass =
   "inline-flex items-center rounded-full border border-primary/25 bg-transparent px-2 py-0.5 text-[9px] leading-[20px] font-bold uppercase tracking-[0.12em] text-primary";
 
@@ -34,10 +33,10 @@ const NAV_VERB_DEFS: { verb: NavVerb; label: string }[] = [
   { verb: "video", label: "Video" },
 ];
 
-const tailLinks: { label: string; href: string; badge?: string }[] = [
-  { label: "Assist", href: SITE_LINKS.assist, badge: "NEW" },
-  { label: "Studio", href: SITE_LINKS.creationStudio },
-  { label: "Pricing", href: SITE_LINKS.pricing },
+const tailLinks: { label: string; badge?: string }[] = [
+  { label: "Assist", badge: "NEW" },
+  { label: "Studio" },
+  { label: "Pricing" },
 ];
 
 function ClickMenuTrigger({
@@ -134,17 +133,20 @@ export function SiteHeader() {
           ))}
 
           <span className="w-px h-4 bg-white/[0.06]" aria-hidden />
-          <a href={SITE_LINKS.models} className={`${triggerBase} ${triggerInactive}`}>
+          <span aria-disabled="true" className={`${triggerBase} ${triggerInactive}`}>
             AI Models
-          </a>
+          </span>
 
           {tailLinks.map((link) => (
             <span key={link.label} className="inline-flex items-center">
               <span className="w-px h-4 bg-white/[0.06]" aria-hidden />
-              <a href={link.href} className={`relative ${triggerBase} ${triggerInactive}`}>
+              <span
+                aria-disabled="true"
+                className={`relative ${triggerBase} ${triggerInactive}`}
+              >
                 {link.label}
                 {link.badge && <span className={badgeClass}>{link.badge}</span>}
-              </a>
+              </span>
             </span>
           ))}
         </nav>
@@ -174,26 +176,14 @@ export function SiteHeader() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52">
                 <DropdownMenuItem asChild>
-                  <a
-                    href={SITE_LINKS.dashboard}
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
+                  <span aria-disabled="true" className="flex items-center gap-2">
                     <LayoutDashboard className="h-4 w-4" /> Dashboard
-                  </a>
+                  </span>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a
-                    href={`${SITE_LINKS.dashboard}?tab=settings`}
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
+                  <span aria-disabled="true" className="flex items-center gap-2">
                     <Settings className="h-4 w-4" /> Settings
-                  </a>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/history" className="flex items-center gap-2 cursor-pointer">
-                    <History className="h-4 w-4" /> History
-                  </Link>
+                  </span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -206,11 +196,13 @@ export function SiteHeader() {
               </DropdownMenu>
             </>
           ) : (
-            <a href={SITE_LINKS.login}>
-              <button className="button-cta inline-flex items-center gap-2 h-11 py-2 px-3.5 sm:px-4 rounded-full bg-primary text-primary-foreground font-extrabold uppercase text-[11px] tracking-[-0.02em] transition-all hover:brightness-110 hover:-translate-y-px active:scale-[0.97]">
-                Sign In
-              </button>
-            </a>
+            <button
+              type="button"
+              aria-disabled="true"
+              className="button-cta inline-flex items-center gap-2 h-11 py-2 px-3.5 sm:px-4 rounded-full bg-primary text-primary-foreground font-extrabold uppercase text-[11px] tracking-[-0.02em] transition-all hover:brightness-110 hover:-translate-y-px active:scale-[0.97]"
+            >
+              Sign In
+            </button>
           )}
         </div>
       </div>

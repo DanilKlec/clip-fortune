@@ -1,5 +1,4 @@
 import { ArrowRight } from "lucide-react";
-import { useNavigate } from "@tanstack/react-router";
 import { Brain3D } from "./Brain3D";
 import { useViralitySession } from "@/lib/virality-session";
 import { useAnalyzeProgress } from "@/lib/analyze-progress";
@@ -26,7 +25,6 @@ function formatDuration(sec: number | undefined) {
 }
 
 export function HeroPreviewCard() {
-  const navigate = useNavigate();
   const { poster, analyzing, phase, result } = useViralitySession();
 
   const state: "idle" | "analyzing" | "ready" = analyzing
@@ -207,9 +205,7 @@ export function HeroPreviewCard() {
       <div className="mt-6 lg:mt-auto lg:pt-5">
         <button
           type="button"
-          onClick={() => {
-            if (state === "ready") navigate({ to: "/report" });
-          }}
+          onClick={() => {}}
           disabled={state !== "ready"}
           className={`relative flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-full text-[14px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--card)] ${state === "ready" ? "button-cta" : ""}`}
         style={{

@@ -44,7 +44,8 @@ const seeAll =
   "mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:text-primary/80 transition-colors px-3";
 
 export function NavMegaMenu({ verb, onNavigate }: { verb: NavVerb; onNavigate?: () => void }) {
-  const { models, modelsAllTo, label, subtitle, studioTo, studioLabel } = NAV_MENUS[verb];
+  const { models, label, subtitle, studioLabel } = NAV_MENUS[verb];
+  void onNavigate;
 
   return (
     <div className="w-[460px] p-5 bg-popover border border-card-border rounded-2xl shadow-[0_24px_64px_rgba(0,0,0,0.6)]">
@@ -52,9 +53,8 @@ export function NavMegaMenu({ verb, onNavigate }: { verb: NavVerb; onNavigate?: 
         <p className="font-display font-bold text-[1rem] text-foreground">{label}</p>
         <p className="text-xs text-muted-foreground font-light">{subtitle}</p>
       </div>
-      <a
-        href={studioTo}
-        onClick={onNavigate}
+      <div
+        aria-disabled="true"
         className="group mb-4 flex items-center justify-between gap-3 rounded-full border border-primary/30 bg-primary/10 px-4 py-3 transition-colors hover:border-primary/50 hover:bg-primary/15"
       >
         <div className="min-w-0">
@@ -62,14 +62,14 @@ export function NavMegaMenu({ verb, onNavigate }: { verb: NavVerb; onNavigate?: 
           <p className="font-display text-sm font-semibold text-foreground">{studioLabel}</p>
         </div>
         <ArrowRight className="h-4 w-4 text-primary transition-transform group-hover:translate-x-0.5" />
-      </a>
+      </div>
       <p className={sectionLabel}>Featured Models</p>
       <div className="space-y-0.5">
         {models.length === 0 && (
           <p className="text-xs text-muted-foreground px-2 py-3">No models yet.</p>
         )}
         {models.map((m) => (
-          <a key={m.id} href={m.href} onClick={onNavigate} className={rowClass}>
+          <div key={m.id} aria-disabled="true" className={rowClass}>
             <ModelLogo model={m} />
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
@@ -83,12 +83,12 @@ export function NavMegaMenu({ verb, onNavigate }: { verb: NavVerb; onNavigate?: 
               <p className={itemDesc}>{m.description || m.provider}</p>
             </div>
             <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
-          </a>
+          </div>
         ))}
       </div>
-      <a href={modelsAllTo} onClick={onNavigate} className={seeAll}>
+      <span aria-disabled="true" className={seeAll}>
         See all models <ArrowRight className="h-3 w-3" />
-      </a>
+      </span>
     </div>
   );
 }

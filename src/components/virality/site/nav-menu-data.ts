@@ -1,5 +1,3 @@
-import { SITE_URL } from "@/lib/site-links";
-
 export type NavVerb = "image" | "video";
 
 export interface NavMenuModel {
@@ -8,20 +6,15 @@ export interface NavMenuModel {
   description: string;
   provider: string;
   logo?: string;
-  href: string;
   tags: string[];
 }
 
 export interface NavMenuConfig {
   label: string;
   subtitle: string;
-  studioTo: string;
   studioLabel: string;
-  modelsAllTo: string;
   models: NavMenuModel[];
 }
-
-const abs = (path: string) => `${SITE_URL}${path}`;
 
 /** Provider logo registry — mirrors the main site's PROVIDER_REGISTRY. */
 export const PROVIDER_LOGOS: Record<string, string> = {
@@ -38,9 +31,7 @@ export const NAV_MENUS: Record<NavVerb, NavMenuConfig> = {
   image: {
     label: "Image",
     subtitle: "Create, edit and enhance still images",
-    studioTo: abs("/creation-studio?tab=image"),
     studioLabel: "Open Creation Studio",
-    modelsAllTo: abs("/models?type=image"),
     models: [
       {
         id: "nano-banana-pro",
@@ -48,7 +39,6 @@ export const NAV_MENUS: Record<NavVerb, NavMenuConfig> = {
         description: "FAL",
         provider: "FAL",
         logo: PROVIDER_LOGOS["fal-ai"],
-        href: abs("/creation-studio?model=fal-ai%2Fnano-banana-pro"),
         tags: ["Featured"],
       },
       {
@@ -57,7 +47,6 @@ export const NAV_MENUS: Record<NavVerb, NavMenuConfig> = {
         description: "FAL",
         provider: "FAL",
         logo: PROVIDER_LOGOS["fal-ai"],
-        href: abs("/creation-studio?model=fal-ai%2Fnano-banana-pro%2Fedit"),
         tags: ["Featured"],
       },
       {
@@ -66,7 +55,6 @@ export const NAV_MENUS: Record<NavVerb, NavMenuConfig> = {
         description: "OpenAI",
         provider: "OpenAI",
         logo: PROVIDER_LOGOS.openai,
-        href: abs("/creation-studio?model=openai%2Fgpt-image-2"),
         tags: ["Featured"],
       },
       {
@@ -75,9 +63,6 @@ export const NAV_MENUS: Record<NavVerb, NavMenuConfig> = {
         description: "xAI",
         provider: "xAI",
         logo: "https://x.ai/favicon.ico",
-        href: abs(
-          "/creation-studio?model=xai%2Fgrok-imagine-image%2Fquality%2Ftext-to-image",
-        ),
         tags: ["Featured"],
       },
     ],
@@ -85,9 +70,7 @@ export const NAV_MENUS: Record<NavVerb, NavMenuConfig> = {
   video: {
     label: "Video",
     subtitle: "Generate cinematic clips from text or images",
-    studioTo: abs("/creation-studio?tab=video"),
     studioLabel: "Open Creation Studio",
-    modelsAllTo: abs("/models?type=video"),
     models: [
       {
         id: "seedance-2-fast-i2v",
@@ -95,7 +78,6 @@ export const NAV_MENUS: Record<NavVerb, NavMenuConfig> = {
         description: "Fast Image To Video",
         provider: "ByteDance",
         logo: PROVIDER_LOGOS.bytedance,
-        href: abs("/creation-studio?model=bytedance%2Fseedance-2.0%2Ffast%2Fimage-to-video"),
         tags: ["Featured"],
       },
       {
@@ -104,7 +86,6 @@ export const NAV_MENUS: Record<NavVerb, NavMenuConfig> = {
         description: "Fast Text To Video",
         provider: "ByteDance",
         logo: PROVIDER_LOGOS.bytedance,
-        href: abs("/creation-studio?model=bytedance%2Fseedance-2.0%2Ffast%2Ftext-to-video"),
         tags: ["Featured"],
       },
       {
@@ -113,7 +94,6 @@ export const NAV_MENUS: Record<NavVerb, NavMenuConfig> = {
         description: "Generate videos using Google's Veo 3.1 fast model.",
         provider: "Google",
         logo: "https://www.google.com/favicon.ico",
-        href: abs("/creation-studio?model=fal-ai%2Fveo3.1%2Ffast"),
         tags: ["Featured"],
       },
       {
@@ -123,7 +103,6 @@ export const NAV_MENUS: Record<NavVerb, NavMenuConfig> = {
           "Generate videos by animating an input image using Google's Veo 3.1 Fast model.",
         provider: "Google",
         logo: "https://www.google.com/favicon.ico",
-        href: abs("/creation-studio?model=fal-ai%2Fveo3.1%2Ffast%2Fimage-to-video"),
         tags: ["Featured"],
       },
       {
@@ -132,7 +111,6 @@ export const NAV_MENUS: Record<NavVerb, NavMenuConfig> = {
         description: "Generate a video based on an image using Grok Imagine.",
         provider: "xAI",
         logo: "https://x.ai/favicon.ico",
-        href: abs("/creation-studio?model=xai%2Fgrok-imagine-video%2Fimage-to-video"),
         tags: ["Featured"],
       },
       {
@@ -141,7 +119,6 @@ export const NAV_MENUS: Record<NavVerb, NavMenuConfig> = {
         description: "Generate a video based on a text description using Grok Imagine.",
         provider: "xAI",
         logo: "https://x.ai/favicon.ico",
-        href: abs("/creation-studio?model=xai%2Fgrok-imagine-video%2Ftext-to-video"),
         tags: ["Featured"],
       },
     ],

@@ -9,32 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as CancelSubscriptionRouteImport } from './routes/cancel-subscription'
 import { Route as GatedRouteImport } from './routes/_gated'
 import { Route as GatedIndexRouteImport } from './routes/_gated.index'
 import { Route as LegalSlugRouteImport } from './routes/legal.$slug'
 import { Route as ApiColorGradeRouteImport } from './routes/api/color-grade'
-import { Route as AdminLoginRouteImport } from './routes/admin.login'
-import { Route as AdminErrorsRouteImport } from './routes/admin.errors'
-import { Route as AdminEmailsRouteImport } from './routes/admin.emails'
-import { Route as GatedReportRouteImport } from './routes/_gated.report'
-import { Route as GatedHistoryRouteImport } from './routes/_gated.history'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicErrorsReportRouteImport } from './routes/api/public/errors/report'
 
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CancelSubscriptionRoute = CancelSubscriptionRouteImport.update({
-  id: '/cancel-subscription',
-  path: '/cancel-subscription',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const GatedRoute = GatedRouteImport.update({
   id: '/_gated',
   getParentRoute: () => rootRouteImport,
@@ -53,31 +36,6 @@ const ApiColorGradeRoute = ApiColorGradeRouteImport.update({
   id: '/api/color-grade',
   path: '/api/color-grade',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AdminLoginRoute = AdminLoginRouteImport.update({
-  id: '/admin/login',
-  path: '/admin/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminErrorsRoute = AdminErrorsRouteImport.update({
-  id: '/admin/errors',
-  path: '/admin/errors',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminEmailsRoute = AdminEmailsRouteImport.update({
-  id: '/admin/emails',
-  path: '/admin/emails',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GatedReportRoute = GatedReportRouteImport.update({
-  id: '/report',
-  path: '/report',
-  getParentRoute: () => GatedRoute,
-} as any)
-const GatedHistoryRoute = GatedHistoryRouteImport.update({
-  id: '/history',
-  path: '/history',
-  getParentRoute: () => GatedRoute,
 } as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
@@ -103,13 +61,6 @@ const ApiPublicErrorsReportRoute = ApiPublicErrorsReportRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof GatedIndexRoute
-  '/cancel-subscription': typeof CancelSubscriptionRoute
-  '/login': typeof LoginRoute
-  '/history': typeof GatedHistoryRoute
-  '/report': typeof GatedReportRoute
-  '/admin/emails': typeof AdminEmailsRoute
-  '/admin/errors': typeof AdminErrorsRoute
-  '/admin/login': typeof AdminLoginRoute
   '/api/color-grade': typeof ApiColorGradeRoute
   '/legal/$slug': typeof LegalSlugRoute
   '/api/public/errors/report': typeof ApiPublicErrorsReportRoute
@@ -118,13 +69,6 @@ export interface FileRoutesByFullPath {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
-  '/cancel-subscription': typeof CancelSubscriptionRoute
-  '/login': typeof LoginRoute
-  '/history': typeof GatedHistoryRoute
-  '/report': typeof GatedReportRoute
-  '/admin/emails': typeof AdminEmailsRoute
-  '/admin/errors': typeof AdminErrorsRoute
-  '/admin/login': typeof AdminLoginRoute
   '/api/color-grade': typeof ApiColorGradeRoute
   '/legal/$slug': typeof LegalSlugRoute
   '/': typeof GatedIndexRoute
@@ -136,13 +80,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_gated': typeof GatedRouteWithChildren
-  '/cancel-subscription': typeof CancelSubscriptionRoute
-  '/login': typeof LoginRoute
-  '/_gated/history': typeof GatedHistoryRoute
-  '/_gated/report': typeof GatedReportRoute
-  '/admin/emails': typeof AdminEmailsRoute
-  '/admin/errors': typeof AdminErrorsRoute
-  '/admin/login': typeof AdminLoginRoute
   '/api/color-grade': typeof ApiColorGradeRoute
   '/legal/$slug': typeof LegalSlugRoute
   '/_gated/': typeof GatedIndexRoute
@@ -155,13 +92,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/cancel-subscription'
-    | '/login'
-    | '/history'
-    | '/report'
-    | '/admin/emails'
-    | '/admin/errors'
-    | '/admin/login'
     | '/api/color-grade'
     | '/legal/$slug'
     | '/api/public/errors/report'
@@ -170,13 +100,6 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/cancel-subscription'
-    | '/login'
-    | '/history'
-    | '/report'
-    | '/admin/emails'
-    | '/admin/errors'
-    | '/admin/login'
     | '/api/color-grade'
     | '/legal/$slug'
     | '/'
@@ -187,13 +110,6 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_gated'
-    | '/cancel-subscription'
-    | '/login'
-    | '/_gated/history'
-    | '/_gated/report'
-    | '/admin/emails'
-    | '/admin/errors'
-    | '/admin/login'
     | '/api/color-grade'
     | '/legal/$slug'
     | '/_gated/'
@@ -205,11 +121,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   GatedRoute: typeof GatedRouteWithChildren
-  CancelSubscriptionRoute: typeof CancelSubscriptionRoute
-  LoginRoute: typeof LoginRoute
-  AdminEmailsRoute: typeof AdminEmailsRoute
-  AdminErrorsRoute: typeof AdminErrorsRoute
-  AdminLoginRoute: typeof AdminLoginRoute
   ApiColorGradeRoute: typeof ApiColorGradeRoute
   LegalSlugRoute: typeof LegalSlugRoute
   ApiPublicErrorsReportRoute: typeof ApiPublicErrorsReportRoute
@@ -220,20 +131,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cancel-subscription': {
-      id: '/cancel-subscription'
-      path: '/cancel-subscription'
-      fullPath: '/cancel-subscription'
-      preLoaderRoute: typeof CancelSubscriptionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_gated': {
       id: '/_gated'
       path: ''
@@ -261,41 +158,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/color-grade'
       preLoaderRoute: typeof ApiColorGradeRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/admin/login': {
-      id: '/admin/login'
-      path: '/admin/login'
-      fullPath: '/admin/login'
-      preLoaderRoute: typeof AdminLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/errors': {
-      id: '/admin/errors'
-      path: '/admin/errors'
-      fullPath: '/admin/errors'
-      preLoaderRoute: typeof AdminErrorsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/emails': {
-      id: '/admin/emails'
-      path: '/admin/emails'
-      fullPath: '/admin/emails'
-      preLoaderRoute: typeof AdminEmailsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_gated/report': {
-      id: '/_gated/report'
-      path: '/report'
-      fullPath: '/report'
-      preLoaderRoute: typeof GatedReportRouteImport
-      parentRoute: typeof GatedRoute
-    }
-    '/_gated/history': {
-      id: '/_gated/history'
-      path: '/history'
-      fullPath: '/history'
-      preLoaderRoute: typeof GatedHistoryRouteImport
-      parentRoute: typeof GatedRoute
     }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
@@ -329,14 +191,10 @@ declare module '@tanstack/react-router' {
 }
 
 interface GatedRouteChildren {
-  GatedHistoryRoute: typeof GatedHistoryRoute
-  GatedReportRoute: typeof GatedReportRoute
   GatedIndexRoute: typeof GatedIndexRoute
 }
 
 const GatedRouteChildren: GatedRouteChildren = {
-  GatedHistoryRoute: GatedHistoryRoute,
-  GatedReportRoute: GatedReportRoute,
   GatedIndexRoute: GatedIndexRoute,
 }
 
@@ -344,11 +202,6 @@ const GatedRouteWithChildren = GatedRoute._addFileChildren(GatedRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   GatedRoute: GatedRouteWithChildren,
-  CancelSubscriptionRoute: CancelSubscriptionRoute,
-  LoginRoute: LoginRoute,
-  AdminEmailsRoute: AdminEmailsRoute,
-  AdminErrorsRoute: AdminErrorsRoute,
-  AdminLoginRoute: AdminLoginRoute,
   ApiColorGradeRoute: ApiColorGradeRoute,
   LegalSlugRoute: LegalSlugRoute,
   ApiPublicErrorsReportRoute: ApiPublicErrorsReportRoute,
