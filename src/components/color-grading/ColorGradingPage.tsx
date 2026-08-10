@@ -67,7 +67,8 @@ export function ColorGradingPage() {
   const [isDesktop, setIsDesktop] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const [presetsOpen, setPresetsOpen] = useState(true);
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({ color: true });
+  // Sections start collapsed — sliders appear only when a section is expanded.
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({ color: false });
 
   useEffect(() => {
     const mql = window.matchMedia("(min-width: 1024px)");
