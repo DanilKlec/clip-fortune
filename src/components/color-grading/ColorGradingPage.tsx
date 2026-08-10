@@ -437,40 +437,110 @@ export function ColorGradingPage() {
               )}
             </div>
 
-            {active && (
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowOriginal((v) => !v)}
-                  aria-pressed={showOriginal}
-                  className="flex h-10 items-center gap-2 rounded-full border px-4 text-[13px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  style={{
-                    borderColor: showOriginal ? "var(--volt)" : "var(--card-border)",
-                    background: showOriginal ? "var(--volt-dim)" : "var(--tile)",
-                    color: showOriginal ? "var(--volt)" : undefined,
-                  }}
-                >
-                  <Eye size={15} strokeWidth={2} />
-                  Original
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowOriginal(false);
-                    setCompareOn((v) => !v);
-                  }}
-                  disabled={!canCompare}
-                  aria-pressed={comparing}
-                  className="flex h-10 items-center gap-2 rounded-full border px-4 text-[13px] font-semibold transition-colors disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  style={{
-                    borderColor: comparing ? "var(--volt)" : "var(--card-border)",
-                    background: comparing ? "var(--volt-dim)" : "var(--tile)",
-                    color: comparing ? "var(--volt)" : undefined,
-                  }}
-                >
-                  <Columns2 size={15} strokeWidth={2} />
-                  Compare
-                </button>
+            {active && st && (
+              <div className="mt-3 flex w-full min-w-0 flex-col items-center gap-3 sm:grid sm:grid-cols-[1fr_auto_1fr] sm:items-center">
+                {/* Left — Compare switch (view-only, never calls the API) */}
+                <div className="order-2 flex w-full justify-center sm:order-none sm:w-auto sm:justify-start">
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={comparing}
+                    disabled={!canCompare}
+                    onClick={toggleCompare}
+                    className="flex h-10 items-center gap-2 rounded-full border px-3 text-[13px] font-semibold transition-colors disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    style={{
+                      borderColor: comparing ? "var(--volt)" : "var(--card-border)",
+                      background: comparing ? "var(--volt-dim)" : "var(--tile)",
+                      color: comparing ? "var(--volt)" : undefined,
+                    }}
+                  >
+                    <Columns2 size={15} strokeWidth={2} />
+                    Compare
+                    <span
+                      aria-hidden
+                      className="relative ml-1 inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors"
+                      style={{
+                        background: comparing ? "var(--volt)" : "var(--card-border)",
+                      }}
+                    >
+                      <span
+                        className="absolute h-4 w-4 rounded-full bg-background transition-transform"
+                        style={{ transform: `translateX(${comparing ? 18 : 2}px)` }}
+                      />
+                    </span>
+                  </button>
+                </div>
+
+                {/* Center — Original / Edited preview switches */}
+                <div className="order-1 flex items-end justify-center gap-3 sm:order-none">
+                  <button
+                    type="button"
+                    onClick={() => setView("original")}
+                    aria-pressed={showOriginal}
+                    className="flex flex-col items-center gap-1 focus-visible:outline-none"
+                  >
+                    <span
+                      className="block h-12 w-12 overflow-hidden rounded-lg border-2 transition-colors sm:h-14 sm:w-14"
+                      style={{ borderColor: showOriginal ? "var(--volt)" : "var(--card-border)" }}
+                    >
+                      <img
+                        src={active.url}
+                        alt="Original"
+                        draggable={false}
+                        className="h-full w-full object-cover"
+                      />
+                    </span>
+                    <span
+                      className="text-[11px] font-semibold"
+                      style={{ color: showOriginal ? "var(--volt)" : undefined }}
+                    >
+                      Original
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={!canCompare}
+                    onClick={() => setView("edited")}
+                    aria-pressed={!showOriginal}
+                    className="flex flex-col items-center gap-1 disabled:opacity-45 focus-visible:outline-none"
+                  >
+                    <span
+                      className="block h-12 w-12 overflow-hidden rounded-lg border-2 transition-colors sm:h-14 sm:w-14"
+                      style={{
+                        borderColor:
+                          !showOriginal && canCompare ? "var(--volt)" : "var(--card-border)",
+                      }}
+                    >
+                      {aiUrl ? (
+                        <img
+                          src={aiUrl}
+                          alt="Edited"
+                          draggable={false}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <GradedImage
+                          src={active.url}
+                          alt="Edited"
+                          adjustments={effective}
+                          className="h-full w-full"
+                          imgClassName="h-full w-full object-cover"
+                        />
+                      )}
+                    </span>
+                    <span
+                      className="text-[11px] font-semibold"
+                      style={{
+                        color: !showOriginal && canCompare ? "var(--volt)" : undefined,
+                      }}
+                    >
+                      Edited
+                    </span>
+                  </button>
+                </div>
+
+                <span className="hidden sm:block" />
               </div>
             )}
           </div>
