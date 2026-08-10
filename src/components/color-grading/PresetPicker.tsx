@@ -1,6 +1,5 @@
-import { GradedImage } from "./GradedImage";
 import { PRESETS, type Preset } from "./grading";
-import presetPhoto from "@/assets/grading-demo.jpg";
+import { PRESET_IMAGES } from "./preset-images";
 
 interface Props {
   activeId: string | null;
@@ -37,12 +36,14 @@ export function PresetPicker({ activeId, onPick, custom = false }: Props) {
                 background: active ? "var(--volt-dim)" : "var(--tile)",
               }}
             >
-              <GradedImage
-                src={presetPhoto}
+              <img
+                src={PRESET_IMAGES[preset.id]}
                 alt={`${preset.name} preview`}
-                adjustments={preset.values}
-                className="w-full"
-                imgClassName="h-[62px] w-full object-cover sm:h-[68px]"
+                loading="lazy"
+                width={512}
+                height={512}
+                draggable={false}
+                className="h-[62px] w-full object-cover sm:h-[68px]"
               />
               <span
                 className="block truncate px-2 py-1.5 text-[11px] font-semibold"
