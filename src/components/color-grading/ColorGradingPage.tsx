@@ -715,17 +715,15 @@ export function ColorGradingPage() {
               <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overflow-x-hidden p-4 sm:p-5">
                 {promptBlockNode(true)}
                 {presetsNode}
-                {adjustmentsNode(false)}
+                {adjustmentsNode(!active)}
               </div>
-              {(resultActions || errorBlock) && (
-                <div
-                  className="shrink-0 space-y-3 border-t px-4 py-3 sm:px-5"
-                  style={{ borderColor: "var(--card-border)", background: "var(--tile)" }}
-                >
-                  {resultActions}
-                  {errorBlock}
-                </div>
-              )}
+              <div
+                className="shrink-0 space-y-3 border-t px-4 py-3 sm:px-5"
+                style={{ borderColor: "var(--card-border)", background: "var(--tile)" }}
+              >
+                {errorBlock}
+                {resultActions}
+              </div>
             </aside>
           ) : (
             <div className="order-3 min-w-0">
