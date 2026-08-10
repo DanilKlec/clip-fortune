@@ -1,7 +1,18 @@
 import { useEffect, useRef, useState, type DragEvent, type ChangeEvent } from "react";
 import { toast } from "sonner";
-import { AlertTriangle, Download, ImagePlus, Loader2, RefreshCw, Sparkles } from "lucide-react";
+import {
+  AlertTriangle,
+  Columns2,
+  Download,
+  Eye,
+  ImagePlus,
+  Loader2,
+  RefreshCw,
+  SlidersHorizontal,
+  Sparkles,
+} from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { GradedImage } from "./GradedImage";
 import { BeforeAfter } from "./BeforeAfter";
 import { ImageStage, useImageAspect } from "./ImageStage";
@@ -33,7 +44,7 @@ import {
 import { ThreeSteps } from "./sections/ThreeSteps";
 import { SeeItInAction } from "./sections/SeeItInAction";
 import { BuiltForCinematicLooks } from "./sections/BuiltForCinematicLooks";
-import demoPhoto from "@/assets/grading-demo.jpg";
+import { ExploreMoreApps } from "@/components/virality/landing/ExploreMoreApps";
 
 export function ColorGradingPage() {
   const {
@@ -51,6 +62,12 @@ export function ColorGradingPage() {
   } = useImageLibrary();
 
   const [dragOver, setDragOver] = useState(false);
+  const [showOriginal, setShowOriginal] = useState(false);
+  const [compareOn, setCompareOn] = useState(false);
+  useEffect(() => {
+    setShowOriginal(false);
+    setCompareOn(false);
+  }, [activeId]);
   const dropRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const runSeq = useRef(0);
@@ -69,6 +86,7 @@ export function ColorGradingPage() {
   /** Priority: AI result for this image, else the live local grade, else none. */
   const aiUrl = st && st.status === "success" ? st.resultUrl : null;
   const canCompare = Boolean(aiUrl) || !isNeutral(effective);
+  const comparing = compareOn && canCompare && !showOriginal;
 
   /** Any input change invalidates the current result for the active image only. */
   const editActive = (patch: (s: ImageState) => Partial<ImageState>) => {
@@ -232,6 +250,18 @@ export function ColorGradingPage() {
     />
   );
 
+  const adjustments = (
+    <AdjustmentPanel
+      values={st?.adjustments ?? NEUTRAL}
+      enabled={st?.enabled ?? DEFAULT_ENABLED}
+      disabled={!active}
+      onChange={updateAdjustment}
+      onToggle={toggleEffect}
+      onResetKey={resetKey}
+      onResetAll={resetAll}
+    />
+  );
+
   return (
     <div className="w-full">
       <section className="page-shell mx-auto w-full max-w-[1600px] pt-6 sm:pt-8 md:pt-10">
@@ -329,19 +359,30 @@ export function ColorGradingPage() {
                 </button>
               )}
 
-              {active && st && !canCompare && (
+              {active && st && showOriginal && (
+                <ImageStage ratio={ratio} maxHeight="min(72vh, 740px)">
+                  <img
+                    src={active.url}
+                    alt="Original image"
+                    draggable={false}
+                    className="absolute inset-0 h-full w-full object-contain object-center"
+                  />
+                </ImageStage>
+              )}
+
+              {active && st && !showOriginal && !comparing && (
                 <ImageStage ratio={ratio} maxHeight="min(72vh, 740px)">
                   <GradedImage
-                    src={active.url}
+                    src={aiUrl ?? active.url}
                     alt={active.file.name}
-                    adjustments={effective}
+                    adjustments={aiUrl ? NEUTRAL : effective}
                     className="absolute inset-0 h-full w-full"
                     imgClassName="h-full w-full object-contain object-center"
                   />
                 </ImageStage>
               )}
 
-              {active && st && canCompare && (
+              {active && st && comparing && (
                 <BeforeAfter
                   label="Compare original and graded image"
                   ratio={ratio}
@@ -389,11 +430,48 @@ export function ColorGradingPage() {
                 </div>
               )}
             </div>
+
+            {active && (
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowOriginal((v) => !v)}
+                  aria-pressed={showOriginal}
+                  className="flex h-10 items-center gap-2 rounded-full border px-4 text-[13px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  style={{
+                    borderColor: showOriginal ? "var(--volt)" : "var(--card-border)",
+                    background: showOriginal ? "var(--volt-dim)" : "var(--tile)",
+                    color: showOriginal ? "var(--volt)" : undefined,
+                  }}
+                >
+                  <Eye size={15} strokeWidth={2} />
+                  Original
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowOriginal(false);
+                    setCompareOn((v) => !v);
+                  }}
+                  disabled={!canCompare}
+                  aria-pressed={comparing}
+                  className="flex h-10 items-center gap-2 rounded-full border px-4 text-[13px] font-semibold transition-colors disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  style={{
+                    borderColor: comparing ? "var(--volt)" : "var(--card-border)",
+                    background: comparing ? "var(--volt-dim)" : "var(--tile)",
+                    color: comparing ? "var(--volt)" : undefined,
+                  }}
+                >
+                  <Columns2 size={15} strokeWidth={2} />
+                  Compare
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Right control panel — prompt, generate, presets, adjustments, actions */}
           <aside
-            className="glass order-3 min-w-0 space-y-5 overflow-x-hidden rounded-2xl p-4 sm:p-5 lg:order-none"
+            className="glass order-3 min-w-0 space-y-5 overflow-x-hidden rounded-2xl p-4 sm:p-5 lg:order-none lg:max-h-[min(82vh,820px)] lg:overflow-y-auto"
             style={{ boxShadow: "var(--shadow-card)" }}
           >
             <div className="min-w-0">
@@ -442,18 +520,33 @@ export function ColorGradingPage() {
               activeId={st?.presetId ?? null}
               custom={custom}
               onPick={pickPreset}
-              previewSrc={active?.url ?? demoPhoto}
             />
 
-            <AdjustmentPanel
-              values={st?.adjustments ?? NEUTRAL}
-              enabled={st?.enabled ?? DEFAULT_ENABLED}
-              disabled={!active}
-              onChange={updateAdjustment}
-              onToggle={toggleEffect}
-              onResetKey={resetKey}
-              onResetAll={resetAll}
-            />
+            {/* Desktop: inline. Mobile/tablet: inside a bottom sheet. */}
+            <div className="hidden lg:block">{adjustments}</div>
+            <Sheet>
+              <SheetTrigger asChild>
+                <button
+                  type="button"
+                  disabled={!active}
+                  className="button-utility flex h-11 w-full items-center justify-center gap-2 rounded-full px-5 text-[14px] font-semibold disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
+                >
+                  <SlidersHorizontal size={16} strokeWidth={2} />
+                  Adjustments
+                </button>
+              </SheetTrigger>
+              <SheetContent
+                side="bottom"
+                className="max-h-[85vh] overflow-y-auto rounded-t-2xl lg:hidden"
+              >
+                <SheetHeader className="text-left">
+                  <SheetTitle className="font-display text-[15px] font-extrabold uppercase tracking-[0.14em]">
+                    Adjustments
+                  </SheetTitle>
+                </SheetHeader>
+                <div className="mt-4 pb-6">{adjustments}</div>
+              </SheetContent>
+            </Sheet>
 
             {status === "success" && (
               <div className="grid min-w-0 gap-2">
@@ -510,6 +603,7 @@ export function ColorGradingPage() {
       <BuiltForCinematicLooks
         onCTA={() => dropRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
       />
+      <ExploreMoreApps />
     </div>
   );
 }

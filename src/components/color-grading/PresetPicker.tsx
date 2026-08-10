@@ -1,16 +1,15 @@
 import { GradedImage } from "./GradedImage";
 import { PRESETS, type Preset } from "./grading";
+import presetPhoto from "@/assets/grading-demo.jpg";
 
 interface Props {
   activeId: string | null;
   onPick: (preset: Preset) => void;
-  /** Preview source: the active user image, or the local demo photo. */
-  previewSrc: string;
   /** Manual settings differ from the selected preset. */
   custom?: boolean;
 }
 
-export function PresetPicker({ activeId, onPick, previewSrc, custom = false }: Props) {
+export function PresetPicker({ activeId, onPick, custom = false }: Props) {
   return (
     <div>
       <div className="flex items-center gap-2">
@@ -39,7 +38,7 @@ export function PresetPicker({ activeId, onPick, previewSrc, custom = false }: P
               }}
             >
               <GradedImage
-                src={previewSrc}
+                src={presetPhoto}
                 alt={`${preset.name} preview`}
                 adjustments={preset.values}
                 className="w-full"
