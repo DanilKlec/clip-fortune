@@ -710,7 +710,12 @@ export function ColorGradingPage() {
           {isDesktop ? (
             <aside
               className="glass order-3 flex min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl lg:order-none lg:self-stretch"
-              style={{ boxShadow: "var(--shadow-card)", height: centerH ? `${centerH}px` : undefined }}
+              style={{
+                boxShadow: "var(--shadow-card)",
+                // Before the first upload the panel sizes to its own content so all
+                // presets and sections are reachable without cramped scrolling.
+                height: active && centerH ? `${centerH}px` : undefined,
+              }}
             >
               <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overflow-x-hidden p-4 sm:p-5">
                 {promptBlockNode(true)}
