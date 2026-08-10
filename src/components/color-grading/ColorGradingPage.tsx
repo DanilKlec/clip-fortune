@@ -62,12 +62,6 @@ export function ColorGradingPage() {
   } = useImageLibrary();
 
   const [dragOver, setDragOver] = useState(false);
-  const [showOriginal, setShowOriginal] = useState(false);
-  const [compareOn, setCompareOn] = useState(false);
-  useEffect(() => {
-    setShowOriginal(false);
-    setCompareOn(false);
-  }, [activeId]);
   const dropRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const runSeq = useRef(0);
@@ -86,7 +80,19 @@ export function ColorGradingPage() {
   /** Priority: AI result for this image, else the live local grade, else none. */
   const aiUrl = st && st.status === "success" ? st.resultUrl : null;
   const canCompare = Boolean(aiUrl) || !isNeutral(effective);
+  const showOriginal = st?.view === "original";
+  const compareOn = st?.compare ?? false;
   const comparing = compareOn && canCompare && !showOriginal;
+
+  /** View-only switches: they never touch the grade, result or Fal.ai. */
+  const setView = (view: "original" | "edited") => {
+    if (!activeId) return;
+    patchState(activeId, (s) => ({ ...s, view }));
+  };
+  const toggleCompare = () => {
+    if (!activeId) return;
+    patchState(activeId, (s) => ({ ...s, compare: !s.compare, view: "edited" }));
+  };
 
   /** Any input change invalidates the current result for the active image only. */
   const editActive = (patch: (s: ImageState) => Partial<ImageState>) => {
