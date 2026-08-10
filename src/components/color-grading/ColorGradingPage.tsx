@@ -459,7 +459,7 @@ export function ColorGradingPage() {
 
           {/* Right control panel — prompt, generate, presets, adjustments, actions */}
           <aside
-            className="glass order-3 min-w-0 space-y-5 overflow-x-hidden rounded-2xl p-4 sm:p-5 lg:order-none"
+            className="glass order-3 min-w-0 space-y-5 overflow-x-hidden rounded-2xl p-4 sm:p-5 lg:order-none lg:max-h-[min(82vh,820px)] lg:overflow-y-auto"
             style={{ boxShadow: "var(--shadow-card)" }}
           >
             <div className="min-w-0">
@@ -508,18 +508,33 @@ export function ColorGradingPage() {
               activeId={st?.presetId ?? null}
               custom={custom}
               onPick={pickPreset}
-              previewSrc={active?.url ?? demoPhoto}
             />
 
-            <AdjustmentPanel
-              values={st?.adjustments ?? NEUTRAL}
-              enabled={st?.enabled ?? DEFAULT_ENABLED}
-              disabled={!active}
-              onChange={updateAdjustment}
-              onToggle={toggleEffect}
-              onResetKey={resetKey}
-              onResetAll={resetAll}
-            />
+            {/* Desktop: inline. Mobile/tablet: inside a bottom sheet. */}
+            <div className="hidden lg:block">{adjustments}</div>
+            <Sheet>
+              <SheetTrigger asChild>
+                <button
+                  type="button"
+                  disabled={!active}
+                  className="button-utility flex h-11 w-full items-center justify-center gap-2 rounded-full px-5 text-[14px] font-semibold disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
+                >
+                  <SlidersHorizontal size={16} strokeWidth={2} />
+                  Adjustments
+                </button>
+              </SheetTrigger>
+              <SheetContent
+                side="bottom"
+                className="max-h-[85vh] overflow-y-auto rounded-t-2xl lg:hidden"
+              >
+                <SheetHeader className="text-left">
+                  <SheetTitle className="font-display text-[15px] font-extrabold uppercase tracking-[0.14em]">
+                    Adjustments
+                  </SheetTitle>
+                </SheetHeader>
+                <div className="mt-4 pb-6">{adjustments}</div>
+              </SheetContent>
+            </Sheet>
 
             {status === "success" && (
               <div className="grid min-w-0 gap-2">
@@ -576,6 +591,7 @@ export function ColorGradingPage() {
       <BuiltForCinematicLooks
         onCTA={() => dropRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
       />
+      <ExploreMoreApps />
     </div>
   );
 }
