@@ -665,14 +665,14 @@ export function ColorGradingPage() {
               className="glass order-3 min-w-0 space-y-5 overflow-x-hidden rounded-2xl p-4 sm:p-5 lg:order-none lg:max-h-[min(82vh,820px)] lg:overflow-y-auto"
               style={{ boxShadow: "var(--shadow-card)" }}
             >
-              {promptBlock}
+              {promptBlockNode(true)}
               {presetsNode}
               {adjustmentsNode(false)}
               {resultActions}
               {errorBlock}
             </aside>
           ) : (
-            <div className="order-3 min-w-0">
+            <div className="order-3 min-w-0 space-y-3">
               <MobileControlPanel
                 open={panelOpen}
                 onToggle={() => setPanelOpen((v) => !v)}
@@ -699,7 +699,7 @@ export function ColorGradingPage() {
                   </>
                 }
               >
-                {promptBlock}
+                {promptBlockNode(false)}
                 <div
                   className="min-w-0 overflow-hidden rounded-xl border"
                   style={{ borderColor: "var(--card-border)", background: "var(--tile)" }}
@@ -735,6 +735,7 @@ export function ColorGradingPage() {
                 {adjustmentsNode(true)}
                 {errorBlock}
               </MobileControlPanel>
+              {generateButton}
             </div>
           )}
         </div>
