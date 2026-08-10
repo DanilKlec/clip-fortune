@@ -672,7 +672,7 @@ export function ColorGradingPage() {
               {errorBlock}
             </aside>
           ) : (
-            <div className="order-3 min-w-0 space-y-3">
+            <div className="order-3 min-w-0">
               <MobileControlPanel
                 open={panelOpen}
                 onToggle={() => setPanelOpen((v) => !v)}
@@ -682,7 +682,7 @@ export function ColorGradingPage() {
                       type="button"
                       onClick={resetAll}
                       disabled={!active}
-                      className="button-utility flex h-11 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-[13px] font-semibold disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      className="button-utility flex h-10 min-w-0 shrink items-center justify-center gap-1.5 rounded-full px-3 text-[13px] font-semibold disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       <RotateCcw size={15} strokeWidth={2} />
                       <span className="truncate">Reset</span>
@@ -691,15 +691,25 @@ export function ColorGradingPage() {
                       type="button"
                       onClick={() => void download()}
                       disabled={status !== "success"}
-                      className="button-cta flex h-11 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-[13px] font-semibold disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      className="button-cta flex h-10 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-[13px] font-semibold disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       <Download size={15} strokeWidth={2} />
                       <span className="truncate">Download</span>
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => void generate(activeId, st?.lastRequest)}
+                      disabled={!active || busy || !st?.lastRequest}
+                      aria-label="Generate again"
+                      title="Generate again"
+                      className="button-utility flex h-10 w-10 shrink-0 items-center justify-center rounded-full disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <RefreshCw size={15} strokeWidth={2} />
+                    </button>
                   </>
                 }
               >
-                {promptBlockNode(false)}
+                {promptBlockNode(true)}
                 <div
                   className="min-w-0 overflow-hidden rounded-xl border"
                   style={{ borderColor: "var(--card-border)", background: "var(--tile)" }}
@@ -735,7 +745,6 @@ export function ColorGradingPage() {
                 {adjustmentsNode(true)}
                 {errorBlock}
               </MobileControlPanel>
-              {generateButton}
             </div>
           )}
         </div>
