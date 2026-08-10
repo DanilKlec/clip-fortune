@@ -71,7 +71,6 @@ export function MobileControlPanel({ open, onToggle, children, actions }: Props)
       </button>
 
       {open && (
-        <>
           <div
             id={id}
             className="min-h-0 flex-1 space-y-4 overflow-y-auto overflow-x-hidden border-t px-3 pb-4 pt-3"
@@ -79,18 +78,14 @@ export function MobileControlPanel({ open, onToggle, children, actions }: Props)
           >
             {children}
           </div>
-          <div
-            className="flex shrink-0 items-center gap-2 border-t px-3 py-3"
-            style={{
-              borderColor: "var(--card-border)",
-              background: "var(--tile)",
-              paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))",
-            }}
-          >
-            {actions}
-          </div>
-        </>
       )}
+
+      <div
+        className="flex shrink-0 items-center gap-2 border-t px-3 py-2.5"
+        style={{ borderColor: "var(--card-border)", background: "var(--tile)" }}
+      >
+        {actions}
+      </div>
     </div>
   );
 }
