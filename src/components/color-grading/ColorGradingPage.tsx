@@ -287,7 +287,23 @@ export function ColorGradingPage() {
     />
   );
 
-  const promptBlock = (
+  const generateButton = (
+    <button
+      type="button"
+      disabled={!active || busy}
+      onClick={() => void generate(activeId)}
+      className="button-cta flex h-12 w-full items-center justify-center gap-2 rounded-full text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-45"
+    >
+      {busy ? (
+        <Loader2 size={18} strokeWidth={2} className="animate-spin" />
+      ) : (
+        <Sparkles size={18} strokeWidth={2} />
+      )}
+      {busy ? "Generating…" : "Generate"}
+    </button>
+  );
+
+  const promptBlockNode = (withGenerate: boolean) => (
     <div className="min-w-0">
       <div className="flex items-center gap-2">
         <label
@@ -308,19 +324,7 @@ export function ColorGradingPage() {
         className="mt-3 w-full rounded-xl border text-[16px] sm:text-[15px]"
         style={{ background: "var(--tile)", borderColor: "var(--card-border)" }}
       />
-      <button
-        type="button"
-        disabled={!active || busy}
-        onClick={() => void generate(activeId)}
-        className="button-cta mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-full text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-45"
-      >
-        {busy ? (
-          <Loader2 size={18} strokeWidth={2} className="animate-spin" />
-        ) : (
-          <Sparkles size={18} strokeWidth={2} />
-        )}
-        {busy ? "Generating…" : "Generate"}
-      </button>
+      {withGenerate && <div className="mt-3">{generateButton}</div>}
       <p className="mt-2 text-[12px] font-medium text-muted-foreground">
         {!active
           ? "Add an image to unlock grading."
@@ -661,14 +665,14 @@ export function ColorGradingPage() {
               className="glass order-3 min-w-0 space-y-5 overflow-x-hidden rounded-2xl p-4 sm:p-5 lg:order-none lg:max-h-[min(82vh,820px)] lg:overflow-y-auto"
               style={{ boxShadow: "var(--shadow-card)" }}
             >
-              {promptBlock}
+              {promptBlockNode(true)}
               {presetsNode}
               {adjustmentsNode(false)}
               {resultActions}
               {errorBlock}
             </aside>
           ) : (
-            <div className="order-3 min-w-0">
+            <div className="order-3 min-w-0 space-y-3">
               <MobileControlPanel
                 open={panelOpen}
                 onToggle={() => setPanelOpen((v) => !v)}
@@ -695,7 +699,7 @@ export function ColorGradingPage() {
                   </>
                 }
               >
-                {promptBlock}
+                {promptBlockNode(false)}
                 <div
                   className="min-w-0 overflow-hidden rounded-xl border"
                   style={{ borderColor: "var(--card-border)", background: "var(--tile)" }}
@@ -731,6 +735,7 @@ export function ColorGradingPage() {
                 {adjustmentsNode(true)}
                 {errorBlock}
               </MobileControlPanel>
+              {generateButton}
             </div>
           )}
         </div>
