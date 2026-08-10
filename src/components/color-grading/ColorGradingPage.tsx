@@ -478,8 +478,12 @@ export function ColorGradingPage() {
               onDrop={onDrop}
               className="relative flex min-h-[240px] w-full min-w-0 flex-1 items-center justify-center overflow-hidden rounded-xl sm:min-h-[320px] lg:min-h-[380px] lg:max-h-[760px]"
               style={{
-                background: dragOver ? "var(--volt-dim)" : "var(--tile)",
-                border: `1.5px dashed ${dragOver ? "var(--volt)" : "var(--card-border)"}`,
+                // In the empty state the workspace keeps one common background and
+                // no dashed frame; the dashed frame/tile only return after upload.
+                background: dragOver ? "var(--volt-dim)" : active ? "var(--tile)" : "transparent",
+                border: active
+                  ? `1.5px dashed ${dragOver ? "var(--volt)" : "var(--card-border)"}`
+                  : "none",
               }}
             >
               <input
@@ -496,10 +500,7 @@ export function ColorGradingPage() {
 
               {!active && (
                 <div className="flex w-full items-center justify-center px-4 py-8">
-                  <div
-                    className="w-full max-w-[300px] rounded-2xl border p-4 text-center"
-                    style={{ borderColor: "var(--card-border)", background: "var(--tile)" }}
-                  >
+                  <div className="w-full max-w-[300px] text-center">
                     <img
                       src={demoImage}
                       alt="Example of a graded frame"
@@ -520,7 +521,7 @@ export function ColorGradingPage() {
                       <ImagePlus size={16} strokeWidth={2} />
                       Upload media
                     </button>
-                    <p className="mt-2 text-[11px] font-medium text-muted-foreground">
+                    <p className="mt-2 text-[11px] font-medium text-muted-foreground/75">
                       {ACCEPTED_LABEL} · up to {MAX_IMAGES} files
                     </p>
                   </div>
