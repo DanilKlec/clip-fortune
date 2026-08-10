@@ -1,9 +1,5 @@
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { Home, Plus, MessageSquare, Library, User } from "lucide-react";
-import { getAuthState } from "@/lib/auth.functions";
-import { SITE_LINKS } from "@/lib/site-links";
 
 /**
  * Returns true while any Radix Dialog is open. Radix sets
@@ -25,43 +21,18 @@ function useDialogOpen(): boolean {
 type Tab = {
   label: string;
   icon: typeof Home;
-  to: (loggedIn: boolean) => string;
   featured?: boolean;
 };
 
 const tabs: Tab[] = [
-  { label: "Home", icon: Home, to: () => SITE_LINKS.home },
-  {
-    label: "Assist",
-    icon: MessageSquare,
-    to: (loggedIn) => (loggedIn ? SITE_LINKS.assist : SITE_LINKS.login),
-  },
-  {
-    label: "Create",
-    icon: Plus,
-    to: () => SITE_LINKS.create,
-    featured: true,
-  },
-  {
-    label: "Creations",
-    icon: Library,
-    to: (loggedIn) => (loggedIn ? SITE_LINKS.creations : SITE_LINKS.create),
-  },
-  {
-    label: "Profile",
-    icon: User,
-    to: (loggedIn) => (loggedIn ? SITE_LINKS.dashboard : SITE_LINKS.login),
-  },
+  { label: "Home", icon: Home },
+  { label: "Assist", icon: MessageSquare },
+  { label: "Create", icon: Plus, featured: true },
+  { label: "Creations", icon: Library },
+  { label: "Profile", icon: User },
 ];
 
 export default function MobileBottomNav() {
-  const getAuthStateFn = useServerFn(getAuthState);
-  const { data: auth } = useQuery({
-    queryKey: ["auth-state"],
-    queryFn: () => getAuthStateFn(),
-    staleTime: 60_000,
-  });
-  const isLoggedIn = !!auth?.authenticated;
   const dialogOpen = useDialogOpen();
 
   if (dialogOpen) return null;
@@ -85,9 +56,9 @@ export default function MobileBottomNav() {
 
             if (tab.featured) {
               return (
-                <a
+                <span
                   key={tab.label}
-                  href={tab.to(isLoggedIn)}
+                  aria-disabled="true"
                   aria-label={tab.label}
                   className="relative flex h-full w-16 flex-col items-center justify-end pb-1.5"
                 >
@@ -103,14 +74,14 @@ export default function MobileBottomNav() {
                   <span className="mt-1 text-[10px] font-bold tracking-tight text-white/80">
                     {tab.label}
                   </span>
-                </a>
+                </span>
               );
             }
 
             return (
-              <a
+              <span
                 key={tab.label}
-                href={tab.to(isLoggedIn)}
+                aria-disabled="true"
                 aria-label={tab.label}
                 className="relative flex h-full flex-1 flex-col items-center justify-end gap-1 pb-2.5 transition-opacity opacity-70 hover:opacity-100"
               >
@@ -124,7 +95,7 @@ export default function MobileBottomNav() {
                 <span className="text-[10px] tracking-tight font-medium text-white">
                   {tab.label}
                 </span>
-              </a>
+              </span>
             );
           })}
         </div>
