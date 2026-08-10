@@ -2,22 +2,23 @@ import { useEffect, useRef, useState, type DragEvent, type ChangeEvent } from "r
 import { toast } from "sonner";
 import {
   AlertTriangle,
+  ChevronDown,
   Columns2,
   Download,
   ImagePlus,
   Loader2,
   RefreshCw,
-  SlidersHorizontal,
+  RotateCcw,
   Sparkles,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { GradedImage } from "./GradedImage";
 import { BeforeAfter } from "./BeforeAfter";
 import { ImageStage, useImageAspect } from "./ImageStage";
 import { ImageTray } from "./ImageTray";
 import { AdjustmentPanel } from "./AdjustmentPanel";
 import { PresetPicker } from "./PresetPicker";
+import { MobileControlPanel } from "./MobileControlPanel";
 import {
   ACCEPTED_LABEL,
   MAX_BYTES,
@@ -61,6 +62,18 @@ export function ColorGradingPage() {
   } = useImageLibrary();
 
   const [dragOver, setDragOver] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [presetsOpen, setPresetsOpen] = useState(true);
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({ color: true });
+
+  useEffect(() => {
+    const mql = window.matchMedia("(min-width: 1024px)");
+    const sync = () => setIsDesktop(mql.matches);
+    sync();
+    mql.addEventListener("change", sync);
+    return () => mql.removeEventListener("change", sync);
+  }, []);
   const dropRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const runSeq = useRef(0);
@@ -255,7 +268,8 @@ export function ColorGradingPage() {
     />
   );
 
-  const adjustments = (
+  /** Single source for every control — rendered either in the desktop rail or the mobile panel. */
+  const adjustmentsNode = (grouped: boolean) => (
     <AdjustmentPanel
       values={st?.adjustments ?? NEUTRAL}
       enabled={st?.enabled ?? DEFAULT_ENABLED}
@@ -264,7 +278,104 @@ export function ColorGradingPage() {
       onToggle={toggleEffect}
       onResetKey={resetKey}
       onResetAll={resetAll}
+      grouped={grouped}
+      hideResetAll={grouped}
+      openGroups={openGroups}
+      onToggleGroup={(gid) =>
+        setOpenGroups((prev) => ({ ...prev, [gid]: !(prev[gid] ?? gid === "color") }))
+      }
     />
+  );
+
+  const promptBlock = (
+    <div className="min-w-0">
+      <div className="flex items-center gap-2">
+        <label
+          htmlFor="grade-prompt"
+          className="font-display text-[13px] font-extrabold uppercase tracking-[0.16em] text-muted-foreground"
+        >
+          Describe your look
+        </label>
+        <span className="badge-sky">AI</span>
+      </div>
+      <Textarea
+        id="grade-prompt"
+        value={st?.prompt ?? ""}
+        disabled={!active}
+        onChange={(e) => editActive(() => ({ prompt: e.target.value }))}
+        placeholder="Describe the color grade you want…"
+        rows={3}
+        className="mt-3 w-full rounded-xl border text-[16px] sm:text-[15px]"
+        style={{ background: "var(--tile)", borderColor: "var(--card-border)" }}
+      />
+      <button
+        type="button"
+        disabled={!active || busy}
+        onClick={() => void generate(activeId)}
+        className="button-cta mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-full text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-45"
+      >
+        {busy ? (
+          <Loader2 size={18} strokeWidth={2} className="animate-spin" />
+        ) : (
+          <Sparkles size={18} strokeWidth={2} />
+        )}
+        {busy ? "Generating…" : "Generate"}
+      </button>
+      <p className="mt-2 text-[12px] font-medium text-muted-foreground">
+        {!active
+          ? "Add an image to unlock grading."
+          : status === "success"
+            ? "Result ready — drag the handle to compare."
+            : "Optional. Combined with your preset and the enabled adjustments."}
+      </p>
+    </div>
+  );
+
+  const presetsNode = (
+    <PresetPicker activeId={st?.presetId ?? null} custom={custom} onPick={pickPreset} />
+  );
+
+  const resultActions = status === "success" && (
+    <div className="grid min-w-0 gap-2">
+      <button
+        type="button"
+        onClick={() => void download()}
+        className="button-cta flex h-11 w-full items-center justify-center gap-2 rounded-full px-5 text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <Download size={16} strokeWidth={2} />
+        Download
+      </button>
+      <button
+        type="button"
+        onClick={() => void generate(activeId, st?.lastRequest)}
+        className="button-utility flex h-11 w-full items-center justify-center gap-2 rounded-full px-5 text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <RefreshCw size={16} strokeWidth={2} />
+        Generate again
+      </button>
+    </div>
+  );
+
+  const errorBlock = status === "error" && (
+    <div
+      className="grid min-w-0 gap-3 rounded-xl border p-3"
+      style={{ borderColor: "var(--coral-bdr)", background: "var(--coral-dim)" }}
+    >
+      <div className="flex min-w-0 items-start gap-2">
+        <AlertTriangle size={16} strokeWidth={2} className="mt-0.5 shrink-0 text-destructive" />
+        <p className="min-w-0 flex-1 text-[13px] font-medium text-foreground">
+          {st?.error ?? "Generation failed"}
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={() => void generate(activeId, st?.lastRequest)}
+        className="button-utility flex h-11 w-full items-center justify-center gap-2 rounded-full px-4 text-[13px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <RefreshCw size={15} strokeWidth={2} />
+        Retry
+      </button>
+    </div>
   );
 
   return (
@@ -544,128 +655,84 @@ export function ColorGradingPage() {
             )}
           </div>
 
-          {/* Right control panel — prompt, generate, presets, adjustments, actions */}
-          <aside
-            className="glass order-3 min-w-0 space-y-5 overflow-x-hidden rounded-2xl p-4 sm:p-5 lg:order-none lg:max-h-[min(82vh,820px)] lg:overflow-y-auto"
-            style={{ boxShadow: "var(--shadow-card)" }}
-          >
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <label
-                  htmlFor="grade-prompt"
-                  className="font-display text-[13px] font-extrabold uppercase tracking-[0.16em] text-muted-foreground"
-                >
-                  Describe your look
-                </label>
-                <span className="badge-sky">AI</span>
-              </div>
-              <Textarea
-                id="grade-prompt"
-                value={st?.prompt ?? ""}
-                disabled={!active}
-                onChange={(e) => editActive(() => ({ prompt: e.target.value }))}
-                placeholder="Describe the color grade you want…"
-                rows={3}
-                className="mt-3 w-full rounded-xl border text-[16px] sm:text-[15px]"
-                style={{ background: "var(--tile)", borderColor: "var(--card-border)" }}
-              />
-              <button
-                type="button"
-                disabled={!active || busy}
-                onClick={() => void generate(activeId)}
-                className="button-cta mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-full text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-45"
+          {/* Controls — desktop right rail, mobile compact collapsible panel */}
+          {isDesktop ? (
+            <aside
+              className="glass order-3 min-w-0 space-y-5 overflow-x-hidden rounded-2xl p-4 sm:p-5 lg:order-none lg:max-h-[min(82vh,820px)] lg:overflow-y-auto"
+              style={{ boxShadow: "var(--shadow-card)" }}
+            >
+              {promptBlock}
+              {presetsNode}
+              {adjustmentsNode(false)}
+              {resultActions}
+              {errorBlock}
+            </aside>
+          ) : (
+            <div className="order-3 min-w-0">
+              <MobileControlPanel
+                open={panelOpen}
+                onToggle={() => setPanelOpen((v) => !v)}
+                actions={
+                  <>
+                    <button
+                      type="button"
+                      onClick={resetAll}
+                      disabled={!active}
+                      className="button-utility flex h-11 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-[13px] font-semibold disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <RotateCcw size={15} strokeWidth={2} />
+                      <span className="truncate">Reset</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void download()}
+                      disabled={status !== "success"}
+                      className="button-cta flex h-11 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-[13px] font-semibold disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <Download size={15} strokeWidth={2} />
+                      <span className="truncate">Download</span>
+                    </button>
+                  </>
+                }
               >
-                {busy ? (
-                  <Loader2 size={18} strokeWidth={2} className="animate-spin" />
-                ) : (
-                  <Sparkles size={18} strokeWidth={2} />
-                )}
-                {busy ? "Generating…" : "Generate"}
-              </button>
-              <p className="mt-2 text-[12px] font-medium text-muted-foreground">
-                {!active
-                  ? "Add an image to unlock grading."
-                  : status === "success"
-                    ? "Result ready — drag the handle to compare."
-                    : "Optional. Combined with your preset and the enabled adjustments."}
-              </p>
-            </div>
-
-            <PresetPicker activeId={st?.presetId ?? null} custom={custom} onPick={pickPreset} />
-
-            {/* Desktop: inline. Mobile/tablet: inside a bottom sheet. */}
-            <div className="hidden lg:block">{adjustments}</div>
-            <Sheet>
-              <SheetTrigger asChild>
-                <button
-                  type="button"
-                  disabled={!active}
-                  className="button-utility flex h-11 w-full items-center justify-center gap-2 rounded-full px-5 text-[14px] font-semibold disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
+                {promptBlock}
+                <div
+                  className="min-w-0 overflow-hidden rounded-xl border"
+                  style={{ borderColor: "var(--card-border)", background: "var(--tile)" }}
                 >
-                  <SlidersHorizontal size={16} strokeWidth={2} />
-                  Adjustments
-                </button>
-              </SheetTrigger>
-              <SheetContent
-                side="bottom"
-                className="max-h-[85vh] overflow-y-auto rounded-t-2xl lg:hidden"
-              >
-                <SheetHeader className="text-left">
-                  <SheetTitle className="font-display text-[15px] font-extrabold uppercase tracking-[0.14em]">
-                    Adjustments
-                  </SheetTitle>
-                </SheetHeader>
-                <div className="mt-4 pb-6">{adjustments}</div>
-              </SheetContent>
-            </Sheet>
-
-            {status === "success" && (
-              <div className="grid min-w-0 gap-2">
-                <button
-                  type="button"
-                  onClick={() => void download()}
-                  className="button-cta flex h-11 w-full items-center justify-center gap-2 rounded-full px-5 text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <Download size={16} strokeWidth={2} />
-                  Download
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void generate(activeId, st?.lastRequest)}
-                  className="button-utility flex h-11 w-full items-center justify-center gap-2 rounded-full px-5 text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <RefreshCw size={16} strokeWidth={2} />
-                  Generate again
-                </button>
-              </div>
-            )}
-
-            {status === "error" && (
-              <div
-                className="grid min-w-0 gap-3 rounded-xl border p-3"
-                style={{ borderColor: "var(--coral-bdr)", background: "var(--coral-dim)" }}
-              >
-                <div className="flex min-w-0 items-start gap-2">
-                  <AlertTriangle
-                    size={16}
-                    strokeWidth={2}
-                    className="mt-0.5 shrink-0 text-destructive"
-                  />
-                  <p className="min-w-0 flex-1 text-[13px] font-medium text-foreground">
-                    {st?.error ?? "Generation failed"}
-                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setPresetsOpen((v) => !v)}
+                    aria-expanded={presetsOpen}
+                    aria-controls="cg-mobile-presets"
+                    className="flex h-11 w-full items-center justify-between gap-2 px-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <span className="font-display truncate text-[12px] font-extrabold uppercase tracking-[0.14em] text-muted-foreground">
+                      Presets
+                    </span>
+                    <ChevronDown
+                      size={15}
+                      strokeWidth={2}
+                      aria-hidden
+                      className={`shrink-0 text-muted-foreground transition-transform ${presetsOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  {presetsOpen && (
+                    <div id="cg-mobile-presets" className="px-2 pb-2">
+                      <PresetPicker
+                        activeId={st?.presetId ?? null}
+                        custom={custom}
+                        onPick={pickPreset}
+                        hideHeading
+                      />
+                    </div>
+                  )}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => void generate(activeId, st?.lastRequest)}
-                  className="button-utility flex h-11 w-full items-center justify-center gap-2 rounded-full px-4 text-[13px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <RefreshCw size={15} strokeWidth={2} />
-                  Retry
-                </button>
-              </div>
-            )}
-          </aside>
+                {adjustmentsNode(true)}
+                {errorBlock}
+              </MobileControlPanel>
+            </div>
+          )}
         </div>
       </section>
 
