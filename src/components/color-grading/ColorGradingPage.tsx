@@ -662,7 +662,7 @@ export function ColorGradingPage() {
           {/* Controls — desktop right rail, mobile compact collapsible panel */}
           {isDesktop ? (
             <aside
-              className="glass order-3 flex min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl lg:order-none lg:h-full lg:self-stretch"
+              className="glass order-3 flex min-w-0 flex-col overflow-hidden rounded-2xl lg:order-none lg:h-0 lg:min-h-full lg:self-stretch"
               style={{ boxShadow: "var(--shadow-card)" }}
             >
               <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overflow-x-hidden p-4 sm:p-5">
