@@ -262,18 +262,6 @@ export function ColorGradingPage() {
     />
   );
 
-  const trayUnused = (orientation: "horizontal" | "vertical") => (
-    <ImageTray
-      orientation={orientation}
-      images={images}
-      activeId={activeId}
-      onSelect={setActiveId}
-      onRemove={remove}
-      onReplace={replace}
-      onAdd={acceptFiles}
-    />
-  );
-
   return (
     <div className="w-full">
       <section className="page-shell mx-auto w-full max-w-[1600px] pt-6 sm:pt-8 md:pt-10">
