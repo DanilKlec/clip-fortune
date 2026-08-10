@@ -11,6 +11,8 @@ interface Props {
   /** Optional controlled handle position (0-100) so it can persist per image. */
   position?: number;
   onPositionChange?: (pos: number) => void;
+  /** Optional CSS height cap forwarded to the shared stage. */
+  maxHeight?: string;
 }
 
 const clamp = (v: number) => Math.min(100, Math.max(0, v));
@@ -23,6 +25,7 @@ export function BeforeAfter({
   label = "Before and after",
   position,
   onPositionChange,
+  maxHeight,
 }: Props) {
   const [internal, setInternal] = useState(position ?? 50);
   const pos = clamp(position ?? internal);
@@ -63,7 +66,7 @@ export function BeforeAfter({
   };
 
   return (
-    <ImageStage ratio={ratio} stageRef={stageRef} className="select-none">
+    <ImageStage ratio={ratio} stageRef={stageRef} className="select-none" maxHeight={maxHeight}>
       <div
         onPointerDown={onDown}
         onPointerMove={(e) => {
