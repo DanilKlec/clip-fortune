@@ -1,4 +1,3 @@
-import { SITE_LINKS } from "@/lib/site-links";
 import { RobinzoneMark } from "./RobinzoneMark";
 
 const linkBase =
@@ -52,24 +51,16 @@ export function SiteFooter() {
         <div>
           <div className={colTitle}>Product</div>
           <div className="flex flex-col gap-[9px]">
-            <a href={SITE_LINKS.models} className={linkBase}>
-              AI Models
-            </a>
-            <a href={SITE_LINKS.creationStudio} className={linkBase}>
-              Creation Studio
-            </a>
-            <a href={SITE_LINKS.pricing} className={linkBase}>
-              Pricing
-            </a>
+            <span className={linkBase}>AI Models</span>
+            <span className={linkBase}>Creation Studio</span>
+            <span className={linkBase}>Pricing</span>
           </div>
         </div>
 
         <div>
           <div className={colTitle}>Resources</div>
           <div className="flex flex-col gap-[9px]">
-            <a href={SITE_LINKS.helpCenter} className={linkBase}>
-              Help Center
-            </a>
+            <span className={linkBase}>Help Center</span>
           </div>
         </div>
 
@@ -77,33 +68,19 @@ export function SiteFooter() {
           <div className={colTitle}>Company</div>
           <div className="flex flex-col gap-[9px]">
             <span className={linkBase}>About</span>
-            <a href={SITE_LINKS.careers} className={linkBase}>
-              Careers {inlineTag("Hiring", "volt")}
-            </a>
-            <a href={SITE_LINKS.contact} className={linkBase}>
-              Contact
-            </a>
+            <span className={linkBase}>Careers {inlineTag("Hiring", "volt")}</span>
+            <span className={linkBase}>Contact</span>
           </div>
         </div>
 
         <div>
           <div className={colTitle}>Legal</div>
           <div className="flex flex-col gap-[9px]">
-            <a href={SITE_LINKS.terms} className={linkBase}>
-              Terms of Use
-            </a>
-            <a href={SITE_LINKS.privacy} className={linkBase}>
-              Privacy Policy
-            </a>
-            <a href={SITE_LINKS.cookies} className={linkBase}>
-              Cookie Policy
-            </a>
-            <a href={SITE_LINKS.billing} className={linkBase}>
-              Billing Terms
-            </a>
-            <a href={SITE_LINKS.refund} className={linkBase}>
-              Refund Policy
-            </a>
+            <span className={linkBase}>Terms of Use</span>
+            <span className={linkBase}>Privacy Policy</span>
+            <span className={linkBase}>Cookie Policy</span>
+            <span className={linkBase}>Billing Terms</span>
+            <span className={linkBase}>Refund Policy</span>
           </div>
         </div>
       </div>
