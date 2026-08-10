@@ -447,27 +447,19 @@ export function ColorGradingPage() {
           change previews instantly — nothing is uploaded until you generate.
         </p>
 
-        <div
-          className={`mt-6 grid w-full min-w-0 grid-cols-1 items-start gap-4 ${
-            images.length > 0
-              ? "lg:grid-cols-[120px_minmax(0,1fr)_320px] xl:grid-cols-[140px_minmax(0,1fr)_340px]"
-              : "lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_340px]"
-          }`}
-        >
-          {/* Left rail — uploaded images only (hidden until something is uploaded) */}
-          {images.length > 0 && (
-            <aside
-              aria-label="Uploaded images"
-              className="order-1 flex min-h-0 min-w-0 flex-col rounded-2xl p-2 sm:p-3 lg:order-none"
-              style={{ background: "var(--tile)" }}
-            >
-              <h2 className="button-meta mb-2 hidden px-1 text-muted-foreground lg:block">
-                Images
-              </h2>
-              <div className="min-w-0 lg:hidden">{tray("horizontal")}</div>
-              <div className="hidden min-h-0 flex-1 lg:flex lg:flex-col">{tray("vertical")}</div>
-            </aside>
-          )}
+        <div className="mt-6 grid w-full min-w-0 grid-cols-1 items-start gap-4 lg:grid-cols-[120px_minmax(0,1fr)_320px] xl:grid-cols-[140px_minmax(0,1fr)_340px]">
+          {/* Left rail — uploaded images plus the compact add button */}
+          <aside
+            aria-label="Uploaded images"
+            className={`order-1 min-h-0 min-w-0 flex-col rounded-2xl p-2 sm:p-3 lg:order-none lg:flex ${
+              images.length > 0 ? "flex" : "hidden"
+            }`}
+            style={{ background: "var(--tile)" }}
+          >
+            <h2 className="button-meta mb-2 hidden px-1 text-muted-foreground lg:block">Images</h2>
+            <div className="min-w-0 lg:hidden">{tray("horizontal")}</div>
+            <div className="hidden min-h-0 flex-1 lg:flex lg:flex-col">{tray("vertical")}</div>
+          </aside>
 
           {/* Center workspace — preview / comparison only */}
           <div
