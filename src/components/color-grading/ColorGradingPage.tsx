@@ -4,7 +4,7 @@ import {
   AlertTriangle,
   Columns2,
   Download,
-  Eye,
+
   ImagePlus,
   Loader2,
   RefreshCw,
