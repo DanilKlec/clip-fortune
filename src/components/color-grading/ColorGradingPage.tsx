@@ -75,6 +75,21 @@ export function ColorGradingPage() {
     return () => mql.removeEventListener("change", sync);
   }, []);
   const dropRef = useRef<HTMLDivElement>(null);
+  const centerRef = useRef<HTMLDivElement>(null);
+  const [centerH, setCenterH] = useState<number | null>(null);
+
+  useEffect(() => {
+    const el = centerRef.current;
+    if (!el || !isDesktop) {
+      setCenterH(null);
+      return;
+    }
+    const ro = new ResizeObserver(([entry]) => {
+      setCenterH((entry.target as HTMLElement).offsetHeight);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [isDesktop]);
   const fileRef = useRef<HTMLInputElement>(null);
   const runSeq = useRef(0);
   const statesRef = useRef(states);
@@ -429,6 +444,7 @@ export function ColorGradingPage() {
 
           {/* Center workspace — preview / comparison only */}
           <div
+            ref={centerRef}
             className="glass order-2 flex min-w-0 flex-col rounded-2xl p-3 sm:p-4 lg:order-none"
             style={{ boxShadow: "var(--shadow-card)" }}
           >
@@ -662,14 +678,23 @@ export function ColorGradingPage() {
           {/* Controls — desktop right rail, mobile compact collapsible panel */}
           {isDesktop ? (
             <aside
-              className="glass order-3 min-w-0 space-y-5 overflow-x-hidden rounded-2xl p-4 sm:p-5 lg:order-none lg:max-h-[min(82vh,820px)] lg:overflow-y-auto"
-              style={{ boxShadow: "var(--shadow-card)" }}
+              className="glass order-3 flex min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl lg:order-none lg:self-stretch"
+              style={{ boxShadow: "var(--shadow-card)", height: centerH ? `${centerH}px` : undefined }}
             >
-              {promptBlockNode(true)}
-              {presetsNode}
-              {adjustmentsNode(false)}
-              {resultActions}
-              {errorBlock}
+              <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overflow-x-hidden p-4 sm:p-5">
+                {promptBlockNode(true)}
+                {presetsNode}
+                {adjustmentsNode(false)}
+              </div>
+              {(resultActions || errorBlock) && (
+                <div
+                  className="shrink-0 space-y-3 border-t px-4 py-3 sm:px-5"
+                  style={{ borderColor: "var(--card-border)", background: "var(--tile)" }}
+                >
+                  {resultActions}
+                  {errorBlock}
+                </div>
+              )}
             </aside>
           ) : (
             <div className="order-3 min-w-0">
