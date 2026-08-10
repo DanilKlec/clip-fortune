@@ -23,6 +23,7 @@ import {
   ACCEPTED_LABEL,
   MAX_BYTES,
   MAX_IMAGES,
+  createImageState,
   fileKey,
   isAccepted,
   useImageLibrary,
@@ -45,6 +46,7 @@ import { ThreeSteps } from "./sections/ThreeSteps";
 import { SeeItInAction } from "./sections/SeeItInAction";
 import { BuiltForCinematicLooks } from "./sections/BuiltForCinematicLooks";
 import { ExploreMoreApps } from "@/components/virality/landing/ExploreMoreApps";
+import demoImage from "@/assets/grading-demo.jpg";
 
 export function ColorGradingPage() {
   const {
@@ -65,7 +67,8 @@ export function ColorGradingPage() {
   const [isDesktop, setIsDesktop] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const [presetsOpen, setPresetsOpen] = useState(true);
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({ color: true });
+  // Sections start collapsed — sliders appear only when a section is expanded.
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({ color: false });
 
   useEffect(() => {
     const mql = window.matchMedia("(min-width: 1024px)");
@@ -97,18 +100,20 @@ export function ColorGradingPage() {
     statesRef.current = states;
   }, [states]);
 
-  const st: ImageState | null = activeState;
-  const status = st?.status ?? "ready";
+  /** Settings are editable before any upload; they carry over to the first image. */
+  const [draft, setDraft] = useState<ImageState>(() => createImageState());
+  const st: ImageState = activeState ?? draft;
+  const status = activeState ? activeState.status : "ready";
   const busy = status === "generating";
-  const custom = st ? !allEnabled(st.enabled) : false;
+  const custom = !allEnabled(st.enabled);
 
   const ratio = useImageAspect(active?.url);
-  const effective = st ? effectiveAdjustments(st.adjustments, st.enabled) : NEUTRAL;
+  const effective = effectiveAdjustments(st.adjustments, st.enabled);
   /** Priority: AI result for this image, else the live local grade, else none. */
-  const aiUrl = st && st.status === "success" ? st.resultUrl : null;
+  const aiUrl = activeState && activeState.status === "success" ? activeState.resultUrl : null;
   const canCompare = Boolean(aiUrl) || !isNeutral(effective);
-  const showOriginal = st?.view === "original";
-  const compareOn = st?.compare ?? false;
+  const showOriginal = st.view === "original";
+  const compareOn = st.compare;
   const comparing = compareOn && canCompare && !showOriginal;
 
   /** View-only switches: they never touch the grade, result or Fal.ai. */
@@ -123,7 +128,10 @@ export function ColorGradingPage() {
 
   /** Any input change invalidates the current result for the active image only. */
   const editActive = (patch: (s: ImageState) => Partial<ImageState>) => {
-    if (!activeId) return;
+    if (!activeId) {
+      setDraft((s) => ({ ...s, ...patch(s), error: null, status: "ready" }));
+      return;
+    }
     const id = activeId;
     const run = ++runSeq.current;
     setResult(id, null);
@@ -166,7 +174,18 @@ export function ColorGradingPage() {
       toast.error(`Only ${MAX_IMAGES} images can be used — extras were skipped`);
     }
     const ok = unique.slice(0, room);
-    if (ok.length > 0) add(ok);
+    if (ok.length === 0) return;
+    add(
+      ok,
+      images.length === 0
+        ? {
+            prompt: draft.prompt,
+            presetId: draft.presetId,
+            adjustments: { ...draft.adjustments },
+            enabled: { ...draft.enabled },
+          }
+        : undefined,
+    );
   };
 
   const onDrop = (e: DragEvent<HTMLDivElement>) => {
@@ -286,9 +305,8 @@ export function ColorGradingPage() {
   /** Single source for every control — rendered either in the desktop rail or the mobile panel. */
   const adjustmentsNode = (grouped: boolean) => (
     <AdjustmentPanel
-      values={st?.adjustments ?? NEUTRAL}
-      enabled={st?.enabled ?? DEFAULT_ENABLED}
-      disabled={!active}
+      values={st.adjustments}
+      enabled={st.enabled}
       onChange={updateAdjustment}
       onToggle={toggleEffect}
       onResetKey={resetKey}
@@ -331,8 +349,7 @@ export function ColorGradingPage() {
       </div>
       <Textarea
         id="grade-prompt"
-        value={st?.prompt ?? ""}
-        disabled={!active}
+        value={st.prompt}
         onChange={(e) => editActive(() => ({ prompt: e.target.value }))}
         placeholder="Describe the color grade you want…"
         rows={3}
@@ -350,28 +367,39 @@ export function ColorGradingPage() {
     </div>
   );
 
-  const presetsNode = (
-    <PresetPicker activeId={st?.presetId ?? null} custom={custom} onPick={pickPreset} />
-  );
+  const presetsNode = <PresetPicker activeId={st.presetId} custom={custom} onPick={pickPreset} />;
 
-  const resultActions = status === "success" && (
+  const resultActions = (
     <div className="grid min-w-0 gap-2">
-      <button
-        type="button"
-        onClick={() => void download()}
-        className="button-cta flex h-11 w-full items-center justify-center gap-2 rounded-full px-5 text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <Download size={16} strokeWidth={2} />
-        Download
-      </button>
-      <button
-        type="button"
-        onClick={() => void generate(activeId, st?.lastRequest)}
-        className="button-utility flex h-11 w-full items-center justify-center gap-2 rounded-full px-5 text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <RefreshCw size={16} strokeWidth={2} />
-        Generate again
-      </button>
+      <div className="flex min-w-0 items-center gap-2">
+        <button
+          type="button"
+          onClick={resetAll}
+          className="button-utility flex h-11 shrink-0 items-center justify-center gap-2 rounded-full px-4 text-[13px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <RotateCcw size={15} strokeWidth={2} />
+          Reset
+        </button>
+        <button
+          type="button"
+          onClick={() => void download()}
+          disabled={status !== "success"}
+          className="button-cta flex h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-full px-4 text-[14px] font-semibold disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <Download size={16} strokeWidth={2} />
+          Download
+        </button>
+      </div>
+      {status === "success" && (
+        <button
+          type="button"
+          onClick={() => void generate(activeId, st.lastRequest)}
+          className="button-utility flex h-11 w-full items-center justify-center gap-2 rounded-full px-5 text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <RefreshCw size={16} strokeWidth={2} />
+          Generate again
+        </button>
+      )}
     </div>
   );
 
@@ -383,12 +411,12 @@ export function ColorGradingPage() {
       <div className="flex min-w-0 items-start gap-2">
         <AlertTriangle size={16} strokeWidth={2} className="mt-0.5 shrink-0 text-destructive" />
         <p className="min-w-0 flex-1 text-[13px] font-medium text-foreground">
-          {st?.error ?? "Generation failed"}
+          {st.error ?? "Generation failed"}
         </p>
       </div>
       <button
         type="button"
-        onClick={() => void generate(activeId, st?.lastRequest)}
+        onClick={() => void generate(activeId, st.lastRequest)}
         className="button-utility flex h-11 w-full items-center justify-center gap-2 rounded-full px-4 text-[13px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <RefreshCw size={15} strokeWidth={2} />
@@ -420,27 +448,19 @@ export function ColorGradingPage() {
           change previews instantly — nothing is uploaded until you generate.
         </p>
 
-        <div
-          className={`mt-6 grid w-full min-w-0 grid-cols-1 items-start gap-4 ${
-            images.length > 0
-              ? "lg:grid-cols-[120px_minmax(0,1fr)_320px] xl:grid-cols-[140px_minmax(0,1fr)_340px]"
-              : "lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_340px]"
-          }`}
-        >
-          {/* Left rail — uploaded images only (hidden until something is uploaded) */}
-          {images.length > 0 && (
-            <aside
-              aria-label="Uploaded images"
-              className="order-1 flex min-h-0 min-w-0 flex-col rounded-2xl p-2 sm:p-3 lg:order-none"
-              style={{ background: "var(--tile)" }}
-            >
-              <h2 className="button-meta mb-2 hidden px-1 text-muted-foreground lg:block">
-                Images
-              </h2>
-              <div className="min-w-0 lg:hidden">{tray("horizontal")}</div>
-              <div className="hidden min-h-0 flex-1 lg:flex lg:flex-col">{tray("vertical")}</div>
-            </aside>
-          )}
+        <div className="mt-6 grid w-full min-w-0 grid-cols-1 items-start gap-4 lg:grid-cols-[120px_minmax(0,1fr)_320px] xl:grid-cols-[140px_minmax(0,1fr)_340px]">
+          {/* Left rail — uploaded images plus the compact add button */}
+          <aside
+            aria-label="Uploaded images"
+            className={`order-1 min-h-0 min-w-0 flex-col rounded-2xl p-2 sm:p-3 lg:order-none lg:flex ${
+              images.length > 0 ? "flex" : "hidden"
+            }`}
+            style={{ background: "var(--tile)" }}
+          >
+            <h2 className="button-meta mb-2 hidden px-1 text-muted-foreground lg:block">Images</h2>
+            <div className="min-w-0 lg:hidden">{tray("horizontal")}</div>
+            <div className="hidden min-h-0 flex-1 lg:flex lg:flex-col">{tray("vertical")}</div>
+          </aside>
 
           {/* Center workspace — preview / comparison only */}
           <div
@@ -475,24 +495,36 @@ export function ColorGradingPage() {
               />
 
               {!active && (
-                <button
-                  type="button"
-                  onClick={() => fileRef.current?.click()}
-                  className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 py-10 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <span
-                    className="flex h-12 w-12 items-center justify-center rounded-full"
-                    style={{ background: "var(--tile)" }}
+                <div className="flex w-full items-center justify-center px-4 py-8">
+                  <div
+                    className="w-full max-w-[300px] rounded-2xl border p-4 text-center"
+                    style={{ borderColor: "var(--card-border)", background: "var(--tile)" }}
                   >
-                    <ImagePlus size={22} strokeWidth={1.5} className="text-volt" />
-                  </span>
-                  <span className="text-[15px] font-medium text-foreground">
-                    Drop images to start grading
-                  </span>
-                  <span className="text-[13px] font-medium text-muted-foreground">
-                    Upload from device · {ACCEPTED_LABEL} · multiple files
-                  </span>
-                </button>
+                    <img
+                      src={demoImage}
+                      alt="Example of a graded frame"
+                      draggable={false}
+                      className="h-[132px] w-full rounded-xl object-cover"
+                    />
+                    <h2 className="font-display mt-4 text-[17px] font-extrabold uppercase tracking-[-0.01em] text-foreground">
+                      Color Grading
+                    </h2>
+                    <p className="mx-auto mt-2 max-w-[240px] text-[13px] font-medium leading-relaxed text-muted-foreground">
+                      Upgraded tools, effortless control and cinematic looks — upload, tweak, done.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => fileRef.current?.click()}
+                      className="button-cta mt-4 flex h-10 w-full items-center justify-center gap-2 rounded-full text-[13px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <ImagePlus size={16} strokeWidth={2} />
+                      Upload media
+                    </button>
+                    <p className="mt-2 text-[11px] font-medium text-muted-foreground">
+                      {ACCEPTED_LABEL} · up to {MAX_IMAGES} files
+                    </p>
+                  </div>
+                </div>
               )}
 
               {active && st && showOriginal && (
@@ -679,22 +711,25 @@ export function ColorGradingPage() {
           {isDesktop ? (
             <aside
               className="glass order-3 flex min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl lg:order-none lg:self-stretch"
-              style={{ boxShadow: "var(--shadow-card)", height: centerH ? `${centerH}px` : undefined }}
+              style={{
+                boxShadow: "var(--shadow-card)",
+                // Before the first upload the panel sizes to its own content so all
+                // presets and sections are reachable without cramped scrolling.
+                height: active && centerH ? `${centerH}px` : undefined,
+              }}
             >
               <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overflow-x-hidden p-4 sm:p-5">
                 {promptBlockNode(true)}
                 {presetsNode}
-                {adjustmentsNode(false)}
+                {adjustmentsNode(!active)}
               </div>
-              {(resultActions || errorBlock) && (
-                <div
-                  className="shrink-0 space-y-3 border-t px-4 py-3 sm:px-5"
-                  style={{ borderColor: "var(--card-border)", background: "var(--tile)" }}
-                >
-                  {resultActions}
-                  {errorBlock}
-                </div>
-              )}
+              <div
+                className="shrink-0 space-y-3 border-t px-4 py-3 sm:px-5"
+                style={{ borderColor: "var(--card-border)", background: "var(--tile)" }}
+              >
+                {errorBlock}
+                {resultActions}
+              </div>
             </aside>
           ) : (
             <div className="order-3 min-w-0">

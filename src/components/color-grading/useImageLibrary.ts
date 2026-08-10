@@ -98,7 +98,7 @@ export function useImageLibrary() {
     [],
   );
 
-  const add = useCallback((files: File[]) => {
+  const add = useCallback((files: File[], initial?: Partial<ImageState>) => {
     if (files.length === 0) return;
     const created = files.map((file) => ({
       id: nextId(),
@@ -108,7 +108,7 @@ export function useImageLibrary() {
     setImages((prev) => [...prev, ...created]);
     setStates((prev) => {
       const next = { ...prev };
-      for (const img of created) next[img.id] = createImageState();
+      for (const img of created) next[img.id] = { ...createImageState(), ...initial };
       return next;
     });
     setActiveId((prev) => prev ?? created[0].id);
