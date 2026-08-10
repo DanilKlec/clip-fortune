@@ -494,24 +494,36 @@ export function ColorGradingPage() {
               />
 
               {!active && (
-                <button
-                  type="button"
-                  onClick={() => fileRef.current?.click()}
-                  className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 py-10 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <span
-                    className="flex h-12 w-12 items-center justify-center rounded-full"
-                    style={{ background: "var(--tile)" }}
+                <div className="flex w-full items-center justify-center px-4 py-8">
+                  <div
+                    className="w-full max-w-[300px] rounded-2xl border p-4 text-center"
+                    style={{ borderColor: "var(--card-border)", background: "var(--tile)" }}
                   >
-                    <ImagePlus size={22} strokeWidth={1.5} className="text-volt" />
-                  </span>
-                  <span className="text-[15px] font-medium text-foreground">
-                    Drop images to start grading
-                  </span>
-                  <span className="text-[13px] font-medium text-muted-foreground">
-                    Upload from device · {ACCEPTED_LABEL} · multiple files
-                  </span>
-                </button>
+                    <img
+                      src={demoImage}
+                      alt="Example of a graded frame"
+                      draggable={false}
+                      className="h-[132px] w-full rounded-xl object-cover"
+                    />
+                    <h2 className="font-display mt-4 text-[17px] font-extrabold uppercase tracking-[-0.01em] text-foreground">
+                      Color Grading
+                    </h2>
+                    <p className="mx-auto mt-2 max-w-[240px] text-[13px] font-medium leading-relaxed text-muted-foreground">
+                      Upgraded tools, effortless control and cinematic looks — upload, tweak, done.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => fileRef.current?.click()}
+                      className="button-cta mt-4 flex h-10 w-full items-center justify-center gap-2 rounded-full text-[13px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <ImagePlus size={16} strokeWidth={2} />
+                      Upload media
+                    </button>
+                    <p className="mt-2 text-[11px] font-medium text-muted-foreground">
+                      {ACCEPTED_LABEL} · up to {MAX_IMAGES} files
+                    </p>
+                  </div>
+                </div>
               )}
 
               {active && st && showOriginal && (
