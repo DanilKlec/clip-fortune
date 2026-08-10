@@ -1,7 +1,18 @@
 import { useEffect, useRef, useState, type DragEvent, type ChangeEvent } from "react";
 import { toast } from "sonner";
-import { AlertTriangle, Download, ImagePlus, Loader2, RefreshCw, Sparkles } from "lucide-react";
+import {
+  AlertTriangle,
+  Columns2,
+  Download,
+  Eye,
+  ImagePlus,
+  Loader2,
+  RefreshCw,
+  SlidersHorizontal,
+  Sparkles,
+} from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { GradedImage } from "./GradedImage";
 import { BeforeAfter } from "./BeforeAfter";
 import { ImageStage, useImageAspect } from "./ImageStage";
@@ -33,7 +44,7 @@ import {
 import { ThreeSteps } from "./sections/ThreeSteps";
 import { SeeItInAction } from "./sections/SeeItInAction";
 import { BuiltForCinematicLooks } from "./sections/BuiltForCinematicLooks";
-import demoPhoto from "@/assets/grading-demo.jpg";
+import { ExploreMoreApps } from "@/components/virality/landing/ExploreMoreApps";
 
 export function ColorGradingPage() {
   const {
@@ -51,6 +62,12 @@ export function ColorGradingPage() {
   } = useImageLibrary();
 
   const [dragOver, setDragOver] = useState(false);
+  const [showOriginal, setShowOriginal] = useState(false);
+  const [compareOn, setCompareOn] = useState(false);
+  useEffect(() => {
+    setShowOriginal(false);
+    setCompareOn(false);
+  }, [activeId]);
   const dropRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const runSeq = useRef(0);
@@ -69,6 +86,7 @@ export function ColorGradingPage() {
   /** Priority: AI result for this image, else the live local grade, else none. */
   const aiUrl = st && st.status === "success" ? st.resultUrl : null;
   const canCompare = Boolean(aiUrl) || !isNeutral(effective);
+  const comparing = compareOn && canCompare && !showOriginal;
 
   /** Any input change invalidates the current result for the active image only. */
   const editActive = (patch: (s: ImageState) => Partial<ImageState>) => {
