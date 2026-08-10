@@ -722,7 +722,7 @@ export function ColorGradingPage() {
               <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overflow-x-hidden p-4 sm:p-5">
                 {promptBlockNode(true)}
                 {presetsNode}
-                {adjustmentsNode(!active)}
+                {adjustmentsNode(true)}
               </div>
               <div
                 className="shrink-0 space-y-3 border-t px-4 py-3 sm:px-5"
