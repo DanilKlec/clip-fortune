@@ -6,12 +6,14 @@ interface Props {
   onPick: (preset: Preset) => void;
   /** Manual settings differ from the selected preset. */
   custom?: boolean;
+  /** Mobile panel supplies its own section header. */
+  hideHeading?: boolean;
 }
 
-export function PresetPicker({ activeId, onPick, custom = false }: Props) {
+export function PresetPicker({ activeId, onPick, custom = false, hideHeading = false }: Props) {
   return (
     <div>
-      <div className="flex items-center gap-2">
+      <div className={`flex items-center gap-2 ${hideHeading ? "sr-only" : ""}`}>
         <h3 className="font-display text-[13px] font-extrabold uppercase tracking-[0.16em] text-muted-foreground">
           Presets
         </h3>
@@ -21,7 +23,9 @@ export function PresetPicker({ activeId, onPick, custom = false }: Props) {
           </span>
         )}
       </div>
-      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-3">
+      <div
+        className={`grid grid-cols-2 gap-2 min-[360px]:grid-cols-3 sm:grid-cols-3 lg:grid-cols-3 ${hideHeading ? "" : "mt-3"}`}
+      >
         {PRESETS.map((preset) => {
           const active = preset.id === activeId;
           return (
@@ -46,6 +50,7 @@ export function PresetPicker({ activeId, onPick, custom = false }: Props) {
                 className="h-[62px] w-full object-cover sm:h-[68px]"
               />
               <span
+                title={preset.name}
                 className="block truncate px-2 py-1.5 text-[11px] font-semibold"
                 style={{ color: active ? "var(--volt)" : undefined }}
               >
