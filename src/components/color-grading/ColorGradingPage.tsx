@@ -304,9 +304,8 @@ export function ColorGradingPage() {
   /** Single source for every control — rendered either in the desktop rail or the mobile panel. */
   const adjustmentsNode = (grouped: boolean) => (
     <AdjustmentPanel
-      values={st?.adjustments ?? NEUTRAL}
-      enabled={st?.enabled ?? DEFAULT_ENABLED}
-      disabled={!active}
+      values={st.adjustments}
+      enabled={st.enabled}
       onChange={updateAdjustment}
       onToggle={toggleEffect}
       onResetKey={resetKey}
@@ -349,8 +348,7 @@ export function ColorGradingPage() {
       </div>
       <Textarea
         id="grade-prompt"
-        value={st?.prompt ?? ""}
-        disabled={!active}
+        value={st.prompt}
         onChange={(e) => editActive(() => ({ prompt: e.target.value }))}
         placeholder="Describe the color grade you want…"
         rows={3}
@@ -368,28 +366,39 @@ export function ColorGradingPage() {
     </div>
   );
 
-  const presetsNode = (
-    <PresetPicker activeId={st?.presetId ?? null} custom={custom} onPick={pickPreset} />
-  );
+  const presetsNode = <PresetPicker activeId={st.presetId} custom={custom} onPick={pickPreset} />;
 
-  const resultActions = status === "success" && (
+  const resultActions = (
     <div className="grid min-w-0 gap-2">
-      <button
-        type="button"
-        onClick={() => void download()}
-        className="button-cta flex h-11 w-full items-center justify-center gap-2 rounded-full px-5 text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <Download size={16} strokeWidth={2} />
-        Download
-      </button>
-      <button
-        type="button"
-        onClick={() => void generate(activeId, st?.lastRequest)}
-        className="button-utility flex h-11 w-full items-center justify-center gap-2 rounded-full px-5 text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <RefreshCw size={16} strokeWidth={2} />
-        Generate again
-      </button>
+      <div className="flex min-w-0 items-center gap-2">
+        <button
+          type="button"
+          onClick={resetAll}
+          className="button-utility flex h-11 shrink-0 items-center justify-center gap-2 rounded-full px-4 text-[13px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <RotateCcw size={15} strokeWidth={2} />
+          Reset
+        </button>
+        <button
+          type="button"
+          onClick={() => void download()}
+          disabled={status !== "success"}
+          className="button-cta flex h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-full px-4 text-[14px] font-semibold disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <Download size={16} strokeWidth={2} />
+          Download
+        </button>
+      </div>
+      {status === "success" && (
+        <button
+          type="button"
+          onClick={() => void generate(activeId, st.lastRequest)}
+          className="button-utility flex h-11 w-full items-center justify-center gap-2 rounded-full px-5 text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <RefreshCw size={16} strokeWidth={2} />
+          Generate again
+        </button>
+      )}
     </div>
   );
 
@@ -401,12 +410,12 @@ export function ColorGradingPage() {
       <div className="flex min-w-0 items-start gap-2">
         <AlertTriangle size={16} strokeWidth={2} className="mt-0.5 shrink-0 text-destructive" />
         <p className="min-w-0 flex-1 text-[13px] font-medium text-foreground">
-          {st?.error ?? "Generation failed"}
+          {st.error ?? "Generation failed"}
         </p>
       </div>
       <button
         type="button"
-        onClick={() => void generate(activeId, st?.lastRequest)}
+        onClick={() => void generate(activeId, st.lastRequest)}
         className="button-utility flex h-11 w-full items-center justify-center gap-2 rounded-full px-4 text-[13px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <RefreshCw size={15} strokeWidth={2} />
