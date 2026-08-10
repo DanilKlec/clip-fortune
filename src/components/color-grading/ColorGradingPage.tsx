@@ -4,7 +4,6 @@ import {
   AlertTriangle,
   Columns2,
   Download,
-
   ImagePlus,
   Loader2,
   RefreshCw,
@@ -592,11 +591,7 @@ export function ColorGradingPage() {
               </p>
             </div>
 
-            <PresetPicker
-              activeId={st?.presetId ?? null}
-              custom={custom}
-              onPick={pickPreset}
-            />
+            <PresetPicker activeId={st?.presetId ?? null} custom={custom} onPick={pickPreset} />
 
             {/* Desktop: inline. Mobile/tablet: inside a bottom sheet. */}
             <div className="hidden lg:block">{adjustments}</div>
