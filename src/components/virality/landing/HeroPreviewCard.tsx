@@ -1,5 +1,4 @@
 import { ArrowRight } from "lucide-react";
-import { useNavigate } from "@tanstack/react-router";
 import { Brain3D } from "./Brain3D";
 import { useViralitySession } from "@/lib/virality-session";
 import { useAnalyzeProgress } from "@/lib/analyze-progress";
@@ -26,7 +25,6 @@ function formatDuration(sec: number | undefined) {
 }
 
 export function HeroPreviewCard() {
-  const navigate = useNavigate();
   const { poster, analyzing, phase, result } = useViralitySession();
 
   const state: "idle" | "analyzing" | "ready" = analyzing
