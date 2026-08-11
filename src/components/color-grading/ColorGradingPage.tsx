@@ -817,38 +817,7 @@ export function ColorGradingPage() {
                 }
               >
                 {promptBlockNode(true)}
-                <div
-                  className="min-w-0 overflow-hidden rounded-xl border"
-                  style={{ borderColor: "var(--card-border)", background: "var(--tile)" }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setPresetsOpen((v) => !v)}
-                    aria-expanded={presetsOpen}
-                    aria-controls="cg-mobile-presets"
-                    className="flex h-11 w-full items-center justify-between gap-2 px-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <span className="font-display truncate text-[12px] font-extrabold uppercase tracking-[0.14em] text-muted-foreground">
-                      Presets
-                    </span>
-                    <ChevronDown
-                      size={15}
-                      strokeWidth={2}
-                      aria-hidden
-                      className={`shrink-0 text-muted-foreground transition-transform ${presetsOpen ? "rotate-180" : ""}`}
-                    />
-                  </button>
-                  {presetsOpen && (
-                    <div id="cg-mobile-presets" className="px-2 pb-2">
-                      <PresetPicker
-                        activeId={st?.presetId ?? null}
-                        custom={custom}
-                        onPick={pickPreset}
-                        hideHeading
-                      />
-                    </div>
-                  )}
-                </div>
+                {presetsNode}
                 {adjustmentsNode(true)}
                 {errorBlock}
               </MobileControlPanel>
