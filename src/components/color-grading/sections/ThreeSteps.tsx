@@ -34,7 +34,7 @@ export function ThreeSteps() {
         </span>
       </h2>
       <div className="mt-8 grid grid-cols-1 gap-4 sm:mt-10 md:grid-cols-3">
-        {steps.map((s, i) => (
+        {steps.map((s) => (
           <div
             key={s.title}
             className="glass rounded-2xl p-5"
