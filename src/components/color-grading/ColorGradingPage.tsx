@@ -454,14 +454,23 @@ export function ColorGradingPage() {
           change previews instantly — nothing is uploaded until you generate.
         </p>
 
-        <div className="mt-6 grid w-full min-w-0 grid-cols-1 items-start gap-4 lg:grid-cols-[120px_minmax(0,1fr)_320px] xl:grid-cols-[140px_minmax(0,1fr)_340px]">
+        {/* The shared parent owns the workspace height; every column stretches to it. */}
+        <div
+          className="mt-6 grid w-full min-w-0 grid-cols-1 items-start gap-4 lg:h-[var(--cg-workspace-h)] lg:min-h-[var(--cg-workspace-min-h)] lg:max-h-[900px] lg:items-stretch lg:grid-cols-[120px_minmax(0,1fr)_320px] xl:grid-cols-[140px_minmax(0,1fr)_340px]"
+          style={
+            {
+              "--cg-workspace-h": "clamp(560px, calc(100dvh - 220px), 900px)",
+              "--cg-workspace-min-h": "min(720px, calc(100dvh - 150px))",
+            } as React.CSSProperties
+          }
+        >
           {/* Left rail — uploaded images plus the compact add button */}
           <aside
             aria-label="Uploaded images"
-            className={`order-1 min-h-0 min-w-0 flex-col rounded-2xl p-2 sm:p-3 lg:order-none lg:flex lg:self-stretch ${
+            className={`order-1 min-h-0 min-w-0 flex-col rounded-2xl p-2 sm:p-3 lg:order-none lg:flex lg:h-full ${
               images.length > 0 ? "flex" : "hidden"
             }`}
-            style={{ background: "var(--tile)", height: centerH ? `${centerH}px` : undefined }}
+            style={{ background: "var(--tile)" }}
           >
             <h2 className="button-meta mb-2 hidden px-1 text-muted-foreground lg:block">Images</h2>
             <div className="min-w-0 lg:hidden">{tray("horizontal")}</div>
@@ -470,8 +479,7 @@ export function ColorGradingPage() {
 
           {/* Center workspace — preview / comparison only */}
           <div
-            ref={centerRef}
-            className="glass order-2 flex min-w-0 flex-col rounded-2xl p-3 sm:p-4 lg:order-none"
+            className="glass order-2 flex min-h-0 min-w-0 flex-col rounded-2xl p-3 sm:p-4 lg:order-none lg:h-full"
             style={{ boxShadow: "var(--shadow-card)" }}
           >
             <div
@@ -745,12 +753,9 @@ export function ColorGradingPage() {
           {/* Controls — desktop right rail, mobile compact collapsible panel */}
           {isDesktop ? (
             <aside
-              className="glass order-3 flex min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl lg:order-none lg:self-stretch"
+              className="glass order-3 flex min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl lg:order-none lg:h-full"
               style={{
                 boxShadow: "var(--shadow-card)",
-                // Identical geometry before and after upload: the rail always
-                // matches the center column height.
-                height: centerH ? `${centerH}px` : undefined,
               }}
             >
               <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overflow-x-hidden p-4 sm:p-5">
