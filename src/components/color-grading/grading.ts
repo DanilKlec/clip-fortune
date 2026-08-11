@@ -7,6 +7,8 @@ export type AdjustmentKey =
   | "temperature"
   | "tint"
   | "exposure"
+  | "gamma"
+  | "fade"
   | "contrast"
   | "saturation"
   | "highlights"
@@ -15,11 +17,21 @@ export type AdjustmentKey =
   | "blacks"
   | "splitTone"
   | "sharpness"
+  | "clarity"
   | "soften"
+  | "texture"
   | "bloom"
+  | "bloomThreshold"
+  | "bloomRadius"
   | "halation"
+  | "halationRadius"
+  | "halationWarmth"
   | "lensHaze"
-  | "grain";
+  | "hazeDensity"
+  | "hazeTint"
+  | "grain"
+  | "grainSize"
+  | "grainRoughness";
 
 export type Adjustments = Record<AdjustmentKey, number>;
 
@@ -54,6 +66,22 @@ export const ADJUSTMENTS: AdjustmentSpec[] = [
     hint: "Negative shifts towards green, positive towards magenta.",
   },
   { key: "exposure", label: "Exposure", min: -100, max: 100, step: 1 },
+  {
+    key: "gamma",
+    label: "Gamma",
+    min: -100,
+    max: 100,
+    step: 1,
+    hint: "Bends the midtones without moving black or white points.",
+  },
+  {
+    key: "fade",
+    label: "Fade",
+    min: 0,
+    max: 100,
+    step: 1,
+    hint: "Milky, lifted look across the whole dynamic range.",
+  },
   { key: "contrast", label: "Contrast", min: -100, max: 100, step: 1 },
   { key: "saturation", label: "Saturation", min: -100, max: 100, step: 1 },
   {
@@ -105,12 +133,28 @@ export const ADJUSTMENTS: AdjustmentSpec[] = [
     hint: "Local-contrast clarity — approximated in the live preview.",
   },
   {
+    key: "clarity",
+    label: "Clarity",
+    min: -100,
+    max: 100,
+    step: 1,
+    hint: "Midtone contrast — punchier or flatter detail.",
+  },
+  {
     key: "soften",
     label: "Soften Details",
     min: 0,
     max: 100,
     step: 1,
     hint: "Gentle diffusion for skin and fine texture.",
+  },
+  {
+    key: "texture",
+    label: "Texture",
+    min: -100,
+    max: 100,
+    step: 1,
+    hint: "Fine surface detail — smooths or emphasises micro texture.",
   },
   {
     key: "bloom",
@@ -121,12 +165,44 @@ export const ADJUSTMENTS: AdjustmentSpec[] = [
     hint: "Soft glow spilling out of the brightest areas.",
   },
   {
+    key: "bloomThreshold",
+    label: "Threshold",
+    min: 0,
+    max: 100,
+    step: 1,
+    hint: "How bright an area must be before it blooms.",
+  },
+  {
+    key: "bloomRadius",
+    label: "Radius",
+    min: 0,
+    max: 100,
+    step: 1,
+    hint: "How far the glow spreads.",
+  },
+  {
     key: "halation",
     label: "Halation",
     min: 0,
     max: 100,
     step: 1,
     hint: "Warm red halo around highlights, like film.",
+  },
+  {
+    key: "halationRadius",
+    label: "Radius",
+    min: 0,
+    max: 100,
+    step: 1,
+    hint: "Size of the halo around highlights.",
+  },
+  {
+    key: "halationWarmth",
+    label: "Warmth",
+    min: 0,
+    max: 100,
+    step: 1,
+    hint: "Colour of the halo, from amber to deep red.",
   },
   {
     key: "lensHaze",
@@ -137,6 +213,22 @@ export const ADJUSTMENTS: AdjustmentSpec[] = [
     hint: "Lifted, milky blacks from an uncoated lens.",
   },
   {
+    key: "hazeDensity",
+    label: "Density",
+    min: 0,
+    max: 100,
+    step: 1,
+    hint: "How thick the atmospheric haze reads.",
+  },
+  {
+    key: "hazeTint",
+    label: "Tint",
+    min: -100,
+    max: 100,
+    step: 1,
+    hint: "Negative cools the haze, positive warms it.",
+  },
+  {
     key: "grain",
     label: "Film Grain",
     min: 0,
@@ -144,12 +236,30 @@ export const ADJUSTMENTS: AdjustmentSpec[] = [
     step: 1,
     hint: "Adds analogue film noise on top of the grade.",
   },
+  {
+    key: "grainSize",
+    label: "Size",
+    min: 0,
+    max: 100,
+    step: 1,
+    hint: "Coarseness of the grain particles.",
+  },
+  {
+    key: "grainRoughness",
+    label: "Roughness",
+    min: 0,
+    max: 100,
+    step: 1,
+    hint: "How harsh and contrasty the grain looks.",
+  },
 ];
 
 export const NEUTRAL: Adjustments = {
   temperature: 0,
   tint: 0,
   exposure: 0,
+  gamma: 0,
+  fade: 0,
   contrast: 0,
   saturation: 0,
   highlights: 0,
@@ -158,11 +268,21 @@ export const NEUTRAL: Adjustments = {
   blacks: 0,
   splitTone: 0,
   sharpness: 0,
+  clarity: 0,
   soften: 0,
+  texture: 0,
   bloom: 0,
+  bloomThreshold: 50,
+  bloomRadius: 50,
   halation: 0,
+  halationRadius: 50,
+  halationWarmth: 50,
   lensHaze: 0,
+  hazeDensity: 50,
+  hazeTint: 0,
   grain: 0,
+  grainSize: 50,
+  grainRoughness: 50,
 };
 
 export const ADJUSTMENT_KEYS = Object.keys(NEUTRAL) as AdjustmentKey[];
