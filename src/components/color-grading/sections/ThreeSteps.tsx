@@ -5,19 +5,16 @@ import stepCompare from "@/assets/step-compare.jpg";
 
 const steps = [
   {
-    icon: ImagePlus,
     image: stepUpload,
     title: "Upload your images",
     desc: "Drop one still or a whole batch — PNG, JPG or WebP. The first frame becomes your reference for the look.",
   },
   {
-    icon: SlidersHorizontal,
     image: stepLook,
     title: "Build your look",
     desc: "Start from a preset, then push temperature, contrast, highlights and grain until the frame reads right.",
   },
   {
-    icon: Download,
     image: stepCompare,
     title: "Compare and download",
     desc: "Drag the handle to check the grade against the original, then export the finished file in one click.",
