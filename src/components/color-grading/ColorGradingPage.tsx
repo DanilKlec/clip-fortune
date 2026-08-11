@@ -18,6 +18,7 @@ import { ImageStage, useImageAspect } from "./ImageStage";
 import { ImageTray } from "./ImageTray";
 import { AdjustmentPanel } from "./AdjustmentPanel";
 import { PresetPicker } from "./PresetPicker";
+import { CollapsibleSection } from "./CollapsibleSection";
 import { MobileControlPanel } from "./MobileControlPanel";
 import {
   ACCEPTED_LABEL,
@@ -78,21 +79,6 @@ export function ColorGradingPage() {
     return () => mql.removeEventListener("change", sync);
   }, []);
   const dropRef = useRef<HTMLDivElement>(null);
-  const centerRef = useRef<HTMLDivElement>(null);
-  const [centerH, setCenterH] = useState<number | null>(null);
-
-  useEffect(() => {
-    const el = centerRef.current;
-    if (!el || !isDesktop) {
-      setCenterH(null);
-      return;
-    }
-    const ro = new ResizeObserver(([entry]) => {
-      setCenterH((entry.target as HTMLElement).offsetHeight);
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [isDesktop]);
   const fileRef = useRef<HTMLInputElement>(null);
   const runSeq = useRef(0);
   const statesRef = useRef(states);
@@ -378,7 +364,16 @@ export function ColorGradingPage() {
     </div>
   );
 
-  const presetsNode = <PresetPicker activeId={st.presetId} custom={custom} onPick={pickPreset} />;
+  const presetsNode = (
+    <CollapsibleSection
+      id="presets"
+      label="Presets"
+      open={presetsOpen}
+      onToggle={() => setPresetsOpen((v) => !v)}
+    >
+      <PresetPicker activeId={st.presetId} custom={custom} onPick={pickPreset} hideHeading />
+    </CollapsibleSection>
+  );
 
   const resultActions = (
     <div className="grid min-w-0 gap-2">
