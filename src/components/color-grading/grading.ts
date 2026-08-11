@@ -451,15 +451,31 @@ export interface RenderLayers {
   filter: string;
   overlays: Overlay[];
   grainOpacity: number;
+  /** Tile size of the grain pattern in px. */
+  grainSize: number;
 }
 
 export function buildLayers(a: Adjustments): RenderLayers {
-  const brightness = 1 + a.exposure / 250 + a.bloom / 900;
+  const bloomSpread = 0.5 + a.bloomRadius / 200;
+  const bloomGate = 1 - a.bloomThreshold / 200;
+  const bloomAmount = a.bloom * bloomGate * bloomSpread;
+  const hazeAmount = a.lensHaze * (0.5 + a.hazeDensity / 100);
+  const halationAmount = a.halation * (0.6 + a.halationRadius / 250);
+  const brightness = 1 + a.exposure / 250 + a.gamma / 500 + bloomAmount / 900 + a.fade / 900;
   // Sharpness is approximated with a local-contrast lift (CSS has no unsharp mask).
   const contrast =
-    1 + a.contrast / 160 + a.sharpness / 600 - a.blacks / 700 - a.lensHaze / 500 + a.whites / 700;
+    1 +
+    a.contrast / 160 +
+    a.sharpness / 600 +
+    a.clarity / 500 +
+    a.texture / 900 -
+    a.gamma / 700 -
+    a.fade / 260 -
+    a.blacks / 700 -
+    hazeAmount / 500 +
+    a.whites / 700;
   const saturate = Math.max(0, 1 + a.saturation / 100);
-  const blur = a.soften / 90;
+  const blur = Math.max(0, a.soften / 90 - Math.max(0, a.texture) / 400);
 
   const overlays: Overlay[] = [];
   const push = (color: string, blend: Overlay["blend"], opacity: number) => {
@@ -498,9 +514,22 @@ export function buildLayers(a: Adjustments): RenderLayers {
     push(a.splitTone > 0 ? WARM_TINT : COOL_TINT, "overlay", Math.min(0.3, Math.abs(a.splitTone) / 320));
     push(a.splitTone > 0 ? COOL_TINT : WARM_TINT, "multiply", Math.min(0.16, Math.abs(a.splitTone) / 620));
   }
-  if (a.bloom > 0) push("255, 255, 255", "screen", Math.min(0.3, a.bloom / 420));
-  if (a.halation > 0) push(HALATION_TINT, "screen", Math.min(0.28, a.halation / 460));
-  if (a.lensHaze > 0) push("255, 255, 255", "soft-light", Math.min(0.35, a.lensHaze / 300));
+  if (bloomAmount > 0) push("255, 255, 255", "screen", Math.min(0.3, bloomAmount / 420));
+  if (halationAmount > 0) {
+    const warm = a.halationWarmth / 100;
+    const halo = `${Math.round(230 + warm * 25)}, ${Math.round(120 - warm * 60)}, ${Math.round(90 - warm * 60)}`;
+    push(halo, "screen", Math.min(0.28, halationAmount / 460));
+  }
+  if (hazeAmount > 0) {
+    const haze =
+      a.hazeTint === 0
+        ? "255, 255, 255"
+        : a.hazeTint > 0
+          ? `255, ${Math.round(255 - a.hazeTint * 0.5)}, ${Math.round(255 - a.hazeTint * 0.9)}`
+          : `${Math.round(255 + a.hazeTint * 0.9)}, ${Math.round(255 + a.hazeTint * 0.4)}, 255`;
+    push(haze, "soft-light", Math.min(0.35, hazeAmount / 300));
+  }
+  if (a.fade > 0) push("255, 255, 255", "screen", Math.min(0.22, a.fade / 500));
 
   const filter = [
     `brightness(${brightness.toFixed(3)})`,
@@ -514,7 +543,8 @@ export function buildLayers(a: Adjustments): RenderLayers {
   return {
     filter,
     overlays,
-    grainOpacity: (a.grain / 100) * 0.35,
+    grainOpacity: (a.grain / 100) * 0.35 * (0.6 + a.grainRoughness / 125),
+    grainSize: 90 + a.grainSize * 1.4,
   };
 }
 
