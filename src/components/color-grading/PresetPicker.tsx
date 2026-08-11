@@ -24,7 +24,7 @@ export function PresetPicker({ activeId, onPick, custom = false, hideHeading = f
         )}
       </div>
       <div
-        className={`grid max-h-[260px] grid-cols-2 gap-2 overflow-y-auto overflow-x-hidden pr-1 min-[360px]:grid-cols-3 sm:grid-cols-3 lg:grid-cols-3 ${hideHeading ? "" : "mt-3"}`}
+        className={`grid max-h-[188px] grid-cols-2 gap-2 overflow-y-auto overflow-x-hidden pr-1 min-[360px]:grid-cols-3 sm:grid-cols-3 lg:grid-cols-3 ${hideHeading ? "" : "mt-3"}`}
         style={{ overscrollBehavior: "contain" }}
       >
         {PRESETS.map((preset) => {
