@@ -318,9 +318,7 @@ export function ColorGradingPage() {
       grouped={grouped}
       hideResetAll={grouped}
       openGroups={openGroups}
-      onToggleGroup={(gid) =>
-        setOpenGroups((prev) => ({ ...prev, [gid]: !(prev[gid] ?? gid === "color") }))
-      }
+      onToggleGroup={(gid) => setOpenGroups((prev) => ({ ...prev, [gid]: !prev[gid] }))}
     />
   );
 
