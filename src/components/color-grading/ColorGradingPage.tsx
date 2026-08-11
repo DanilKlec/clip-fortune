@@ -640,13 +640,13 @@ export function ColorGradingPage() {
                   </button>
                 </div>
 
-                {/* Center — Original / Edited preview switches */}
-                <div className="order-1 flex items-end justify-center gap-3 sm:order-none">
+                {/* Center — Original / Edited / AI history switches */}
+                <div className="scrollbar-hide order-1 flex max-w-full items-end justify-start gap-3 overflow-x-auto px-1 sm:order-none sm:justify-center">
                   <button
                     type="button"
                     onClick={() => setView("original")}
                     aria-pressed={showOriginal}
-                    className="flex flex-col items-center gap-1 focus-visible:outline-none"
+                    className="flex shrink-0 flex-col items-center gap-1 focus-visible:outline-none"
                   >
                     <span
                       className="block h-12 w-12 overflow-hidden rounded-lg border-2 transition-colors sm:h-14 sm:w-14"
@@ -670,43 +670,71 @@ export function ColorGradingPage() {
                   <button
                     type="button"
                     disabled={!canCompare}
-                    onClick={() => setView("edited")}
-                    aria-pressed={!showOriginal}
-                    className="flex flex-col items-center gap-1 disabled:opacity-45 focus-visible:outline-none"
+                    onClick={() => selectVersion(-1)}
+                    aria-pressed={!showOriginal && st.resultIndex === -1}
+                    className="flex shrink-0 flex-col items-center gap-1 disabled:opacity-45 focus-visible:outline-none"
                   >
                     <span
                       className="block h-12 w-12 overflow-hidden rounded-lg border-2 transition-colors sm:h-14 sm:w-14"
                       style={{
                         borderColor:
-                          !showOriginal && canCompare ? "var(--volt)" : "var(--card-border)",
+                          !showOriginal && st.resultIndex === -1 && canCompare
+                            ? "var(--volt)"
+                            : "var(--card-border)",
                       }}
                     >
-                      {aiUrl ? (
-                        <img
-                          src={aiUrl}
-                          alt="Edited"
-                          draggable={false}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <GradedImage
-                          src={active.url}
-                          alt="Edited"
-                          adjustments={effective}
-                          className="h-full w-full"
-                          imgClassName="h-full w-full object-cover"
-                        />
-                      )}
+                      <GradedImage
+                        src={active.url}
+                        alt="Edited"
+                        adjustments={effective}
+                        className="h-full w-full"
+                        imgClassName="h-full w-full object-cover"
+                      />
                     </span>
                     <span
                       className="text-[11px] font-semibold"
                       style={{
-                        color: !showOriginal && canCompare ? "var(--volt)" : undefined,
+                        color:
+                          !showOriginal && st.resultIndex === -1 && canCompare
+                            ? "var(--volt)"
+                            : undefined,
                       }}
                     >
                       Edited
                     </span>
                   </button>
+
+                  {/* AI history — every successful result of this session */}
+                  {results.map((url, i) => {
+                    const picked = !showOriginal && st.resultIndex === i;
+                    return (
+                      <button
+                        key={url}
+                        type="button"
+                        onClick={() => selectVersion(i)}
+                        aria-pressed={picked}
+                        className="flex shrink-0 flex-col items-center gap-1 focus-visible:outline-none"
+                      >
+                        <span
+                          className="block h-12 w-12 overflow-hidden rounded-lg border-2 transition-colors sm:h-14 sm:w-14"
+                          style={{ borderColor: picked ? "var(--volt)" : "var(--card-border)" }}
+                        >
+                          <img
+                            src={url}
+                            alt={`AI result ${i + 1}`}
+                            draggable={false}
+                            className="h-full w-full object-cover"
+                          />
+                        </span>
+                        <span
+                          className="text-[11px] font-semibold"
+                          style={{ color: picked ? "var(--volt)" : undefined }}
+                        >
+                          AI {i + 1}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
 
                 <span className="hidden sm:block" />
