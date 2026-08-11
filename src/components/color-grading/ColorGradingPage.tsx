@@ -60,7 +60,7 @@ export function ColorGradingPage() {
     remove,
     replace,
     patchState,
-    setResult,
+    addResult,
   } = useImageLibrary();
 
   const [dragOver, setDragOver] = useState(false);
@@ -109,8 +109,10 @@ export function ColorGradingPage() {
 
   const ratio = useImageAspect(active?.url);
   const effective = effectiveAdjustments(st.adjustments, st.enabled);
-  /** Priority: AI result for this image, else the live local grade, else none. */
-  const aiUrl = activeState && activeState.status === "success" ? activeState.resultUrl : null;
+  /** Session history of AI results for the active image. */
+  const results = activeState?.results ?? [];
+  /** Selected AI version, or null when the live local grade is shown. */
+  const aiUrl = activeState && st.resultIndex >= 0 ? (results[st.resultIndex] ?? null) : null;
   const canCompare = Boolean(aiUrl) || !isNeutral(effective);
   const showOriginal = st.view === "original";
   const compareOn = st.compare;
@@ -125,6 +127,11 @@ export function ColorGradingPage() {
     if (!activeId) return;
     patchState(activeId, (s) => ({ ...s, compare: !s.compare, view: "edited" }));
   };
+  /** Pick a version to preview: -1 is the live local grade, else an AI result. */
+  const selectVersion = (index: number) => {
+    if (!activeId) return;
+    patchState(activeId, (s) => ({ ...s, resultIndex: index, view: "edited" }));
+  };
 
   /** Any input change invalidates the current result for the active image only. */
   const editActive = (patch: (s: ImageState) => Partial<ImageState>) => {
@@ -134,13 +141,15 @@ export function ColorGradingPage() {
     }
     const id = activeId;
     const run = ++runSeq.current;
-    setResult(id, null);
+    // Editing never discards existing AI results — it only switches the preview
+    // back to the live local grade.
     patchState(id, (s) => ({
       ...s,
       ...patch(s),
       run,
       error: null,
-      status: "ready",
+      status: s.status === "generating" ? s.status : "ready",
+      resultIndex: -1,
     }));
   };
 
@@ -233,7 +242,6 @@ export function ColorGradingPage() {
       enabled: current.enabled,
     };
     const run = ++runSeq.current;
-    setResult(id, null);
     patchState(id, (s) => ({
       ...s,
       status: "generating",
@@ -256,20 +264,23 @@ export function ColorGradingPage() {
         if (res.imageUrl.startsWith("blob:")) URL.revokeObjectURL(res.imageUrl);
         return;
       }
-      setResult(id, res.imageUrl);
+      addResult(id, res.imageUrl);
       patchState(id, (s) =>
-        s.run === run ? { ...s, status: "success", error: null, comparePos: 50 } : s,
+        s.run === run
+          ? { ...s, status: "success", error: null, comparePos: 50, view: "edited" }
+          : s,
       );
     } catch (err) {
       if (statesRef.current[id]?.run !== run) return;
-      setResult(id, null);
       const message = err instanceof Error ? err.message : "Something went wrong while grading";
       patchState(id, (s) => (s.run === run ? { ...s, status: "error", error: message } : s));
     }
   };
 
+  const hasResult = Boolean(aiUrl);
+
   const download = async () => {
-    const url = st?.resultUrl;
+    const url = aiUrl;
     if (!url) return;
     let href = url;
     let temp: string | null = null;
@@ -383,14 +394,14 @@ export function ColorGradingPage() {
         <button
           type="button"
           onClick={() => void download()}
-          disabled={status !== "success"}
+          disabled={!hasResult}
           className="button-cta flex h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-full px-4 text-[14px] font-semibold disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Download size={16} strokeWidth={2} />
           Download
         </button>
       </div>
-      {status === "success" && (
+      {results.length > 0 && (
         <button
           type="button"
           onClick={() => void generate(activeId, st.lastRequest)}
@@ -452,10 +463,10 @@ export function ColorGradingPage() {
           {/* Left rail — uploaded images plus the compact add button */}
           <aside
             aria-label="Uploaded images"
-            className={`order-1 min-h-0 min-w-0 flex-col rounded-2xl p-2 sm:p-3 lg:order-none lg:flex ${
+            className={`order-1 min-h-0 min-w-0 flex-col rounded-2xl p-2 sm:p-3 lg:order-none lg:flex lg:self-stretch ${
               images.length > 0 ? "flex" : "hidden"
             }`}
-            style={{ background: "var(--tile)" }}
+            style={{ background: "var(--tile)", height: centerH ? `${centerH}px` : undefined }}
           >
             <h2 className="button-meta mb-2 hidden px-1 text-muted-foreground lg:block">Images</h2>
             <div className="min-w-0 lg:hidden">{tray("horizontal")}</div>
@@ -634,13 +645,13 @@ export function ColorGradingPage() {
                   </button>
                 </div>
 
-                {/* Center — Original / Edited preview switches */}
-                <div className="order-1 flex items-end justify-center gap-3 sm:order-none">
+                {/* Center — Original / Edited / AI history switches */}
+                <div className="scrollbar-hide order-1 flex max-w-full items-end justify-start gap-3 overflow-x-auto px-1 sm:order-none sm:justify-center">
                   <button
                     type="button"
                     onClick={() => setView("original")}
                     aria-pressed={showOriginal}
-                    className="flex flex-col items-center gap-1 focus-visible:outline-none"
+                    className="flex shrink-0 flex-col items-center gap-1 focus-visible:outline-none"
                   >
                     <span
                       className="block h-12 w-12 overflow-hidden rounded-lg border-2 transition-colors sm:h-14 sm:w-14"
@@ -664,43 +675,71 @@ export function ColorGradingPage() {
                   <button
                     type="button"
                     disabled={!canCompare}
-                    onClick={() => setView("edited")}
-                    aria-pressed={!showOriginal}
-                    className="flex flex-col items-center gap-1 disabled:opacity-45 focus-visible:outline-none"
+                    onClick={() => selectVersion(-1)}
+                    aria-pressed={!showOriginal && st.resultIndex === -1}
+                    className="flex shrink-0 flex-col items-center gap-1 disabled:opacity-45 focus-visible:outline-none"
                   >
                     <span
                       className="block h-12 w-12 overflow-hidden rounded-lg border-2 transition-colors sm:h-14 sm:w-14"
                       style={{
                         borderColor:
-                          !showOriginal && canCompare ? "var(--volt)" : "var(--card-border)",
+                          !showOriginal && st.resultIndex === -1 && canCompare
+                            ? "var(--volt)"
+                            : "var(--card-border)",
                       }}
                     >
-                      {aiUrl ? (
-                        <img
-                          src={aiUrl}
-                          alt="Edited"
-                          draggable={false}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <GradedImage
-                          src={active.url}
-                          alt="Edited"
-                          adjustments={effective}
-                          className="h-full w-full"
-                          imgClassName="h-full w-full object-cover"
-                        />
-                      )}
+                      <GradedImage
+                        src={active.url}
+                        alt="Edited"
+                        adjustments={effective}
+                        className="h-full w-full"
+                        imgClassName="h-full w-full object-cover"
+                      />
                     </span>
                     <span
                       className="text-[11px] font-semibold"
                       style={{
-                        color: !showOriginal && canCompare ? "var(--volt)" : undefined,
+                        color:
+                          !showOriginal && st.resultIndex === -1 && canCompare
+                            ? "var(--volt)"
+                            : undefined,
                       }}
                     >
                       Edited
                     </span>
                   </button>
+
+                  {/* AI history — every successful result of this session */}
+                  {results.map((url, i) => {
+                    const picked = !showOriginal && st.resultIndex === i;
+                    return (
+                      <button
+                        key={url}
+                        type="button"
+                        onClick={() => selectVersion(i)}
+                        aria-pressed={picked}
+                        className="flex shrink-0 flex-col items-center gap-1 focus-visible:outline-none"
+                      >
+                        <span
+                          className="block h-12 w-12 overflow-hidden rounded-lg border-2 transition-colors sm:h-14 sm:w-14"
+                          style={{ borderColor: picked ? "var(--volt)" : "var(--card-border)" }}
+                        >
+                          <img
+                            src={url}
+                            alt={`AI result ${i + 1}`}
+                            draggable={false}
+                            className="h-full w-full object-cover"
+                          />
+                        </span>
+                        <span
+                          className="text-[11px] font-semibold"
+                          style={{ color: picked ? "var(--volt)" : undefined }}
+                        >
+                          AI {i + 1}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
 
                 <span className="hidden sm:block" />
@@ -714,9 +753,9 @@ export function ColorGradingPage() {
               className="glass order-3 flex min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl lg:order-none lg:self-stretch"
               style={{
                 boxShadow: "var(--shadow-card)",
-                // Before the first upload the panel sizes to its own content so all
-                // presets and sections are reachable without cramped scrolling.
-                height: active && centerH ? `${centerH}px` : undefined,
+                // Identical geometry before and after upload: the rail always
+                // matches the center column height.
+                height: centerH ? `${centerH}px` : undefined,
               }}
             >
               <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overflow-x-hidden p-4 sm:p-5">
@@ -751,7 +790,7 @@ export function ColorGradingPage() {
                     <button
                       type="button"
                       onClick={() => void download()}
-                      disabled={status !== "success"}
+                      disabled={!hasResult}
                       className="button-cta flex h-10 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-[13px] font-semibold disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       <Download size={15} strokeWidth={2} />

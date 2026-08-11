@@ -30,10 +30,21 @@ const GROUPS: { id: string; label: string; keys: AdjustmentKey[] }[] = [
   {
     id: "color",
     label: "Color Correct",
-    keys: ["temperature", "contrast", "saturation", "highlights", "exposure"],
+    keys: [
+      "temperature",
+      "tint",
+      "exposure",
+      "contrast",
+      "saturation",
+      "highlights",
+      "shadows",
+      "whites",
+      "blacks",
+      "splitTone",
+    ],
   },
-  { id: "details", label: "Details", keys: ["sharpness"] },
-  { id: "effects", label: "Effects", keys: ["grain"] },
+  { id: "details", label: "Details", keys: ["sharpness", "soften"] },
+  { id: "effects", label: "Effects", keys: ["bloom", "halation", "lensHaze", "grain"] },
 ];
 
 export function AdjustmentPanel({

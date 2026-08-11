@@ -24,7 +24,10 @@ export interface ImageState {
   enabled: EffectToggles;
   status: GradingStatus;
   error: string | null;
-  resultUrl: string | null;
+  /** Every successful AI result for this image, in generation order. */
+  results: string[];
+  /** Index into results; -1 means the live local grade is shown. */
+  resultIndex: number;
   comparePos: number;
   lastRequest: GradeRequestSnapshot | null;
   /** Which version the preview shows; independent from compare mode. */
@@ -45,7 +48,8 @@ export function createImageState(): ImageState {
     enabled: { ...DEFAULT_ENABLED },
     status: "ready",
     error: null,
-    resultUrl: null,
+    results: [],
+    resultIndex: -1,
     comparePos: 50,
     lastRequest: null,
     view: "edited",
@@ -124,7 +128,7 @@ export function useImageLibrary() {
     });
     setStates((prev) => {
       const st = prev[id];
-      if (st?.resultUrl) release(st.resultUrl);
+      st?.results.forEach(release);
       const next = { ...prev };
       delete next[id];
       return next;
@@ -140,7 +144,7 @@ export function useImageLibrary() {
       }),
     );
     setStates((prev) => {
-      if (prev[id]?.resultUrl) release(prev[id].resultUrl);
+      prev[id]?.results.forEach(release);
       return { ...prev, [id]: createImageState() };
     });
   }, []);
@@ -151,7 +155,7 @@ export function useImageLibrary() {
       return [];
     });
     setStates((prev) => {
-      Object.values(prev).forEach((s) => s.resultUrl && release(s.resultUrl));
+      Object.values(prev).forEach((s) => s.results.forEach(release));
       return {};
     });
     setActiveId(null);
@@ -166,17 +170,17 @@ export function useImageLibrary() {
     });
   }, []);
 
-  /** Replace an image's result URL, revoking the previous one. */
-  const setResult = useCallback((id: string, url: string | null) => {
+  /** Append a new AI result to an image's session history and select it. */
+  const addResult = useCallback((id: string, url: string) => {
     setStates((prev) => {
       const cur = prev[id];
       if (!cur) {
-        if (url) URL.revokeObjectURL(url);
+        if (url.startsWith("blob:")) URL.revokeObjectURL(url);
         return prev;
       }
-      if (cur.resultUrl && cur.resultUrl !== url) release(cur.resultUrl);
-      if (url?.startsWith("blob:")) track(url);
-      return { ...prev, [id]: { ...cur, resultUrl: url } };
+      if (url.startsWith("blob:")) track(url);
+      const results = [...cur.results, url];
+      return { ...prev, [id]: { ...cur, results, resultIndex: results.length - 1 } };
     });
   }, []);
 
@@ -195,6 +199,6 @@ export function useImageLibrary() {
     replace,
     clearAll,
     patchState,
-    setResult,
+    addResult,
   };
 }
