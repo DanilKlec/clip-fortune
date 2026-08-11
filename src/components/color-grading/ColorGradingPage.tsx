@@ -127,6 +127,11 @@ export function ColorGradingPage() {
     if (!activeId) return;
     patchState(activeId, (s) => ({ ...s, compare: !s.compare, view: "edited" }));
   };
+  /** Pick a version to preview: -1 is the live local grade, else an AI result. */
+  const selectVersion = (index: number) => {
+    if (!activeId) return;
+    patchState(activeId, (s) => ({ ...s, resultIndex: index, view: "edited" }));
+  };
 
   /** Any input change invalidates the current result for the active image only. */
   const editActive = (patch: (s: ImageState) => Partial<ImageState>) => {
