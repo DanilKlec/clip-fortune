@@ -39,7 +39,7 @@ export function ImageStage({ ratio, children, stageRef, className, maxHeight }: 
   // A percentage max-height needs a definite parent height; when a caller gives
   // an explicit cap we mirror it into max-width so the ratio is never broken.
   const cap = maxHeight ?? "100%";
-  const maxWidth = maxHeight ? `calc(${maxHeight} * ${ratio})` : "100%";
+  const maxWidth = maxHeight && maxHeight !== "100%" ? `calc(${maxHeight} * ${ratio})` : "100%";
   return (
     <div className="flex h-full w-full min-w-0 items-center justify-center">
       <div

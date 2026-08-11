@@ -38,18 +38,42 @@ function describe(key: keyof Adjustments, v: number): string | null {
       return `Split tone: ${s} ${v > 0 ? "warm highlights with cool shadows" : "cool highlights with warm shadows"} (${v})`;
     case "exposure":
       return `Exposure: ${s} ${v > 0 ? "brighter" : "darker"} overall exposure (${v})`;
+    case "gamma":
+      return `Gamma: ${s} ${v > 0 ? "lifted" : "lowered"} midtones (${v})`;
+    case "fade":
+      return `Fade: ${s} faded, milky tonal response (${v})`;
     case "sharpness":
       return `Sharpness: ${s} increased detail clarity (${v})`;
+    case "clarity":
+      return `Clarity: ${s} ${v > 0 ? "stronger" : "softer"} midtone contrast (${v})`;
     case "soften":
       return `Soften details: ${s} diffused, softened fine detail (${v})`;
+    case "texture":
+      return `Texture: ${s} ${v > 0 ? "more pronounced" : "smoothed"} fine surface texture (${v})`;
     case "bloom":
       return `Bloom: ${s} soft glow around bright areas (${v})`;
+    case "bloomThreshold":
+      return `Bloom threshold: glow starts at ${v}% brightness`;
+    case "bloomRadius":
+      return `Bloom radius: ${v > 50 ? "wide" : "tight"} glow spread (${v})`;
     case "halation":
       return `Halation: ${s} warm red halo around highlights (${v})`;
+    case "halationRadius":
+      return `Halation radius: ${v > 50 ? "wide" : "tight"} halo (${v})`;
+    case "halationWarmth":
+      return `Halation warmth: ${v > 50 ? "warmer amber" : "deeper red"} halo (${v})`;
     case "lensHaze":
       return `Lens haze: ${s} hazy, lifted blacks like an uncoated lens (${v})`;
+    case "hazeDensity":
+      return `Haze density: ${v > 50 ? "thicker" : "thinner"} atmospheric haze (${v})`;
+    case "hazeTint":
+      return `Haze tint: ${s} ${v > 0 ? "warm" : "cool"} haze colour (${v})`;
     case "grain":
       return `Film grain: ${s} visible film grain (${v})`;
+    case "grainSize":
+      return `Grain size: ${v > 50 ? "coarse" : "fine"} grain particles (${v})`;
+    case "grainRoughness":
+      return `Grain roughness: ${v > 50 ? "harsh" : "smooth"} grain (${v})`;
     default:
       return null;
   }

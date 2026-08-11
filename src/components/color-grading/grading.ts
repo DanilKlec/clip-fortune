@@ -7,6 +7,8 @@ export type AdjustmentKey =
   | "temperature"
   | "tint"
   | "exposure"
+  | "gamma"
+  | "fade"
   | "contrast"
   | "saturation"
   | "highlights"
@@ -15,11 +17,21 @@ export type AdjustmentKey =
   | "blacks"
   | "splitTone"
   | "sharpness"
+  | "clarity"
   | "soften"
+  | "texture"
   | "bloom"
+  | "bloomThreshold"
+  | "bloomRadius"
   | "halation"
+  | "halationRadius"
+  | "halationWarmth"
   | "lensHaze"
-  | "grain";
+  | "hazeDensity"
+  | "hazeTint"
+  | "grain"
+  | "grainSize"
+  | "grainRoughness";
 
 export type Adjustments = Record<AdjustmentKey, number>;
 
@@ -54,6 +66,22 @@ export const ADJUSTMENTS: AdjustmentSpec[] = [
     hint: "Negative shifts towards green, positive towards magenta.",
   },
   { key: "exposure", label: "Exposure", min: -100, max: 100, step: 1 },
+  {
+    key: "gamma",
+    label: "Gamma",
+    min: -100,
+    max: 100,
+    step: 1,
+    hint: "Bends the midtones without moving black or white points.",
+  },
+  {
+    key: "fade",
+    label: "Fade",
+    min: 0,
+    max: 100,
+    step: 1,
+    hint: "Milky, lifted look across the whole dynamic range.",
+  },
   { key: "contrast", label: "Contrast", min: -100, max: 100, step: 1 },
   { key: "saturation", label: "Saturation", min: -100, max: 100, step: 1 },
   {
@@ -105,12 +133,28 @@ export const ADJUSTMENTS: AdjustmentSpec[] = [
     hint: "Local-contrast clarity — approximated in the live preview.",
   },
   {
+    key: "clarity",
+    label: "Clarity",
+    min: -100,
+    max: 100,
+    step: 1,
+    hint: "Midtone contrast — punchier or flatter detail.",
+  },
+  {
     key: "soften",
     label: "Soften Details",
     min: 0,
     max: 100,
     step: 1,
     hint: "Gentle diffusion for skin and fine texture.",
+  },
+  {
+    key: "texture",
+    label: "Texture",
+    min: -100,
+    max: 100,
+    step: 1,
+    hint: "Fine surface detail — smooths or emphasises micro texture.",
   },
   {
     key: "bloom",
@@ -121,12 +165,44 @@ export const ADJUSTMENTS: AdjustmentSpec[] = [
     hint: "Soft glow spilling out of the brightest areas.",
   },
   {
+    key: "bloomThreshold",
+    label: "Threshold",
+    min: 0,
+    max: 100,
+    step: 1,
+    hint: "How bright an area must be before it blooms.",
+  },
+  {
+    key: "bloomRadius",
+    label: "Radius",
+    min: 0,
+    max: 100,
+    step: 1,
+    hint: "How far the glow spreads.",
+  },
+  {
     key: "halation",
     label: "Halation",
     min: 0,
     max: 100,
     step: 1,
     hint: "Warm red halo around highlights, like film.",
+  },
+  {
+    key: "halationRadius",
+    label: "Radius",
+    min: 0,
+    max: 100,
+    step: 1,
+    hint: "Size of the halo around highlights.",
+  },
+  {
+    key: "halationWarmth",
+    label: "Warmth",
+    min: 0,
+    max: 100,
+    step: 1,
+    hint: "Colour of the halo, from amber to deep red.",
   },
   {
     key: "lensHaze",
@@ -137,6 +213,22 @@ export const ADJUSTMENTS: AdjustmentSpec[] = [
     hint: "Lifted, milky blacks from an uncoated lens.",
   },
   {
+    key: "hazeDensity",
+    label: "Density",
+    min: 0,
+    max: 100,
+    step: 1,
+    hint: "How thick the atmospheric haze reads.",
+  },
+  {
+    key: "hazeTint",
+    label: "Tint",
+    min: -100,
+    max: 100,
+    step: 1,
+    hint: "Negative cools the haze, positive warms it.",
+  },
+  {
     key: "grain",
     label: "Film Grain",
     min: 0,
@@ -144,12 +236,30 @@ export const ADJUSTMENTS: AdjustmentSpec[] = [
     step: 1,
     hint: "Adds analogue film noise on top of the grade.",
   },
+  {
+    key: "grainSize",
+    label: "Size",
+    min: 0,
+    max: 100,
+    step: 1,
+    hint: "Coarseness of the grain particles.",
+  },
+  {
+    key: "grainRoughness",
+    label: "Roughness",
+    min: 0,
+    max: 100,
+    step: 1,
+    hint: "How harsh and contrasty the grain looks.",
+  },
 ];
 
 export const NEUTRAL: Adjustments = {
   temperature: 0,
   tint: 0,
   exposure: 0,
+  gamma: 0,
+  fade: 0,
   contrast: 0,
   saturation: 0,
   highlights: 0,
@@ -158,11 +268,21 @@ export const NEUTRAL: Adjustments = {
   blacks: 0,
   splitTone: 0,
   sharpness: 0,
+  clarity: 0,
   soften: 0,
+  texture: 0,
   bloom: 0,
+  bloomThreshold: 50,
+  bloomRadius: 50,
   halation: 0,
+  halationRadius: 50,
+  halationWarmth: 50,
   lensHaze: 0,
+  hazeDensity: 50,
+  hazeTint: 0,
   grain: 0,
+  grainSize: 50,
+  grainRoughness: 50,
 };
 
 export const ADJUSTMENT_KEYS = Object.keys(NEUTRAL) as AdjustmentKey[];
@@ -331,15 +451,31 @@ export interface RenderLayers {
   filter: string;
   overlays: Overlay[];
   grainOpacity: number;
+  /** Tile size of the grain pattern in px. */
+  grainSize: number;
 }
 
 export function buildLayers(a: Adjustments): RenderLayers {
-  const brightness = 1 + a.exposure / 250 + a.bloom / 900;
+  const bloomSpread = 0.5 + a.bloomRadius / 200;
+  const bloomGate = 1 - a.bloomThreshold / 200;
+  const bloomAmount = a.bloom * bloomGate * bloomSpread;
+  const hazeAmount = a.lensHaze * (0.5 + a.hazeDensity / 100);
+  const halationAmount = a.halation * (0.6 + a.halationRadius / 250);
+  const brightness = 1 + a.exposure / 250 + a.gamma / 500 + bloomAmount / 900 + a.fade / 900;
   // Sharpness is approximated with a local-contrast lift (CSS has no unsharp mask).
   const contrast =
-    1 + a.contrast / 160 + a.sharpness / 600 - a.blacks / 700 - a.lensHaze / 500 + a.whites / 700;
+    1 +
+    a.contrast / 160 +
+    a.sharpness / 600 +
+    a.clarity / 500 +
+    a.texture / 900 -
+    a.gamma / 700 -
+    a.fade / 260 -
+    a.blacks / 700 -
+    hazeAmount / 500 +
+    a.whites / 700;
   const saturate = Math.max(0, 1 + a.saturation / 100);
-  const blur = a.soften / 90;
+  const blur = Math.max(0, a.soften / 90 - Math.max(0, a.texture) / 400);
 
   const overlays: Overlay[] = [];
   const push = (color: string, blend: Overlay["blend"], opacity: number) => {
@@ -378,9 +514,22 @@ export function buildLayers(a: Adjustments): RenderLayers {
     push(a.splitTone > 0 ? WARM_TINT : COOL_TINT, "overlay", Math.min(0.3, Math.abs(a.splitTone) / 320));
     push(a.splitTone > 0 ? COOL_TINT : WARM_TINT, "multiply", Math.min(0.16, Math.abs(a.splitTone) / 620));
   }
-  if (a.bloom > 0) push("255, 255, 255", "screen", Math.min(0.3, a.bloom / 420));
-  if (a.halation > 0) push(HALATION_TINT, "screen", Math.min(0.28, a.halation / 460));
-  if (a.lensHaze > 0) push("255, 255, 255", "soft-light", Math.min(0.35, a.lensHaze / 300));
+  if (bloomAmount > 0) push("255, 255, 255", "screen", Math.min(0.3, bloomAmount / 420));
+  if (halationAmount > 0) {
+    const warm = a.halationWarmth / 100;
+    const halo = `${Math.round(230 + warm * 25)}, ${Math.round(120 - warm * 60)}, ${Math.round(90 - warm * 60)}`;
+    push(halo, "screen", Math.min(0.28, halationAmount / 460));
+  }
+  if (hazeAmount > 0) {
+    const haze =
+      a.hazeTint === 0
+        ? "255, 255, 255"
+        : a.hazeTint > 0
+          ? `255, ${Math.round(255 - a.hazeTint * 0.5)}, ${Math.round(255 - a.hazeTint * 0.9)}`
+          : `${Math.round(255 + a.hazeTint * 0.9)}, ${Math.round(255 + a.hazeTint * 0.4)}, 255`;
+    push(haze, "soft-light", Math.min(0.35, hazeAmount / 300));
+  }
+  if (a.fade > 0) push("255, 255, 255", "screen", Math.min(0.22, a.fade / 500));
 
   const filter = [
     `brightness(${brightness.toFixed(3)})`,
@@ -394,7 +543,8 @@ export function buildLayers(a: Adjustments): RenderLayers {
   return {
     filter,
     overlays,
-    grainOpacity: (a.grain / 100) * 0.35,
+    grainOpacity: (a.grain / 100) * 0.35 * (0.6 + a.grainRoughness / 125),
+    grainSize: 90 + a.grainSize * 1.4,
   };
 }
 

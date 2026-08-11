@@ -1,8 +1,14 @@
-import { useEffect, useRef, useState, type DragEvent, type ChangeEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type DragEvent,
+  type ChangeEvent,
+} from "react";
 import { toast } from "sonner";
 import {
   AlertTriangle,
-  ChevronDown,
   Columns2,
   Download,
   ImagePlus,
@@ -18,6 +24,7 @@ import { ImageStage, useImageAspect } from "./ImageStage";
 import { ImageTray } from "./ImageTray";
 import { AdjustmentPanel } from "./AdjustmentPanel";
 import { PresetPicker } from "./PresetPicker";
+import { CollapsibleSection } from "./CollapsibleSection";
 import { MobileControlPanel } from "./MobileControlPanel";
 import {
   ACCEPTED_LABEL,
@@ -78,21 +85,6 @@ export function ColorGradingPage() {
     return () => mql.removeEventListener("change", sync);
   }, []);
   const dropRef = useRef<HTMLDivElement>(null);
-  const centerRef = useRef<HTMLDivElement>(null);
-  const [centerH, setCenterH] = useState<number | null>(null);
-
-  useEffect(() => {
-    const el = centerRef.current;
-    if (!el || !isDesktop) {
-      setCenterH(null);
-      return;
-    }
-    const ro = new ResizeObserver(([entry]) => {
-      setCenterH((entry.target as HTMLElement).offsetHeight);
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [isDesktop]);
   const fileRef = useRef<HTMLInputElement>(null);
   const runSeq = useRef(0);
   const statesRef = useRef(states);
@@ -325,9 +317,7 @@ export function ColorGradingPage() {
       grouped={grouped}
       hideResetAll={grouped}
       openGroups={openGroups}
-      onToggleGroup={(gid) =>
-        setOpenGroups((prev) => ({ ...prev, [gid]: !(prev[gid] ?? gid === "color") }))
-      }
+      onToggleGroup={(gid) => setOpenGroups((prev) => ({ ...prev, [gid]: !prev[gid] }))}
     />
   );
 
@@ -378,7 +368,16 @@ export function ColorGradingPage() {
     </div>
   );
 
-  const presetsNode = <PresetPicker activeId={st.presetId} custom={custom} onPick={pickPreset} />;
+  const presetsNode = (
+    <CollapsibleSection
+      id="presets"
+      label="Presets"
+      open={presetsOpen}
+      onToggle={() => setPresetsOpen((v) => !v)}
+    >
+      <PresetPicker activeId={st.presetId} custom={custom} onPick={pickPreset} hideHeading />
+    </CollapsibleSection>
+  );
 
   const resultActions = (
     <div className="grid min-w-0 gap-2">
@@ -459,14 +458,23 @@ export function ColorGradingPage() {
           change previews instantly — nothing is uploaded until you generate.
         </p>
 
-        <div className="mt-6 grid w-full min-w-0 grid-cols-1 items-start gap-4 lg:grid-cols-[120px_minmax(0,1fr)_320px] xl:grid-cols-[140px_minmax(0,1fr)_340px]">
+        {/* The shared parent owns the workspace height; every column stretches to it. */}
+        <div
+          className="mt-6 grid w-full min-w-0 grid-cols-1 items-start gap-4 lg:h-[var(--cg-workspace-h)] lg:min-h-[var(--cg-workspace-min-h)] lg:max-h-[900px] lg:items-stretch lg:grid-cols-[120px_minmax(0,1fr)_320px] xl:grid-cols-[140px_minmax(0,1fr)_340px]"
+          style={
+            {
+              "--cg-workspace-h": "clamp(560px, calc(100dvh - 220px), 900px)",
+              "--cg-workspace-min-h": "min(720px, calc(100dvh - 150px))",
+            } as CSSProperties
+          }
+        >
           {/* Left rail — uploaded images plus the compact add button */}
           <aside
             aria-label="Uploaded images"
-            className={`order-1 min-h-0 min-w-0 flex-col rounded-2xl p-2 sm:p-3 lg:order-none lg:flex lg:self-stretch ${
+            className={`order-1 min-h-0 min-w-0 flex-col rounded-2xl p-2 sm:p-3 lg:order-none lg:flex lg:h-full ${
               images.length > 0 ? "flex" : "hidden"
             }`}
-            style={{ background: "var(--tile)", height: centerH ? `${centerH}px` : undefined }}
+            style={{ background: "var(--tile)" }}
           >
             <h2 className="button-meta mb-2 hidden px-1 text-muted-foreground lg:block">Images</h2>
             <div className="min-w-0 lg:hidden">{tray("horizontal")}</div>
@@ -475,8 +483,7 @@ export function ColorGradingPage() {
 
           {/* Center workspace — preview / comparison only */}
           <div
-            ref={centerRef}
-            className="glass order-2 flex min-w-0 flex-col rounded-2xl p-3 sm:p-4 lg:order-none"
+            className="glass order-2 flex min-h-0 min-w-0 flex-col rounded-2xl p-3 sm:p-4 lg:order-none lg:h-full"
             style={{ boxShadow: "var(--shadow-card)" }}
           >
             <div
@@ -487,7 +494,7 @@ export function ColorGradingPage() {
               }}
               onDragLeave={() => setDragOver(false)}
               onDrop={onDrop}
-              className="relative flex min-h-[240px] w-full min-w-0 flex-1 items-center justify-center overflow-hidden rounded-xl sm:min-h-[320px] lg:min-h-[380px] lg:max-h-[760px]"
+              className="relative flex min-h-[240px] w-full min-w-0 flex-1 items-center justify-center overflow-hidden rounded-xl sm:min-h-[320px] lg:min-h-0"
               style={{
                 // In the empty state the workspace keeps one common background and
                 // no dashed frame; the dashed frame/tile only return after upload.
@@ -540,7 +547,7 @@ export function ColorGradingPage() {
               )}
 
               {active && st && showOriginal && (
-                <ImageStage ratio={ratio} maxHeight="min(72vh, 740px)">
+                <ImageStage ratio={ratio} maxHeight="100%">
                   <img
                     src={active.url}
                     alt="Original image"
@@ -551,7 +558,7 @@ export function ColorGradingPage() {
               )}
 
               {active && st && !showOriginal && !comparing && (
-                <ImageStage ratio={ratio} maxHeight="min(72vh, 740px)">
+                <ImageStage ratio={ratio} maxHeight="100%">
                   <GradedImage
                     src={aiUrl ?? active.url}
                     alt={active.file.name}
@@ -566,7 +573,7 @@ export function ColorGradingPage() {
                 <BeforeAfter
                   label="Compare original and graded image"
                   ratio={ratio}
-                  maxHeight="min(72vh, 740px)"
+                  maxHeight="100%"
                   position={st.comparePos}
                   onPositionChange={(pos) =>
                     activeId && patchState(activeId, (s) => ({ ...s, comparePos: pos }))
@@ -750,12 +757,9 @@ export function ColorGradingPage() {
           {/* Controls — desktop right rail, mobile compact collapsible panel */}
           {isDesktop ? (
             <aside
-              className="glass order-3 flex min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl lg:order-none lg:self-stretch"
+              className="glass order-3 flex min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl lg:order-none lg:h-full"
               style={{
                 boxShadow: "var(--shadow-card)",
-                // Identical geometry before and after upload: the rail always
-                // matches the center column height.
-                height: centerH ? `${centerH}px` : undefined,
               }}
             >
               <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overflow-x-hidden p-4 sm:p-5">
@@ -810,38 +814,7 @@ export function ColorGradingPage() {
                 }
               >
                 {promptBlockNode(true)}
-                <div
-                  className="min-w-0 overflow-hidden rounded-xl border"
-                  style={{ borderColor: "var(--card-border)", background: "var(--tile)" }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setPresetsOpen((v) => !v)}
-                    aria-expanded={presetsOpen}
-                    aria-controls="cg-mobile-presets"
-                    className="flex h-11 w-full items-center justify-between gap-2 px-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <span className="font-display truncate text-[12px] font-extrabold uppercase tracking-[0.14em] text-muted-foreground">
-                      Presets
-                    </span>
-                    <ChevronDown
-                      size={15}
-                      strokeWidth={2}
-                      aria-hidden
-                      className={`shrink-0 text-muted-foreground transition-transform ${presetsOpen ? "rotate-180" : ""}`}
-                    />
-                  </button>
-                  {presetsOpen && (
-                    <div id="cg-mobile-presets" className="px-2 pb-2">
-                      <PresetPicker
-                        activeId={st?.presetId ?? null}
-                        custom={custom}
-                        onPick={pickPreset}
-                        hideHeading
-                      />
-                    </div>
-                  )}
-                </div>
+                {presetsNode}
                 {adjustmentsNode(true)}
                 {errorBlock}
               </MobileControlPanel>

@@ -38,6 +38,7 @@ export function GradedImage({ src, alt, adjustments, className, imgClassName }: 
           className="pointer-events-none absolute inset-0"
           style={{
             backgroundImage: GRAIN_URL,
+            backgroundSize: `${layers.grainSize}px ${layers.grainSize}px`,
             opacity: layers.grainOpacity,
             mixBlendMode: "overlay",
           }}

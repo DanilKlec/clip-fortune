@@ -1,6 +1,7 @@
-import { ChevronDown, Info, RotateCcw } from "lucide-react";
+import { Info, RotateCcw } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { CollapsibleSection } from "./CollapsibleSection";
 import {
   ADJUSTMENTS,
   NEUTRAL,
@@ -25,15 +26,22 @@ interface Props {
   onToggleGroup?: (id: string) => void;
 }
 
-/** Group layout used by the mobile panel — every existing effect stays reachable. */
-const GROUPS: { id: string; label: string; keys: AdjustmentKey[] }[] = [
+/** Purpose-based groups — every parameter appears exactly once. */
+const GROUPS: {
+  id: string;
+  label: string;
+  keys: AdjustmentKey[];
+  /** Effect groups get a master switch in the header. */
+  effect?: boolean;
+  /** Short in-group labels, e.g. "Amount" instead of "Bloom". */
+  labels?: Partial<Record<AdjustmentKey, string>>;
+}[] = [
   {
     id: "color",
     label: "Color Correct",
     keys: [
       "temperature",
       "tint",
-      "exposure",
       "contrast",
       "saturation",
       "highlights",
@@ -43,8 +51,40 @@ const GROUPS: { id: string; label: string; keys: AdjustmentKey[] }[] = [
       "splitTone",
     ],
   },
-  { id: "details", label: "Details", keys: ["sharpness", "soften"] },
-  { id: "effects", label: "Effects", keys: ["bloom", "halation", "lensHaze", "grain"] },
+  { id: "exposure", label: "Exposure", keys: ["exposure", "gamma", "fade"] },
+  {
+    id: "details",
+    label: "Soften Details",
+    keys: ["sharpness", "clarity", "soften", "texture"],
+  },
+  {
+    id: "bloom",
+    label: "Bloom",
+    effect: true,
+    keys: ["bloom", "bloomThreshold", "bloomRadius"],
+    labels: { bloom: "Amount" },
+  },
+  {
+    id: "halation",
+    label: "Halation",
+    effect: true,
+    keys: ["halation", "halationRadius", "halationWarmth"],
+    labels: { halation: "Amount" },
+  },
+  {
+    id: "haze",
+    label: "Lens Haze",
+    effect: true,
+    keys: ["lensHaze", "hazeDensity", "hazeTint"],
+    labels: { lensHaze: "Amount" },
+  },
+  {
+    id: "grain",
+    label: "Film Grain",
+    effect: true,
+    keys: ["grain", "grainSize", "grainRoughness"],
+    labels: { grain: "Amount" },
+  },
 ];
 
 export function AdjustmentPanel({
@@ -60,8 +100,9 @@ export function AdjustmentPanel({
   openGroups,
   onToggleGroup,
 }: Props) {
-  const rowFor = (key: AdjustmentKey) => {
+  const rowFor = (key: AdjustmentKey, labelOverride?: string) => {
     const spec = ADJUSTMENTS.find((s) => s.key === key)!;
+    const label = labelOverride ?? spec.label;
     const value = values[spec.key];
     const changed = value !== NEUTRAL[spec.key];
     const on = enabled[spec.key];
@@ -76,7 +117,7 @@ export function AdjustmentPanel({
           checked={on}
           disabled={disabled}
           onCheckedChange={(next) => onToggle(spec.key, next)}
-          aria-label={`${on ? "Disable" : "Enable"} ${spec.label}`}
+          aria-label={`${on ? "Disable" : "Enable"} ${label}`}
           className="cg-switch"
         />
         <div
@@ -102,8 +143,8 @@ export function AdjustmentPanel({
             <span
               className={`flex min-w-0 items-center gap-1 truncate text-[12px] font-semibold ${on ? "text-foreground" : "text-muted-foreground"}`}
             >
-              <span className="truncate" title={spec.label}>
-                {spec.label}
+              <span className="truncate" title={label}>
+                {label}
               </span>
               {spec.hint && (
                 <span title={spec.hint} aria-hidden className="shrink-0 text-muted-foreground">
@@ -117,7 +158,7 @@ export function AdjustmentPanel({
           </div>
           <Slider
             id={`adj-${spec.key}`}
-            aria-label={`${spec.label}${spec.hint ? `: ${spec.hint}` : ""}`}
+            aria-label={`${label}${spec.hint ? `: ${spec.hint}` : ""}`}
             aria-valuetext={`${value}`}
             disabled={disabled || !on}
             min={spec.min}
@@ -130,7 +171,7 @@ export function AdjustmentPanel({
         </div>
         <button
           type="button"
-          aria-label={`Reset ${spec.label}`}
+          aria-label={`Reset ${label}`}
           onClick={() => onResetKey(spec.key)}
           disabled={disabled || !changed}
           className="cg-tray-btn flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -145,36 +186,25 @@ export function AdjustmentPanel({
     return (
       <div className="space-y-2">
         {GROUPS.map((group) => {
-          const open = openGroups?.[group.id] ?? group.id === "color";
+          const open = openGroups?.[group.id] ?? false;
+          const effectOn = group.effect ? group.keys.some((k) => enabled[k]) : undefined;
           return (
-            <div
+            <CollapsibleSection
               key={group.id}
-              className="min-w-0 overflow-hidden rounded-xl border"
-              style={{ borderColor: "var(--card-border)", background: "var(--tile)" }}
+              id={group.id}
+              label={group.label}
+              open={open}
+              onToggle={() => onToggleGroup?.(group.id)}
+              disabled={disabled}
+              effectOn={effectOn}
+              onEffectToggle={
+                group.effect
+                  ? (next) => group.keys.forEach((k) => onToggle(k, next))
+                  : undefined
+              }
             >
-              <button
-                type="button"
-                onClick={() => onToggleGroup?.(group.id)}
-                aria-expanded={open}
-                aria-controls={`cg-group-${group.id}`}
-                className="flex h-11 w-full items-center justify-between gap-2 px-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <span className="font-display truncate text-[12px] font-extrabold uppercase tracking-[0.14em] text-muted-foreground">
-                  {group.label}
-                </span>
-                <ChevronDown
-                  size={15}
-                  strokeWidth={2}
-                  aria-hidden
-                  className={`shrink-0 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
-                />
-              </button>
-              {open && (
-                <div id={`cg-group-${group.id}`} className="space-y-2 px-2 pb-2">
-                  {group.keys.map(rowFor)}
-                </div>
-              )}
-            </div>
+              {group.keys.map((k) => rowFor(k, group.labels?.[k]))}
+            </CollapsibleSection>
           );
         })}
       </div>
