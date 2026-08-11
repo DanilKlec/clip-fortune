@@ -44,12 +44,6 @@ export function ThreeSteps() {
                 className="h-[150px] w-full object-cover sm:h-[170px]"
               />
             </div>
-            <div className="mt-4 flex items-center gap-3">
-              <span
-                className="flex h-11 w-11 items-center justify-center rounded-full"
-                style={{ background: "var(--volt-dim)" }}
-              ></span>
-            </div>
             <h3 className="mt-4 font-display text-[22px] font-extrabold uppercase leading-[0.95] tracking-[-0.02em] text-foreground">
               {s.title}
             </h3>
