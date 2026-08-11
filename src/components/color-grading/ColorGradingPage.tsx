@@ -550,7 +550,7 @@ export function ColorGradingPage() {
               )}
 
               {active && st && showOriginal && (
-                <ImageStage ratio={ratio} maxHeight="min(72vh, 740px)">
+                <ImageStage ratio={ratio} maxHeight="100%">
                   <img
                     src={active.url}
                     alt="Original image"
@@ -561,7 +561,7 @@ export function ColorGradingPage() {
               )}
 
               {active && st && !showOriginal && !comparing && (
-                <ImageStage ratio={ratio} maxHeight="min(72vh, 740px)">
+                <ImageStage ratio={ratio} maxHeight="100%">
                   <GradedImage
                     src={aiUrl ?? active.url}
                     alt={active.file.name}
@@ -576,7 +576,7 @@ export function ColorGradingPage() {
                 <BeforeAfter
                   label="Compare original and graded image"
                   ratio={ratio}
-                  maxHeight="min(72vh, 740px)"
+                  maxHeight="100%"
                   position={st.comparePos}
                   onPositionChange={(pos) =>
                     activeId && patchState(activeId, (s) => ({ ...s, comparePos: pos }))
