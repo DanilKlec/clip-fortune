@@ -20,16 +20,34 @@ function describe(key: keyof Adjustments, v: number): string | null {
   switch (key) {
     case "temperature":
       return `Temperature: ${s} ${v > 0 ? "warmer" : "cooler"} white balance (${v})`;
+    case "tint":
+      return `Tint: ${s} ${v > 0 ? "magenta" : "green"} tint (${v})`;
     case "contrast":
       return `Contrast: ${s} ${v > 0 ? "stronger" : "softer"} contrast (${v})`;
     case "saturation":
       return `Saturation: ${s} ${v > 0 ? "more vivid" : "more muted"} colors (${v})`;
     case "highlights":
       return `Highlights: ${s} ${v > 0 ? "brighter, lifted" : "softer, rolled-off"} highlights (${v})`;
+    case "shadows":
+      return `Shadows: ${s} ${v > 0 ? "lifted, open" : "deeper, crushed"} shadows (${v})`;
+    case "whites":
+      return `Whites: ${s} ${v > 0 ? "brighter" : "pulled back"} white point (${v})`;
+    case "blacks":
+      return `Blacks: ${s} ${v > 0 ? "raised, matte" : "deeper"} black point (${v})`;
+    case "splitTone":
+      return `Split tone: ${s} ${v > 0 ? "warm highlights with cool shadows" : "cool highlights with warm shadows"} (${v})`;
     case "exposure":
       return `Exposure: ${s} ${v > 0 ? "brighter" : "darker"} overall exposure (${v})`;
     case "sharpness":
       return `Sharpness: ${s} increased detail clarity (${v})`;
+    case "soften":
+      return `Soften details: ${s} diffused, softened fine detail (${v})`;
+    case "bloom":
+      return `Bloom: ${s} soft glow around bright areas (${v})`;
+    case "halation":
+      return `Halation: ${s} warm red halo around highlights (${v})`;
+    case "lensHaze":
+      return `Lens haze: ${s} hazy, lifted blacks like an uncoated lens (${v})`;
     case "grain":
       return `Film grain: ${s} visible film grain (${v})`;
     default:
