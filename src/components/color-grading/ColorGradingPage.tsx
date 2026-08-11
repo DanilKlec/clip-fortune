@@ -463,10 +463,10 @@ export function ColorGradingPage() {
           {/* Left rail — uploaded images plus the compact add button */}
           <aside
             aria-label="Uploaded images"
-            className={`order-1 min-h-0 min-w-0 flex-col rounded-2xl p-2 sm:p-3 lg:order-none lg:flex ${
+            className={`order-1 min-h-0 min-w-0 flex-col rounded-2xl p-2 sm:p-3 lg:order-none lg:flex lg:self-stretch ${
               images.length > 0 ? "flex" : "hidden"
             }`}
-            style={{ background: "var(--tile)" }}
+            style={{ background: "var(--tile)", height: centerH ? `${centerH}px` : undefined }}
           >
             <h2 className="button-meta mb-2 hidden px-1 text-muted-foreground lg:block">Images</h2>
             <div className="min-w-0 lg:hidden">{tray("horizontal")}</div>
