@@ -518,7 +518,7 @@ export function ColorGradingPage() {
               />
 
               {!active && (
-                <div className="flex w-full items-center justify-center px-3 py-3 sm:px-4 sm:py-8">
+                <div className="flex h-full w-full items-center justify-center px-3 py-3 sm:px-4 sm:py-8">
                   <div className="w-full max-w-[300px] text-center">
                     <img
                       src={demoImage}
