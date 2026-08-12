@@ -497,12 +497,10 @@ export function ColorGradingPage() {
               onDrop={onDrop}
               className="relative flex h-[40dvh] w-full min-w-0 items-center justify-center overflow-hidden rounded-xl sm:h-auto sm:min-h-[320px] lg:flex-1 lg:min-h-0"
               style={{
-                // In the empty state the workspace keeps one common background and
-                // no dashed frame; the dashed frame/tile only return after upload.
-                background: dragOver ? "var(--volt-dim)" : active ? "var(--tile)" : "transparent",
-                border: active
-                  ? `1.5px dashed ${dragOver ? "var(--volt)" : "var(--card-border)"}`
-                  : "none",
+                // Identical shell for empty and loaded states — only the inner
+                // content changes, so uploading never shifts the layout.
+                background: dragOver ? "var(--volt-dim)" : "var(--tile)",
+                border: `1.5px dashed ${dragOver ? "var(--volt)" : "var(--card-border)"}`,
               }}
             >
               <input
@@ -519,30 +517,28 @@ export function ColorGradingPage() {
 
               {!active && (
                 <>
-                  {/* Mobile — fill the whole photo block so it matches a loaded image */}
-                  <div className="relative flex h-full w-full items-center justify-center sm:hidden">
+                  {/* Mobile — compact content inside the same-sized block */}
+                  <div className="flex h-full w-full flex-col items-center justify-center gap-2 overflow-hidden px-4 py-3 text-center sm:hidden">
                     <img
                       src={demoImage}
                       alt="Example of a graded frame"
                       draggable={false}
-                      className="absolute inset-0 h-full w-full object-cover"
+                      className="max-h-[42%] w-auto max-w-[180px] rounded-lg object-contain"
                     />
-                    <div className="relative flex flex-col items-center gap-2 px-4 text-center">
-                      <h2 className="font-display text-[15px] font-extrabold uppercase tracking-[-0.01em] text-foreground drop-shadow">
-                        Color Grading
-                      </h2>
-                      <button
-                        type="button"
-                        onClick={() => fileRef.current?.click()}
-                        className="button-cta flex h-10 items-center justify-center gap-2 rounded-full px-5 text-[13px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      >
-                        <ImagePlus size={16} strokeWidth={2} />
-                        Upload media
-                      </button>
-                      <p className="text-[11px] font-medium text-muted-foreground/80">
-                        {ACCEPTED_LABEL} · up to {MAX_IMAGES} files
-                      </p>
-                    </div>
+                    <h2 className="font-display text-[14px] font-extrabold uppercase tracking-[-0.01em] text-foreground">
+                      Color Grading
+                    </h2>
+                    <button
+                      type="button"
+                      onClick={() => fileRef.current?.click()}
+                      className="button-cta flex h-9 items-center justify-center gap-2 rounded-full px-5 text-[13px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <ImagePlus size={16} strokeWidth={2} />
+                      Upload media
+                    </button>
+                    <p className="text-[10px] font-medium text-muted-foreground/75">
+                      {ACCEPTED_LABEL} · up to {MAX_IMAGES} files
+                    </p>
                   </div>
                   {/* Desktop — centered card */}
                   <div className="hidden w-full max-w-[300px] flex-col items-center justify-center px-4 py-8 text-center sm:flex">
