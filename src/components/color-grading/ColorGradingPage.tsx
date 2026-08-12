@@ -621,16 +621,16 @@ export function ColorGradingPage() {
             </div>
 
             {active && st && (
-              <div className="mt-3 flex w-full min-w-0 flex-col items-center gap-3 sm:grid sm:grid-cols-[1fr_auto_1fr] sm:items-center">
+              <div className="mt-2 flex w-full min-w-0 flex-row items-center gap-2 sm:mt-3 sm:grid sm:grid-cols-[1fr_auto_1fr] sm:gap-3">
                 {/* Left — Compare switch (view-only, never calls the API) */}
-                <div className="order-2 flex w-full justify-center sm:order-none sm:w-auto sm:justify-start">
+                <div className="order-2 flex shrink-0 justify-center sm:order-none sm:w-auto sm:justify-start">
                   <button
                     type="button"
                     role="switch"
                     aria-checked={comparing}
                     disabled={!canCompare}
                     onClick={toggleCompare}
-                    className="flex h-10 items-center gap-2 rounded-full border px-3 text-[13px] font-semibold transition-colors disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="flex h-9 items-center gap-1.5 rounded-full border px-2.5 text-[12px] font-semibold transition-colors disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-10 sm:gap-2 sm:px-3 sm:text-[13px]"
                     style={{
                       borderColor: comparing ? "var(--volt)" : "var(--card-border)",
                       background: comparing ? "var(--volt-dim)" : "var(--tile)",
@@ -641,7 +641,7 @@ export function ColorGradingPage() {
                     Compare
                     <span
                       aria-hidden
-                      className="relative ml-1 inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors"
+                      className="relative ml-0.5 hidden h-5 w-9 shrink-0 items-center rounded-full transition-colors sm:ml-1 sm:inline-flex"
                       style={{
                         background: comparing ? "var(--volt)" : "var(--card-border)",
                       }}
@@ -655,7 +655,7 @@ export function ColorGradingPage() {
                 </div>
 
                 {/* Center — Original / Edited / AI history switches */}
-                <div className="scrollbar-hide order-1 flex max-w-full items-end justify-start gap-3 overflow-x-auto px-1 sm:order-none sm:justify-center">
+                <div className="scrollbar-hide order-1 flex min-w-0 flex-1 items-end justify-start gap-2 overflow-x-auto px-1 sm:order-none sm:flex-none sm:justify-center sm:gap-3">
                   <button
                     type="button"
                     onClick={() => setView("original")}
@@ -663,7 +663,7 @@ export function ColorGradingPage() {
                     className="flex shrink-0 flex-col items-center gap-1 focus-visible:outline-none"
                   >
                     <span
-                      className="block h-12 w-12 overflow-hidden rounded-lg border-2 transition-colors sm:h-14 sm:w-14"
+                      className="block h-10 w-10 overflow-hidden rounded-lg border-2 transition-colors sm:h-14 sm:w-14"
                       style={{ borderColor: showOriginal ? "var(--volt)" : "var(--card-border)" }}
                     >
                       <img
@@ -674,7 +674,7 @@ export function ColorGradingPage() {
                       />
                     </span>
                     <span
-                      className="text-[11px] font-semibold"
+                      className="text-[10px] font-semibold sm:text-[11px]"
                       style={{ color: showOriginal ? "var(--volt)" : undefined }}
                     >
                       Original
@@ -689,7 +689,7 @@ export function ColorGradingPage() {
                     className="flex shrink-0 flex-col items-center gap-1 disabled:opacity-45 focus-visible:outline-none"
                   >
                     <span
-                      className="block h-12 w-12 overflow-hidden rounded-lg border-2 transition-colors sm:h-14 sm:w-14"
+                      className="block h-10 w-10 overflow-hidden rounded-lg border-2 transition-colors sm:h-14 sm:w-14"
                       style={{
                         borderColor:
                           !showOriginal && st.resultIndex === -1 && canCompare
@@ -706,7 +706,7 @@ export function ColorGradingPage() {
                       />
                     </span>
                     <span
-                      className="text-[11px] font-semibold"
+                      className="text-[10px] font-semibold sm:text-[11px]"
                       style={{
                         color:
                           !showOriginal && st.resultIndex === -1 && canCompare
@@ -730,7 +730,7 @@ export function ColorGradingPage() {
                         className="flex shrink-0 flex-col items-center gap-1 focus-visible:outline-none"
                       >
                         <span
-                          className="block h-12 w-12 overflow-hidden rounded-lg border-2 transition-colors sm:h-14 sm:w-14"
+                          className="block h-10 w-10 overflow-hidden rounded-lg border-2 transition-colors sm:h-14 sm:w-14"
                           style={{ borderColor: picked ? "var(--volt)" : "var(--card-border)" }}
                         >
                           <img
@@ -741,7 +741,7 @@ export function ColorGradingPage() {
                           />
                         </span>
                         <span
-                          className="text-[11px] font-semibold"
+                          className="text-[10px] font-semibold sm:text-[11px]"
                           style={{ color: picked ? "var(--volt)" : undefined }}
                         >
                           AI {i + 1}
