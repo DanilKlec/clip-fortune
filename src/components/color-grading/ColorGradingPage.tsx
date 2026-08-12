@@ -433,7 +433,7 @@ export function ColorGradingPage() {
             aria-hidden={!hasImages}
             inert={!hasImages ? true : undefined}
             className={`order-1 flex h-[96px] min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl p-2 sm:h-[112px] sm:p-3 lg:order-none lg:h-full ${
-              hasImages ? "lg:flex" : "pointer-events-none lg:hidden"
+              hasImages ? "" : "pointer-events-none select-none"
             }`}
             style={{ background: hasImages ? "var(--tile)" : "transparent" }}
           >
