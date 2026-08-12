@@ -241,7 +241,6 @@ export function ColorGradingPage() {
     }
   };
 
-  const hasImages = images.length > 0;
   const hasResult = Boolean(aiUrl);
 
   const download = async () => {
