@@ -9,7 +9,6 @@ import {
 import { toast } from "sonner";
 import {
   AlertTriangle,
-  ArrowRight,
   Columns2,
   Download,
   ImagePlus,
@@ -439,7 +438,7 @@ export function ColorGradingPage() {
 
   return (
     <div className="w-full">
-      <section className="page-shell mx-auto w-full max-w-[1600px] pt-4 sm:pt-8 md:pt-10">
+      <section className="page-shell mx-auto w-full max-w-[1600px] pt-2 sm:pt-8 md:pt-10">
         <nav
           aria-label="Breadcrumb"
           className="mb-3 hidden items-center gap-2 text-[13px] font-medium text-muted-foreground sm:mb-6 sm:flex"
@@ -462,7 +461,7 @@ export function ColorGradingPage() {
 
         {/* The shared parent owns the workspace height; every column stretches to it. */}
         <div
-          className="mt-3 grid w-full min-w-0 grid-cols-1 items-start gap-2.5 sm:mt-6 sm:gap-4 lg:h-[var(--cg-workspace-h)] lg:min-h-[var(--cg-workspace-min-h)] lg:max-h-[900px] lg:items-stretch lg:grid-cols-[120px_minmax(0,1fr)_320px] xl:grid-cols-[140px_minmax(0,1fr)_340px]"
+          className="mt-2 grid w-full min-w-0 grid-cols-1 items-start gap-2 sm:mt-6 sm:gap-4 lg:h-[var(--cg-workspace-h)] lg:min-h-[var(--cg-workspace-min-h)] lg:max-h-[900px] lg:items-stretch lg:grid-cols-[120px_minmax(0,1fr)_320px] xl:grid-cols-[140px_minmax(0,1fr)_340px]"
           style={
             {
               "--cg-workspace-h": "clamp(560px, calc(100dvh - 220px), 900px)",
@@ -780,29 +779,8 @@ export function ColorGradingPage() {
           ) : (
             <>
               {/* Mobile first screen — presets strip and the compact AI prompt row */}
-              <div className="order-3 min-w-0 space-y-2">
+              <div className="order-3 min-w-0">
                 <MobilePresetStrip activeId={st.presetId} custom={custom} onPick={pickPreset} />
-                <div className="flex min-w-0 items-center gap-2">
-                  <input
-                    type="text"
-                    inputMode="text"
-                    value={st.prompt}
-                    onChange={(e) => editActive(() => ({ prompt: e.target.value }))}
-                    onFocus={() => setPanelOpen(true)}
-                    placeholder="Describe your look…"
-                    aria-label="Describe your look"
-                    className="h-11 min-w-0 flex-1 rounded-full border px-4 text-[16px] font-medium text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
-                    style={{ background: "var(--tile)", borderColor: "var(--card-border)" }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setPanelOpen(true)}
-                    aria-label="Open AI prompt and Generate"
-                    className="button-cta flex h-11 w-11 shrink-0 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <ArrowRight size={18} strokeWidth={2} />
-                  </button>
-                </div>
               </div>
 
               <div className="order-4 min-w-0">
