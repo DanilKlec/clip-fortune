@@ -432,13 +432,15 @@ export function ColorGradingPage() {
             aria-label="Uploaded images"
             aria-hidden={!hasImages}
             inert={!hasImages ? true : undefined}
-            className={`order-1 min-h-0 min-w-0 flex-col rounded-2xl p-2 sm:p-3 lg:order-none lg:flex lg:h-full ${
-              images.length > 0 ? "flex" : "hidden"
+            className={`order-1 flex h-[96px] min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl p-2 sm:h-[112px] sm:p-3 lg:order-none lg:h-full ${
+              hasImages ? "lg:flex" : "pointer-events-none lg:hidden"
             }`}
-            style={{ background: "var(--tile)" }}
+            style={{ background: hasImages ? "var(--tile)" : "transparent" }}
           >
             <h2 className="button-meta mb-2 hidden px-1 text-muted-foreground lg:block">Images</h2>
-            <div className="min-w-0 lg:hidden">{tray("horizontal")}</div>
+            <div className={`min-w-0 lg:hidden ${hasImages ? "" : "invisible pointer-events-none select-none"}`}>
+              {tray("horizontal")}
+            </div>
             <div className="hidden min-h-0 flex-1 lg:flex lg:flex-col">{tray("vertical")}</div>
           </aside>
 
