@@ -437,11 +437,17 @@ export function ColorGradingPage() {
             }`}
             style={{ background: hasImages ? "var(--tile)" : "transparent" }}
           >
-            <h2 className="button-meta mb-2 hidden px-1 text-muted-foreground lg:block">Images</h2>
+            <h2
+              className={`button-meta mb-2 hidden px-1 text-muted-foreground lg:block ${hasImages ? "" : "invisible"}`}
+            >
+              Images
+            </h2>
             <div className={`min-w-0 lg:hidden ${hasImages ? "" : "invisible pointer-events-none select-none"}`}>
               {tray("horizontal")}
             </div>
-            <div className="hidden min-h-0 flex-1 lg:flex lg:flex-col">{tray("vertical")}</div>
+            <div className={`hidden min-h-0 flex-1 lg:flex lg:flex-col ${hasImages ? "" : "invisible"}`}>
+              {tray("vertical")}
+            </div>
           </aside>
 
           {/* Center workspace — preview / comparison only */}
