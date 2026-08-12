@@ -439,7 +439,7 @@ export function ColorGradingPage() {
 
   return (
     <div className="w-full">
-      <section className="page-shell mx-auto w-full max-w-[1600px] pt-4 sm:pt-8 md:pt-10">
+      <section className="page-shell mx-auto w-full max-w-[1600px] pt-2 sm:pt-8 md:pt-10">
         <nav
           aria-label="Breadcrumb"
           className="mb-3 hidden items-center gap-2 text-[13px] font-medium text-muted-foreground sm:mb-6 sm:flex"
