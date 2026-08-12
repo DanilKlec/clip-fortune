@@ -778,7 +778,34 @@ export function ColorGradingPage() {
               </div>
             </aside>
           ) : (
-            <div className="order-3 min-w-0">
+            <>
+              {/* Mobile first screen — presets strip and the compact AI prompt row */}
+              <div className="order-3 min-w-0 space-y-2">
+                <MobilePresetStrip activeId={st.presetId} custom={custom} onPick={pickPreset} />
+                <div className="flex min-w-0 items-center gap-2">
+                  <input
+                    type="text"
+                    inputMode="text"
+                    value={st.prompt}
+                    onChange={(e) => editActive(() => ({ prompt: e.target.value }))}
+                    onFocus={() => setPanelOpen(true)}
+                    placeholder="Describe your look…"
+                    aria-label="Describe your look"
+                    className="h-11 min-w-0 flex-1 rounded-full border px-4 text-[16px] font-medium text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                    style={{ background: "var(--tile)", borderColor: "var(--card-border)" }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setPanelOpen(true)}
+                    aria-label="Open AI prompt and Generate"
+                    className="button-cta flex h-11 w-11 shrink-0 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <ArrowRight size={18} strokeWidth={2} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="order-4 min-w-0">
               <MobileControlPanel
                 open={panelOpen}
                 onToggle={() => setPanelOpen((v) => !v)}
@@ -816,11 +843,11 @@ export function ColorGradingPage() {
                 }
               >
                 {promptBlockNode(true)}
-                {presetsNode}
                 {adjustmentsNode(true)}
                 {errorBlock}
               </MobileControlPanel>
-            </div>
+              </div>
+            </>
           )}
         </div>
       </section>
