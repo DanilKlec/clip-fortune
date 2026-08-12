@@ -439,30 +439,30 @@ export function ColorGradingPage() {
 
   return (
     <div className="w-full">
-      <section className="page-shell mx-auto w-full max-w-[1600px] pt-6 sm:pt-8 md:pt-10">
+      <section className="page-shell mx-auto w-full max-w-[1600px] pt-4 sm:pt-8 md:pt-10">
         <nav
           aria-label="Breadcrumb"
-          className="mb-4 flex items-center gap-2 text-[13px] font-medium text-muted-foreground sm:mb-6"
+          className="mb-3 hidden items-center gap-2 text-[13px] font-medium text-muted-foreground sm:mb-6 sm:flex"
         >
           <span className="transition-colors">Apps</span>
           <span aria-hidden>/</span>
           <span className="text-foreground">AI Color Grading</span>
         </nav>
 
-        <h1 className="font-display text-[clamp(1.75rem,6vw,2.75rem)] font-extrabold uppercase leading-[0.95] tracking-[-0.02em] text-foreground [text-wrap:balance]">
+        <h1 className="font-display text-[clamp(1.35rem,5.5vw,2.75rem)] font-extrabold uppercase leading-[0.95] tracking-[-0.02em] text-foreground [text-wrap:balance]">
           AI Color{" "}
           <span className="bg-gradient-to-b from-volt to-volt/60 bg-clip-text text-transparent">
             Grading
           </span>
         </h1>
-        <p className="mt-3 max-w-2xl text-[14px] font-medium leading-relaxed text-muted-foreground sm:text-[15px]">
+        <p className="mt-3 hidden max-w-2xl text-[14px] font-medium leading-relaxed text-muted-foreground sm:block sm:text-[15px]">
           Drop your stills, dial in the look with live controls, and export a cinematic grade. Every
           change previews instantly — nothing is uploaded until you generate.
         </p>
 
         {/* The shared parent owns the workspace height; every column stretches to it. */}
         <div
-          className="mt-6 grid w-full min-w-0 grid-cols-1 items-start gap-4 lg:h-[var(--cg-workspace-h)] lg:min-h-[var(--cg-workspace-min-h)] lg:max-h-[900px] lg:items-stretch lg:grid-cols-[120px_minmax(0,1fr)_320px] xl:grid-cols-[140px_minmax(0,1fr)_340px]"
+          className="mt-3 grid w-full min-w-0 grid-cols-1 items-start gap-2.5 sm:mt-6 sm:gap-4 lg:h-[var(--cg-workspace-h)] lg:min-h-[var(--cg-workspace-min-h)] lg:max-h-[900px] lg:items-stretch lg:grid-cols-[120px_minmax(0,1fr)_320px] xl:grid-cols-[140px_minmax(0,1fr)_340px]"
           style={
             {
               "--cg-workspace-h": "clamp(560px, calc(100dvh - 220px), 900px)",
