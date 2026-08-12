@@ -462,7 +462,7 @@ export function ColorGradingPage() {
 
         {/* The shared parent owns the workspace height; every column stretches to it. */}
         <div
-          className="mt-3 grid w-full min-w-0 grid-cols-1 items-start gap-2.5 sm:mt-6 sm:gap-4 lg:h-[var(--cg-workspace-h)] lg:min-h-[var(--cg-workspace-min-h)] lg:max-h-[900px] lg:items-stretch lg:grid-cols-[120px_minmax(0,1fr)_320px] xl:grid-cols-[140px_minmax(0,1fr)_340px]"
+          className="mt-2 grid w-full min-w-0 grid-cols-1 items-start gap-2 sm:mt-6 sm:gap-4 lg:h-[var(--cg-workspace-h)] lg:min-h-[var(--cg-workspace-min-h)] lg:max-h-[900px] lg:items-stretch lg:grid-cols-[120px_minmax(0,1fr)_320px] xl:grid-cols-[140px_minmax(0,1fr)_340px]"
           style={
             {
               "--cg-workspace-h": "clamp(560px, calc(100dvh - 220px), 900px)",
