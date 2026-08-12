@@ -495,7 +495,7 @@ export function ColorGradingPage() {
               }}
               onDragLeave={() => setDragOver(false)}
               onDrop={onDrop}
-              className="relative flex max-h-[40dvh] min-h-[170px] w-full min-w-0 flex-1 items-center justify-center overflow-hidden rounded-xl sm:max-h-none sm:min-h-[320px] lg:min-h-0"
+              className="relative flex h-[40dvh] w-full min-w-0 items-center justify-center overflow-hidden rounded-xl sm:h-auto sm:min-h-[320px] lg:flex-1 lg:min-h-0"
               style={{
                 // In the empty state the workspace keeps one common background and
                 // no dashed frame; the dashed frame/tile only return after upload.
@@ -518,7 +518,7 @@ export function ColorGradingPage() {
               />
 
               {!active && (
-                <div className="flex w-full items-center justify-center px-3 py-3 sm:px-4 sm:py-8">
+                <div className="flex h-full w-full items-center justify-center px-3 py-3 sm:px-4 sm:py-8">
                   <div className="w-full max-w-[300px] text-center">
                     <img
                       src={demoImage}
