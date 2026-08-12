@@ -9,6 +9,7 @@ import {
 import { toast } from "sonner";
 import {
   AlertTriangle,
+  ArrowRight,
   Columns2,
   Download,
   ImagePlus,
@@ -24,6 +25,7 @@ import { ImageStage, useImageAspect } from "./ImageStage";
 import { ImageTray } from "./ImageTray";
 import { AdjustmentPanel } from "./AdjustmentPanel";
 import { PresetPicker } from "./PresetPicker";
+import { MobilePresetStrip } from "./MobilePresetStrip";
 import { CollapsibleSection } from "./CollapsibleSection";
 import { MobileControlPanel } from "./MobileControlPanel";
 import {
