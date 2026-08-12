@@ -9,6 +9,7 @@ import {
 import { toast } from "sonner";
 import {
   AlertTriangle,
+  ArrowRight,
   Columns2,
   Download,
   ImagePlus,
@@ -24,6 +25,7 @@ import { ImageStage, useImageAspect } from "./ImageStage";
 import { ImageTray } from "./ImageTray";
 import { AdjustmentPanel } from "./AdjustmentPanel";
 import { PresetPicker } from "./PresetPicker";
+import { MobilePresetStrip } from "./MobilePresetStrip";
 import { CollapsibleSection } from "./CollapsibleSection";
 import { MobileControlPanel } from "./MobileControlPanel";
 import {
@@ -437,30 +439,30 @@ export function ColorGradingPage() {
 
   return (
     <div className="w-full">
-      <section className="page-shell mx-auto w-full max-w-[1600px] pt-6 sm:pt-8 md:pt-10">
+      <section className="page-shell mx-auto w-full max-w-[1600px] pt-4 sm:pt-8 md:pt-10">
         <nav
           aria-label="Breadcrumb"
-          className="mb-4 flex items-center gap-2 text-[13px] font-medium text-muted-foreground sm:mb-6"
+          className="mb-3 hidden items-center gap-2 text-[13px] font-medium text-muted-foreground sm:mb-6 sm:flex"
         >
           <span className="transition-colors">Apps</span>
           <span aria-hidden>/</span>
           <span className="text-foreground">AI Color Grading</span>
         </nav>
 
-        <h1 className="font-display text-[clamp(1.75rem,6vw,2.75rem)] font-extrabold uppercase leading-[0.95] tracking-[-0.02em] text-foreground [text-wrap:balance]">
+        <h1 className="font-display text-[clamp(1.35rem,5.5vw,2.75rem)] font-extrabold uppercase leading-[0.95] tracking-[-0.02em] text-foreground [text-wrap:balance]">
           AI Color{" "}
           <span className="bg-gradient-to-b from-volt to-volt/60 bg-clip-text text-transparent">
             Grading
           </span>
         </h1>
-        <p className="mt-3 max-w-2xl text-[14px] font-medium leading-relaxed text-muted-foreground sm:text-[15px]">
+        <p className="mt-3 hidden max-w-2xl text-[14px] font-medium leading-relaxed text-muted-foreground sm:block sm:text-[15px]">
           Drop your stills, dial in the look with live controls, and export a cinematic grade. Every
           change previews instantly — nothing is uploaded until you generate.
         </p>
 
         {/* The shared parent owns the workspace height; every column stretches to it. */}
         <div
-          className="mt-6 grid w-full min-w-0 grid-cols-1 items-start gap-4 lg:h-[var(--cg-workspace-h)] lg:min-h-[var(--cg-workspace-min-h)] lg:max-h-[900px] lg:items-stretch lg:grid-cols-[120px_minmax(0,1fr)_320px] xl:grid-cols-[140px_minmax(0,1fr)_340px]"
+          className="mt-3 grid w-full min-w-0 grid-cols-1 items-start gap-2.5 sm:mt-6 sm:gap-4 lg:h-[var(--cg-workspace-h)] lg:min-h-[var(--cg-workspace-min-h)] lg:max-h-[900px] lg:items-stretch lg:grid-cols-[120px_minmax(0,1fr)_320px] xl:grid-cols-[140px_minmax(0,1fr)_340px]"
           style={
             {
               "--cg-workspace-h": "clamp(560px, calc(100dvh - 220px), 900px)",
@@ -483,7 +485,7 @@ export function ColorGradingPage() {
 
           {/* Center workspace — preview / comparison only */}
           <div
-            className="glass order-2 flex min-h-0 min-w-0 flex-col rounded-2xl p-3 sm:p-4 lg:order-none lg:h-full"
+            className="glass order-2 flex min-h-0 min-w-0 flex-col rounded-2xl p-2 sm:p-4 lg:order-none lg:h-full"
             style={{ boxShadow: "var(--shadow-card)" }}
           >
             <div
@@ -494,7 +496,7 @@ export function ColorGradingPage() {
               }}
               onDragLeave={() => setDragOver(false)}
               onDrop={onDrop}
-              className="relative flex min-h-[240px] w-full min-w-0 flex-1 items-center justify-center overflow-hidden rounded-xl sm:min-h-[320px] lg:min-h-0"
+              className="relative flex max-h-[40dvh] min-h-[170px] w-full min-w-0 flex-1 items-center justify-center overflow-hidden rounded-xl sm:max-h-none sm:min-h-[320px] lg:min-h-0"
               style={{
                 // In the empty state the workspace keeps one common background and
                 // no dashed frame; the dashed frame/tile only return after upload.
@@ -517,29 +519,29 @@ export function ColorGradingPage() {
               />
 
               {!active && (
-                <div className="flex w-full items-center justify-center px-4 py-8">
+                <div className="flex w-full items-center justify-center px-3 py-3 sm:px-4 sm:py-8">
                   <div className="w-full max-w-[300px] text-center">
                     <img
                       src={demoImage}
                       alt="Example of a graded frame"
                       draggable={false}
-                      className="h-[132px] w-full rounded-xl object-cover"
+                      className="h-[92px] w-full rounded-xl object-cover sm:h-[132px]"
                     />
-                    <h2 className="font-display mt-4 text-[17px] font-extrabold uppercase tracking-[-0.01em] text-foreground">
+                    <h2 className="font-display mt-3 text-[15px] font-extrabold uppercase tracking-[-0.01em] text-foreground sm:mt-4 sm:text-[17px]">
                       Color Grading
                     </h2>
-                    <p className="mx-auto mt-2 max-w-[240px] text-[13px] font-medium leading-relaxed text-muted-foreground">
+                    <p className="mx-auto mt-2 hidden max-w-[240px] text-[13px] font-medium leading-relaxed text-muted-foreground sm:block">
                       Upgraded tools, effortless control and cinematic looks — upload, tweak, done.
                     </p>
                     <button
                       type="button"
                       onClick={() => fileRef.current?.click()}
-                      className="button-cta mt-4 flex h-10 w-full items-center justify-center gap-2 rounded-full text-[13px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      className="button-cta mt-3 flex h-10 w-full items-center justify-center gap-2 rounded-full text-[13px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:mt-4"
                     >
                       <ImagePlus size={16} strokeWidth={2} />
                       Upload media
                     </button>
-                    <p className="mt-2 text-[11px] font-medium text-muted-foreground/75">
+                    <p className="mt-2 hidden text-[11px] font-medium text-muted-foreground/75 sm:block">
                       {ACCEPTED_LABEL} · up to {MAX_IMAGES} files
                     </p>
                   </div>
@@ -619,16 +621,16 @@ export function ColorGradingPage() {
             </div>
 
             {active && st && (
-              <div className="mt-3 flex w-full min-w-0 flex-col items-center gap-3 sm:grid sm:grid-cols-[1fr_auto_1fr] sm:items-center">
+              <div className="mt-2 flex w-full min-w-0 flex-row items-center gap-2 sm:mt-3 sm:grid sm:grid-cols-[1fr_auto_1fr] sm:gap-3">
                 {/* Left — Compare switch (view-only, never calls the API) */}
-                <div className="order-2 flex w-full justify-center sm:order-none sm:w-auto sm:justify-start">
+                <div className="order-2 flex shrink-0 justify-center sm:order-none sm:w-auto sm:justify-start">
                   <button
                     type="button"
                     role="switch"
                     aria-checked={comparing}
                     disabled={!canCompare}
                     onClick={toggleCompare}
-                    className="flex h-10 items-center gap-2 rounded-full border px-3 text-[13px] font-semibold transition-colors disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="flex h-9 items-center gap-1.5 rounded-full border px-2.5 text-[12px] font-semibold transition-colors disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-10 sm:gap-2 sm:px-3 sm:text-[13px]"
                     style={{
                       borderColor: comparing ? "var(--volt)" : "var(--card-border)",
                       background: comparing ? "var(--volt-dim)" : "var(--tile)",
@@ -639,7 +641,7 @@ export function ColorGradingPage() {
                     Compare
                     <span
                       aria-hidden
-                      className="relative ml-1 inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors"
+                      className="relative ml-0.5 hidden h-5 w-9 shrink-0 items-center rounded-full transition-colors sm:ml-1 sm:inline-flex"
                       style={{
                         background: comparing ? "var(--volt)" : "var(--card-border)",
                       }}
@@ -653,7 +655,7 @@ export function ColorGradingPage() {
                 </div>
 
                 {/* Center — Original / Edited / AI history switches */}
-                <div className="scrollbar-hide order-1 flex max-w-full items-end justify-start gap-3 overflow-x-auto px-1 sm:order-none sm:justify-center">
+                <div className="scrollbar-hide order-1 flex min-w-0 flex-1 items-end justify-start gap-2 overflow-x-auto px-1 sm:order-none sm:flex-none sm:justify-center sm:gap-3">
                   <button
                     type="button"
                     onClick={() => setView("original")}
@@ -661,7 +663,7 @@ export function ColorGradingPage() {
                     className="flex shrink-0 flex-col items-center gap-1 focus-visible:outline-none"
                   >
                     <span
-                      className="block h-12 w-12 overflow-hidden rounded-lg border-2 transition-colors sm:h-14 sm:w-14"
+                      className="block h-10 w-10 overflow-hidden rounded-lg border-2 transition-colors sm:h-14 sm:w-14"
                       style={{ borderColor: showOriginal ? "var(--volt)" : "var(--card-border)" }}
                     >
                       <img
@@ -672,7 +674,7 @@ export function ColorGradingPage() {
                       />
                     </span>
                     <span
-                      className="text-[11px] font-semibold"
+                      className="text-[10px] font-semibold sm:text-[11px]"
                       style={{ color: showOriginal ? "var(--volt)" : undefined }}
                     >
                       Original
@@ -687,7 +689,7 @@ export function ColorGradingPage() {
                     className="flex shrink-0 flex-col items-center gap-1 disabled:opacity-45 focus-visible:outline-none"
                   >
                     <span
-                      className="block h-12 w-12 overflow-hidden rounded-lg border-2 transition-colors sm:h-14 sm:w-14"
+                      className="block h-10 w-10 overflow-hidden rounded-lg border-2 transition-colors sm:h-14 sm:w-14"
                       style={{
                         borderColor:
                           !showOriginal && st.resultIndex === -1 && canCompare
@@ -704,7 +706,7 @@ export function ColorGradingPage() {
                       />
                     </span>
                     <span
-                      className="text-[11px] font-semibold"
+                      className="text-[10px] font-semibold sm:text-[11px]"
                       style={{
                         color:
                           !showOriginal && st.resultIndex === -1 && canCompare
@@ -728,7 +730,7 @@ export function ColorGradingPage() {
                         className="flex shrink-0 flex-col items-center gap-1 focus-visible:outline-none"
                       >
                         <span
-                          className="block h-12 w-12 overflow-hidden rounded-lg border-2 transition-colors sm:h-14 sm:w-14"
+                          className="block h-10 w-10 overflow-hidden rounded-lg border-2 transition-colors sm:h-14 sm:w-14"
                           style={{ borderColor: picked ? "var(--volt)" : "var(--card-border)" }}
                         >
                           <img
@@ -739,7 +741,7 @@ export function ColorGradingPage() {
                           />
                         </span>
                         <span
-                          className="text-[11px] font-semibold"
+                          className="text-[10px] font-semibold sm:text-[11px]"
                           style={{ color: picked ? "var(--volt)" : undefined }}
                         >
                           AI {i + 1}
@@ -776,7 +778,34 @@ export function ColorGradingPage() {
               </div>
             </aside>
           ) : (
-            <div className="order-3 min-w-0">
+            <>
+              {/* Mobile first screen — presets strip and the compact AI prompt row */}
+              <div className="order-3 min-w-0 space-y-2">
+                <MobilePresetStrip activeId={st.presetId} custom={custom} onPick={pickPreset} />
+                <div className="flex min-w-0 items-center gap-2">
+                  <input
+                    type="text"
+                    inputMode="text"
+                    value={st.prompt}
+                    onChange={(e) => editActive(() => ({ prompt: e.target.value }))}
+                    onFocus={() => setPanelOpen(true)}
+                    placeholder="Describe your look…"
+                    aria-label="Describe your look"
+                    className="h-11 min-w-0 flex-1 rounded-full border px-4 text-[16px] font-medium text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                    style={{ background: "var(--tile)", borderColor: "var(--card-border)" }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setPanelOpen(true)}
+                    aria-label="Open AI prompt and Generate"
+                    className="button-cta flex h-11 w-11 shrink-0 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <ArrowRight size={18} strokeWidth={2} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="order-4 min-w-0">
               <MobileControlPanel
                 open={panelOpen}
                 onToggle={() => setPanelOpen((v) => !v)}
@@ -814,11 +843,11 @@ export function ColorGradingPage() {
                 }
               >
                 {promptBlockNode(true)}
-                {presetsNode}
                 {adjustmentsNode(true)}
                 {errorBlock}
               </MobileControlPanel>
-            </div>
+              </div>
+            </>
           )}
         </div>
       </section>
