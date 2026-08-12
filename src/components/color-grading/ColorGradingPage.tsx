@@ -9,7 +9,6 @@ import {
 import { toast } from "sonner";
 import {
   AlertTriangle,
-  ArrowRight,
   Columns2,
   Download,
   ImagePlus,
