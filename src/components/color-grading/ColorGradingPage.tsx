@@ -322,7 +322,7 @@ export function ColorGradingPage() {
         onChange={(e) => editActive(() => ({ prompt: e.target.value }))}
         placeholder="Describe the color grade you want…"
         rows={3}
-        className="mt-3 w-full rounded-xl border text-[16px] sm:text-[15px]"
+        className="mt-3 w-full rounded-xl border text-[16px] placeholder:text-muted-foreground focus-visible:ring-2 sm:text-[15px]"
         style={{ background: "var(--tile)", borderColor: "var(--card-border)" }}
       />
       {withGenerate && <div className="mt-3">{generateButton}</div>}
@@ -617,14 +617,14 @@ export function ColorGradingPage() {
                     Compare
                     <span
                       aria-hidden
-                      className="relative ml-0.5 hidden h-5 w-9 shrink-0 items-center rounded-full transition-colors sm:ml-1 sm:inline-flex"
+                      className="relative ml-0.5 hidden h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-[180ms] sm:ml-1 sm:inline-flex"
                       style={{
-                        background: comparing ? "var(--volt)" : "var(--card-border)",
+                        background: comparing ? "var(--volt)" : "var(--input)",
                       }}
                     >
                       <span
-                        className="absolute h-4 w-4 rounded-full bg-background transition-transform"
-                        style={{ transform: `translateX(${comparing ? 18 : 2}px)` }}
+                        className="absolute h-5 w-5 rounded-full bg-background shadow-lg transition-transform duration-[180ms]"
+                        style={{ transform: `translateX(${comparing ? 22 : 2}px)` }}
                       />
                     </span>
                   </button>

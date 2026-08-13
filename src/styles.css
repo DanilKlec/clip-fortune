@@ -774,6 +774,7 @@
 .cg-tray-btn {
   flex: 0 0 auto;
   box-sizing: border-box;
+  position: relative;
   width: 22px;
   min-width: 22px;
   height: 22px;
@@ -784,9 +785,21 @@
     min-width: 22px;
     min-height: 22px;
   }
+  /* Invisible 44x44 touch target, centered on the 22px visual button. */
+  .cg-tray-btn::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 44px;
+    height: 44px;
+    transform: translate(-50%, -50%);
+    border-radius: 9999px;
+  }
 }
 
-/* Filled block slider: the whole rounded rectangle is the control. */
+/* Filled block slider: the whole rounded rectangle is the control,
+   with the design-system track + thumb rendered inside it. */
 .cg-slider {
   position: absolute;
   inset: 0;
@@ -795,6 +808,8 @@
   border-radius: inherit;
 }
 .cg-slider > span:first-of-type {
+  /* The filled block itself acts as the track; keep Radix's own track invisible
+     so the row height and the label stay untouched. */
   height: 100%;
   background: transparent;
   border-radius: inherit;
@@ -804,12 +819,13 @@
   background: transparent;
 }
 .cg-slider span[role="slider"] {
-  height: 100%;
-  width: 3px;
+  height: 20px;
+  width: 20px;
   border-radius: 9999px;
-  border: 0;
-  background: var(--volt);
-  box-shadow: none;
+  border: 2px solid var(--volt);
+  background: var(--background);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.35);
+  transition: border-color 150ms ease;
 }
 .cg-slider span[role="slider"]:focus-visible {
   outline: 2px solid var(--ring);
