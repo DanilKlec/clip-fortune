@@ -755,17 +755,17 @@
 .cg-switch {
   flex: 0 0 auto;
   box-sizing: border-box;
-  width: 36px;
-  min-width: 36px;
-  height: 20px;
-  min-height: 20px;
-  aspect-ratio: 36 / 20;
+  width: 44px;
+  min-width: 44px;
+  height: 24px;
+  min-height: 24px;
+  aspect-ratio: 44 / 24;
   border-radius: 9999px;
 }
 @media (pointer: coarse) {
   button.cg-switch {
-    min-width: 36px;
-    min-height: 20px;
+    min-width: 44px;
+    min-height: 24px;
   }
 }
 
