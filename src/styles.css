@@ -806,18 +806,17 @@
   height: 100%;
   width: 100%;
   border-radius: inherit;
-  display: flex;
-  align-items: center;
-  padding: 0 10px;
 }
 .cg-slider > span:first-of-type {
-  height: 8px;
-  border-radius: 9999px;
-  background: color-mix(in srgb, var(--secondary, hsl(232 14% 21%)) 70%, transparent);
-  overflow: hidden;
+  /* The filled block itself acts as the track; keep Radix's own track invisible
+     so the row height and the label stay untouched. */
+  height: 100%;
+  background: transparent;
+  border-radius: inherit;
+  overflow: visible;
 }
 .cg-slider > span:first-of-type > span {
-  background: var(--volt);
+  background: transparent;
 }
 .cg-slider span[role="slider"] {
   height: 20px;
@@ -825,7 +824,8 @@
   border-radius: 9999px;
   border: 2px solid var(--volt);
   background: var(--background);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.35);
+  transition: border-color 150ms ease;
 }
 .cg-slider span[role="slider"]:focus-visible {
   outline: 2px solid var(--ring);
