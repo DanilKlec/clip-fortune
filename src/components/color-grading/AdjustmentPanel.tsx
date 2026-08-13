@@ -152,7 +152,7 @@ export function AdjustmentPanel({
                 </span>
               )}
             </span>
-            <span className="shrink-0 text-[11px] font-bold tabular-nums text-muted-foreground">
+            <span className="font-mono shrink-0 text-[11px] font-medium tabular-nums text-muted-foreground">
               {on ? value : "off"}
             </span>
           </div>
