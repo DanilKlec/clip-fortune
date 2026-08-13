@@ -322,7 +322,7 @@ export function ColorGradingPage() {
         onChange={(e) => editActive(() => ({ prompt: e.target.value }))}
         placeholder="Describe the color grade you want…"
         rows={3}
-        className="mt-3 w-full rounded-xl border text-[16px] sm:text-[15px]"
+        className="mt-3 w-full rounded-xl border text-[16px] placeholder:text-muted-foreground focus-visible:ring-2 sm:text-[15px]"
         style={{ background: "var(--tile)", borderColor: "var(--card-border)" }}
       />
       {withGenerate && <div className="mt-3">{generateButton}</div>}
