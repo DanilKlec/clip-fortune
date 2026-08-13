@@ -774,10 +774,22 @@
 .cg-tray-btn {
   flex: 0 0 auto;
   box-sizing: border-box;
+  position: relative;
   width: 22px;
   min-width: 22px;
   height: 22px;
   min-height: 22px;
+}
+/* Invisible 44x44 hit area, centered on the 22px visual button. */
+.cg-tray-btn::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+  border-radius: 9999px;
 }
 @media (pointer: coarse) {
   button.cg-tray-btn {
@@ -786,30 +798,34 @@
   }
 }
 
-/* Filled block slider: the whole rounded rectangle is the control. */
+/* Filled block slider: the whole rounded rectangle is the control,
+   with the design-system track + thumb rendered inside it. */
 .cg-slider {
   position: absolute;
   inset: 0;
   height: 100%;
   width: 100%;
   border-radius: inherit;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
 }
 .cg-slider > span:first-of-type {
-  height: 100%;
-  background: transparent;
-  border-radius: inherit;
-  overflow: visible;
+  height: 8px;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--secondary, hsl(232 14% 21%)) 70%, transparent);
+  overflow: hidden;
 }
 .cg-slider > span:first-of-type > span {
-  background: transparent;
+  background: var(--volt);
 }
 .cg-slider span[role="slider"] {
-  height: 100%;
-  width: 3px;
+  height: 20px;
+  width: 20px;
   border-radius: 9999px;
-  border: 0;
-  background: var(--volt);
-  box-shadow: none;
+  border: 2px solid var(--volt);
+  background: var(--background);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.3);
 }
 .cg-slider span[role="slider"]:focus-visible {
   outline: 2px solid var(--ring);
