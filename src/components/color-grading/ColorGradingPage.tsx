@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type DragEvent, type ChangeEvent } from "react";
 import { toast } from "sonner";
-import { AlertTriangle, Columns2, Download, ImagePlus, Loader2, RefreshCw, RotateCcw, Sparkles } from "lucide-react";
+import { AlertTriangle, Columns2, Download, Loader2, RefreshCw, RotateCcw, Sparkles, UploadCloud } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { GradedImage } from "./GradedImage";
 import { BeforeAfter } from "./BeforeAfter";
@@ -38,7 +38,6 @@ import { ThreeSteps } from "./sections/ThreeSteps";
 import { SeeItInAction } from "./sections/SeeItInAction";
 import { BuiltForCinematicLooks } from "./sections/BuiltForCinematicLooks";
 import { ExploreMoreApps } from "@/components/virality/landing/ExploreMoreApps";
-import demoImage from "@/assets/grading-demo.jpg";
 
 export function ColorGradingPage() {
   const { images, active, activeId, activeState, states, setActiveId, add, remove, replace, patchState, addResult } =
@@ -452,7 +451,8 @@ export function ColorGradingPage() {
               }}
               onDragLeave={() => setDragOver(false)}
               onDrop={onDrop}
-              className="relative flex h-[40dvh] w-full min-w-0 items-center justify-center overflow-hidden rounded-xl sm:h-auto sm:min-h-[320px] lg:flex-1 lg:min-h-0"
+              onClick={active ? undefined : () => fileRef.current?.click()}
+              className={`relative flex h-[40dvh] w-full min-w-0 items-center justify-center overflow-hidden rounded-xl transition-colors sm:h-auto sm:min-h-[320px] lg:flex-1 lg:min-h-0 ${active ? "" : "cursor-pointer"}`}
               style={{
                 // Identical shell for empty and loaded states — only the inner
                 // content changes, so uploading never shifts the layout.
@@ -473,57 +473,20 @@ export function ColorGradingPage() {
               />
 
               {!active && (
-                <>
-                  {/* Mobile — compact content inside the same-sized block */}
-                  <div className="flex h-full w-full flex-col items-center justify-center gap-2 overflow-hidden px-4 py-3 text-center sm:hidden">
-                    <img
-                      src={demoImage}
-                      alt="Example of a graded frame"
-                      draggable={false}
-                      className="max-h-[42%] w-auto max-w-[180px] rounded-lg object-contain"
-                    />
-                    <h2 className="font-display text-[14px] font-extrabold uppercase tracking-[-0.01em] text-foreground">
-                      Color Grading
-                    </h2>
-                    <button
-                      type="button"
-                      onClick={() => fileRef.current?.click()}
-                      className="button-cta flex h-9 items-center justify-center gap-2 rounded-full px-5 text-[13px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      <ImagePlus size={16} strokeWidth={2} />
-                      Upload media
-                    </button>
-                    <p className="text-[10px] font-medium text-muted-foreground/75">
-                      {ACCEPTED_LABEL} · up to {MAX_IMAGES} files
-                    </p>
+                <div className="flex h-full w-full flex-col items-center justify-center px-4 py-6 text-center sm:px-6 sm:py-10">
+                  <div
+                    className="mx-auto flex h-12 w-12 items-center justify-center rounded-full"
+                    style={{ background: "var(--tile)" }}
+                  >
+                    <UploadCloud size={22} strokeWidth={1.5} className="text-volt" />
                   </div>
-                  {/* Desktop — centered card */}
-                  <div className="hidden w-full max-w-[300px] flex-col items-center justify-center px-4 py-8 text-center sm:flex">
-                    <img
-                      src={demoImage}
-                      alt="Example of a graded frame"
-                      draggable={false}
-                      className="h-[132px] w-full rounded-xl object-cover"
-                    />
-                    <h2 className="font-display mt-4 text-[17px] font-extrabold uppercase tracking-[-0.01em] text-foreground">
-                      Color Grading
-                    </h2>
-                    <p className="mx-auto mt-2 max-w-[240px] text-[13px] font-medium leading-relaxed text-muted-foreground">
-                      Upgraded tools, effortless control and cinematic looks — upload, tweak, done.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => fileRef.current?.click()}
-                      className="button-cta mt-4 flex h-10 w-full items-center justify-center gap-2 rounded-full text-[13px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      <ImagePlus size={16} strokeWidth={2} />
-                      Upload media
-                    </button>
-                    <p className="mt-2 text-[11px] font-medium text-muted-foreground/75">
-                      {ACCEPTED_LABEL} · up to {MAX_IMAGES} files
-                    </p>
+                  <div className="mt-4 text-[15px] font-medium text-foreground">
+                    Drop your images to start color grading
                   </div>
-                </>
+                  <div className="mt-1 text-[13px] font-medium text-muted-foreground">
+                    Upload from device · {ACCEPTED_LABEL} · up to {MAX_IMAGES} files
+                  </div>
+                </div>
               )}
 
               {active && st && showOriginal && (
