@@ -402,7 +402,9 @@ export function ColorGradingPage() {
           aria-label="Breadcrumb"
           className="mb-3 hidden items-center gap-2 text-[13px] font-medium text-muted-foreground sm:mb-6 sm:flex"
         >
-          <span className="transition-colors">Apps</span>
+          <a href="#explore-apps" className="transition-colors hover:text-foreground">
+            Apps
+          </a>
           <span aria-hidden>/</span>
           <span className="text-foreground">AI Color Grading</span>
         </nav>
