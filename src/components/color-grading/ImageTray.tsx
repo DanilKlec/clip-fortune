@@ -52,7 +52,9 @@ export function ImageTray({
           <img src={img.url} alt={img.file.name} className="h-full w-full object-cover" />
         </button>
         {active && (
-          <span className="badge-volt pointer-events-none absolute top-1 left-1/2 -translate-x-1/2">Main</span>
+          <span className="badge-volt pointer-events-none absolute top-1 left-1/2 -translate-x-1/2">
+            Main
+          </span>
         )}
         <div className="absolute -bottom-1 left-0 right-0 flex justify-between px-0.5">
           <button

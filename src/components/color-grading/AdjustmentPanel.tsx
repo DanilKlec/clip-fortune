@@ -198,9 +198,7 @@ export function AdjustmentPanel({
               disabled={disabled}
               effectOn={effectOn}
               onEffectToggle={
-                group.effect
-                  ? (next) => group.keys.forEach((k) => onToggle(k, next))
-                  : undefined
+                group.effect ? (next) => group.keys.forEach((k) => onToggle(k, next)) : undefined
               }
             >
               {group.keys.map((k) => rowFor(k, group.labels?.[k]))}

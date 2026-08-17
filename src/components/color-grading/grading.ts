@@ -330,12 +330,26 @@ export const PRESETS: Preset[] = [
   {
     id: "old-lens",
     name: "Old Lens",
-    values: p({ temperature: 20, contrast: -8, saturation: -22, highlights: 14, grain: 30, lensHaze: 28 }),
+    values: p({
+      temperature: 20,
+      contrast: -8,
+      saturation: -22,
+      highlights: 14,
+      grain: 30,
+      lensHaze: 28,
+    }),
   },
   {
     id: "16mm",
     name: "16mm",
-    values: p({ temperature: 10, contrast: 16, saturation: -10, grain: 55, sharpness: 20, halation: 24 }),
+    values: p({
+      temperature: 10,
+      contrast: 16,
+      saturation: -10,
+      grain: 55,
+      sharpness: 20,
+      halation: 24,
+    }),
   },
   {
     id: "warm-film",
@@ -355,7 +369,14 @@ export const PRESETS: Preset[] = [
   {
     id: "faded-film",
     name: "Faded Film",
-    values: p({ temperature: -6, contrast: -26, saturation: -18, highlights: 24, grain: 22, lensHaze: 34 }),
+    values: p({
+      temperature: -6,
+      contrast: -26,
+      saturation: -18,
+      highlights: 24,
+      grain: 22,
+      lensHaze: 34,
+    }),
   },
   {
     id: "high-contrast",
@@ -365,7 +386,15 @@ export const PRESETS: Preset[] = [
   {
     id: "golden-hour",
     name: "Golden Hour",
-    values: p({ temperature: 52, exposure: 10, contrast: 10, saturation: 18, highlights: 16, bloom: 26, halation: 22 }),
+    values: p({
+      temperature: 52,
+      exposure: 10,
+      contrast: 10,
+      saturation: 18,
+      highlights: 16,
+      bloom: 26,
+      halation: 22,
+    }),
   },
   {
     id: "bleach-bypass",
@@ -390,7 +419,14 @@ export const PRESETS: Preset[] = [
   {
     id: "vintage-fade",
     name: "Vintage Fade",
-    values: p({ temperature: 16, contrast: -30, saturation: -24, shadows: 26, blacks: 34, grain: 26 }),
+    values: p({
+      temperature: 16,
+      contrast: -30,
+      saturation: -24,
+      shadows: 26,
+      blacks: 34,
+      grain: 26,
+    }),
   },
   {
     id: "cyberpunk",
@@ -410,7 +446,15 @@ export const PRESETS: Preset[] = [
   {
     id: "pastel",
     name: "Pastel",
-    values: p({ temperature: 8, tint: 12, contrast: -22, saturation: -12, exposure: 14, shadows: 24, soften: 20 }),
+    values: p({
+      temperature: 8,
+      tint: 12,
+      contrast: -22,
+      saturation: -12,
+      exposure: 14,
+      shadows: 24,
+      soften: 20,
+    }),
   },
   {
     id: "matte",
@@ -425,7 +469,14 @@ export const PRESETS: Preset[] = [
   {
     id: "sunset",
     name: "Sunset",
-    values: p({ temperature: 46, tint: 20, contrast: 16, saturation: 26, highlights: 18, halation: 26 }),
+    values: p({
+      temperature: 46,
+      tint: 20,
+      contrast: 16,
+      saturation: 26,
+      highlights: 18,
+      halation: 26,
+    }),
   },
   {
     id: "clean-editorial",
@@ -511,8 +562,16 @@ export function buildLayers(a: Adjustments): RenderLayers {
     );
   }
   if (a.splitTone !== 0) {
-    push(a.splitTone > 0 ? WARM_TINT : COOL_TINT, "overlay", Math.min(0.3, Math.abs(a.splitTone) / 320));
-    push(a.splitTone > 0 ? COOL_TINT : WARM_TINT, "multiply", Math.min(0.16, Math.abs(a.splitTone) / 620));
+    push(
+      a.splitTone > 0 ? WARM_TINT : COOL_TINT,
+      "overlay",
+      Math.min(0.3, Math.abs(a.splitTone) / 320),
+    );
+    push(
+      a.splitTone > 0 ? COOL_TINT : WARM_TINT,
+      "multiply",
+      Math.min(0.16, Math.abs(a.splitTone) / 620),
+    );
   }
   if (bloomAmount > 0) push("255, 255, 255", "screen", Math.min(0.3, bloomAmount / 420));
   if (halationAmount > 0) {

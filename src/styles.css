@@ -769,6 +769,26 @@
   }
 }
 
+/* Dropzone (empty upload state) — DevKit §11: 2px dashed white/12, radius 14px,
+   hover / drag-over switch to the Volt border with a volt-dim wash. */
+.cg-dropzone {
+  border: 2px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  transition:
+    border-color 150ms ease-out,
+    background-color 150ms ease-out;
+}
+.cg-dropzone-interactive:hover,
+.cg-dropzone-interactive:focus-visible,
+.cg-dropzone-active {
+  border-color: var(--volt);
+  background-color: var(--volt-dim);
+}
+.cg-dropzone-interactive:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--volt);
+}
+
 /* Thumbnail action buttons (replace/remove): keep them small so they don't
    cover the photo on touch devices (the coarse-pointer rule forces 44x44). */
 .cg-tray-btn {
