@@ -452,12 +452,26 @@ export function ColorGradingPage() {
               onDragLeave={() => setDragOver(false)}
               onDrop={onDrop}
               onClick={active ? undefined : () => fileRef.current?.click()}
-              className={`relative flex h-[40dvh] w-full min-w-0 items-center justify-center overflow-hidden rounded-xl transition-colors sm:h-auto sm:min-h-[320px] lg:flex-1 lg:min-h-0 ${active ? "" : "cursor-pointer"}`}
+              onKeyDown={
+                active
+                  ? undefined
+                  : (e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        fileRef.current?.click();
+                      }
+                    }
+              }
+              role={active ? undefined : "button"}
+              tabIndex={active ? undefined : 0}
+              aria-label={active ? undefined : "Drop images or click to upload"}
+              className={`cg-dropzone relative flex h-[40dvh] w-full min-w-0 items-center justify-center overflow-hidden sm:h-auto sm:min-h-[320px] lg:flex-1 lg:min-h-0 ${
+                active ? "" : "cg-dropzone-interactive cursor-pointer"
+              } ${dragOver ? "cg-dropzone-active" : ""}`}
               style={{
                 // Identical shell for empty and loaded states — only the inner
                 // content changes, so uploading never shifts the layout.
-                background: dragOver ? "var(--volt-dim)" : "var(--tile)",
-                border: `1.5px dashed ${dragOver ? "var(--volt)" : "var(--card-border)"}`,
+                backgroundColor: "var(--tile)",
               }}
             >
               <input
@@ -478,13 +492,13 @@ export function ColorGradingPage() {
                     className="mx-auto flex h-12 w-12 items-center justify-center rounded-full"
                     style={{ background: "var(--tile)" }}
                   >
-                    <UploadCloud size={22} strokeWidth={1.5} className="text-volt" />
+                    <UploadCloud size={24} strokeWidth={1.5} className="text-volt" />
                   </div>
-                  <div className="mt-4 text-[15px] font-medium text-foreground">
-                    Drop your images to start color grading
+                  <div className="mt-4 text-[13px] font-medium text-foreground">
+                    Drop images or click to upload
                   </div>
-                  <div className="mt-1 text-[13px] font-medium text-muted-foreground">
-                    Upload from device · {ACCEPTED_LABEL} · up to {MAX_IMAGES} files
+                  <div className="font-mono mt-1 text-[11px] font-medium text-muted-foreground">
+                    {ACCEPTED_LABEL} · up to {MAX_IMAGES} files · max 20MB
                   </div>
                 </div>
               )}
