@@ -1,6 +1,22 @@
-import { useEffect, useRef, useState, type CSSProperties, type DragEvent, type ChangeEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type DragEvent,
+  type ChangeEvent,
+} from "react";
 import { toast } from "sonner";
-import { AlertTriangle, Columns2, Download, Loader2, RefreshCw, RotateCcw, Sparkles, UploadCloud } from "lucide-react";
+import {
+  AlertTriangle,
+  Columns2,
+  Download,
+  Loader2,
+  RefreshCw,
+  RotateCcw,
+  Sparkles,
+  UploadCloud,
+} from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { GradedImage } from "./GradedImage";
 import { BeforeAfter } from "./BeforeAfter";
@@ -40,8 +56,19 @@ import { BuiltForCinematicLooks } from "./sections/BuiltForCinematicLooks";
 import { ExploreMoreApps } from "@/components/virality/landing/ExploreMoreApps";
 
 export function ColorGradingPage() {
-  const { images, active, activeId, activeState, states, setActiveId, add, remove, replace, patchState, addResult } =
-    useImageLibrary();
+  const {
+    images,
+    active,
+    activeId,
+    activeState,
+    states,
+    setActiveId,
+    add,
+    remove,
+    replace,
+    patchState,
+    addResult,
+  } = useImageLibrary();
 
   const [dragOver, setDragOver] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
@@ -231,7 +258,9 @@ export function ColorGradingPage() {
       }
       addResult(id, res.imageUrl);
       patchState(id, (s) =>
-        s.run === run ? { ...s, status: "success", error: null, comparePos: 50, view: "edited" } : s,
+        s.run === run
+          ? { ...s, status: "success", error: null, comparePos: 50, view: "edited" }
+          : s,
       );
     } catch (err) {
       if (statesRef.current[id]?.run !== run) return;
@@ -299,7 +328,11 @@ export function ColorGradingPage() {
       onClick={() => void generate(activeId)}
       className="button-cta flex h-12 w-full items-center justify-center gap-2 rounded-full text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-45"
     >
-      {busy ? <Loader2 size={18} strokeWidth={2} className="animate-spin" /> : <Sparkles size={18} strokeWidth={2} />}
+      {busy ? (
+        <Loader2 size={18} strokeWidth={2} className="animate-spin" />
+      ) : (
+        <Sparkles size={18} strokeWidth={2} />
+      )}
       {busy ? "Generating…" : "Generate"}
     </button>
   );
@@ -336,7 +369,12 @@ export function ColorGradingPage() {
   );
 
   const presetsNode = (
-    <CollapsibleSection id="presets" label="Presets" open={presetsOpen} onToggle={() => setPresetsOpen((v) => !v)}>
+    <CollapsibleSection
+      id="presets"
+      label="Presets"
+      open={presetsOpen}
+      onToggle={() => setPresetsOpen((v) => !v)}
+    >
       <PresetPicker activeId={st.presetId} custom={custom} onPick={pickPreset} hideHeading />
     </CollapsibleSection>
   );
@@ -382,7 +420,9 @@ export function ColorGradingPage() {
     >
       <div className="flex min-w-0 items-start gap-2">
         <AlertTriangle size={16} strokeWidth={2} className="mt-0.5 shrink-0 text-destructive" />
-        <p className="min-w-0 flex-1 text-[13px] font-medium text-foreground">{st.error ?? "Generation failed"}</p>
+        <p className="min-w-0 flex-1 text-[13px] font-medium text-foreground">
+          {st.error ?? "Generation failed"}
+        </p>
       </div>
       <button
         type="button"
@@ -410,11 +450,14 @@ export function ColorGradingPage() {
         </nav>
 
         <h1 className="font-display text-[clamp(1.35rem,5.5vw,2.75rem)] font-extrabold uppercase leading-[0.95] tracking-[-0.02em] text-foreground [text-wrap:balance]">
-          AI Color <span className="bg-gradient-to-b from-volt to-volt/60 bg-clip-text text-transparent">Grading</span>
+          AI Color{" "}
+          <span className="bg-gradient-to-b from-volt to-volt/60 bg-clip-text text-transparent">
+            Grading
+          </span>
         </h1>
         <p className="mt-3 hidden max-w-2xl text-[14px] font-medium leading-relaxed text-muted-foreground sm:block sm:text-[15px]">
-          Drop your stills, dial in the look with live controls, and export a cinematic grade. Every change previews
-          instantly — nothing is uploaded until you generate.
+          Drop your stills, dial in the look with live controls, and export a cinematic grade. Every
+          change previews instantly — nothing is uploaded until you generate.
         </p>
 
         {/* The shared parent owns the workspace height; every column stretches to it. */}
@@ -534,7 +577,9 @@ export function ColorGradingPage() {
                   ratio={ratio}
                   maxHeight="100%"
                   position={st.comparePos}
-                  onPositionChange={(pos) => activeId && patchState(activeId, (s) => ({ ...s, comparePos: pos }))}
+                  onPositionChange={(pos) =>
+                    activeId && patchState(activeId, (s) => ({ ...s, comparePos: pos }))
+                  }
                   before={
                     <img
                       src={active.url}
@@ -621,7 +666,12 @@ export function ColorGradingPage() {
                       className="block h-10 w-10 overflow-hidden rounded-lg border-2 transition-colors sm:h-14 sm:w-14"
                       style={{ borderColor: showOriginal ? "var(--volt)" : "var(--card-border)" }}
                     >
-                      <img src={active.url} alt="Original" draggable={false} className="h-full w-full object-cover" />
+                      <img
+                        src={active.url}
+                        alt="Original"
+                        draggable={false}
+                        className="h-full w-full object-cover"
+                      />
                     </span>
                     <span
                       className="text-[10px] font-semibold sm:text-[11px]"
@@ -642,7 +692,9 @@ export function ColorGradingPage() {
                       className="block h-10 w-10 overflow-hidden rounded-lg border-2 transition-colors sm:h-14 sm:w-14"
                       style={{
                         borderColor:
-                          !showOriginal && st.resultIndex === -1 && canCompare ? "var(--volt)" : "var(--card-border)",
+                          !showOriginal && st.resultIndex === -1 && canCompare
+                            ? "var(--volt)"
+                            : "var(--card-border)",
                       }}
                     >
                       <GradedImage
@@ -656,7 +708,10 @@ export function ColorGradingPage() {
                     <span
                       className="text-[10px] font-semibold sm:text-[11px]"
                       style={{
-                        color: !showOriginal && st.resultIndex === -1 && canCompare ? "var(--volt)" : undefined,
+                        color:
+                          !showOriginal && st.resultIndex === -1 && canCompare
+                            ? "var(--volt)"
+                            : undefined,
                       }}
                     >
                       Edited
@@ -778,7 +833,9 @@ export function ColorGradingPage() {
 
       <ThreeSteps />
       <SeeItInAction />
-      <BuiltForCinematicLooks onCTA={() => dropRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })} />
+      <BuiltForCinematicLooks
+        onCTA={() => dropRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+      />
       <ExploreMoreApps />
     </div>
   );

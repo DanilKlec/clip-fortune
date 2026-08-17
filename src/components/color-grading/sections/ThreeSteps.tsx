@@ -26,11 +26,17 @@ export function ThreeSteps() {
     <section className="page-shell mx-auto w-full max-w-6xl py-12 sm:py-16 md:py-20">
       <h2 className="text-center font-display text-[clamp(1.5rem,5.5vw,2.75rem)] font-extrabold uppercase leading-[0.95] tracking-[-0.02em] text-foreground [text-wrap:balance]">
         Color grade your image in{" "}
-        <span className="bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">3 easy steps</span>
+        <span className="bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
+          3 easy steps
+        </span>
       </h2>
       <div className="mt-8 grid grid-cols-1 gap-4 sm:mt-10 md:grid-cols-3">
         {steps.map((s) => (
-          <div key={s.title} className="glass rounded-2xl p-5" style={{ boxShadow: "var(--shadow-card)" }}>
+          <div
+            key={s.title}
+            className="glass rounded-2xl p-5"
+            style={{ boxShadow: "var(--shadow-card)" }}
+          >
             <div className="overflow-hidden rounded-xl border border-white/10">
               <img
                 src={s.image}
