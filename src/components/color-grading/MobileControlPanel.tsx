@@ -36,8 +36,6 @@ export function MobileControlPanel({ open, onToggle, children, actions }: Props)
       className="glass flex min-w-0 flex-col overflow-hidden rounded-2xl"
       style={{
         boxShadow: "var(--shadow-card)",
-        maxHeight: open ? "75dvh" : undefined,
-        minHeight: 0,
       }}
       onKeyDown={(e) => {
         if (e.key === "Escape" && open) {
@@ -80,20 +78,14 @@ export function MobileControlPanel({ open, onToggle, children, actions }: Props)
         <>
           <div
             id={id}
-            className="min-h-0 flex-1 space-y-4 overflow-y-auto overflow-x-hidden border-t px-3 pb-4 pt-3"
-            style={{
-              borderColor: "var(--card-border)",
-              overscrollBehaviorY: "auto",
-              overscrollBehaviorX: "contain",
-              WebkitOverflowScrolling: "touch",
-              touchAction: "pan-y",
-            }}
+            className="space-y-4 border-t px-3 pb-4 pt-3"
+            style={{ borderColor: "var(--card-border)" }}
           >
             {children}
           </div>
 
           <div
-            className="flex shrink-0 items-center gap-2 border-t px-3 py-2.5"
+            className="flex items-center gap-2 border-t px-3 py-2.5"
             style={{ borderColor: "var(--card-border)", background: "var(--tile)" }}
           >
             {actions}
