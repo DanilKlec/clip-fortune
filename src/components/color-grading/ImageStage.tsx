@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode, type RefObject } from "react";
+import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 
 /** Reads the natural aspect ratio (w/h) of a source image. */
 export function useImageAspect(src?: string | null) {
@@ -36,16 +36,41 @@ interface Props {
  * the largest `contain` fit. Every layer inside it shares identical bounds.
  */
 export function ImageStage({ ratio, children, stageRef, className, maxHeight }: Props) {
-  // A percentage max-height needs a definite parent height; when a caller gives
-  // an explicit cap we mirror it into max-width so the ratio is never broken.
-  const cap = maxHeight ?? "100%";
-  const maxWidth = maxHeight && maxHeight !== "100%" ? `calc(${maxHeight} * ${ratio})` : "100%";
+  // The stage is measured in pixels: a percentage/aspect-ratio-only box keeps a
+  // definite width, so a tall image would overflow the (clipped) container and
+  // read as zoomed. Measuring gives an exact `contain` fit for every ratio.
+  const boxRef = useRef<HTMLDivElement>(null);
+  const [box, setBox] = useState({ w: 0, h: 0 });
+
+  useEffect(() => {
+    const el = boxRef.current;
+    if (!el) return;
+    const read = () => setBox({ w: el.clientWidth, h: el.clientHeight });
+    read();
+    const ro = new ResizeObserver(read);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const fit =
+    box.w > 0 && box.h > 0
+      ? (() => {
+          const w = Math.min(box.w, box.h * ratio);
+          return { width: `${w}px`, height: `${w / ratio}px` };
+        })()
+      : // Pre-measure / auto-height parents: fall back to a ratio box.
+        { width: "100%", aspectRatio: `${ratio}`, maxWidth: "100%", maxHeight: maxHeight ?? "100%" };
+
   return (
-    <div className="flex h-full w-full min-w-0 items-center justify-center">
+    <div
+      ref={boxRef}
+      className="flex h-full w-full min-w-0 items-center justify-center"
+      style={maxHeight && maxHeight !== "100%" ? { maxHeight } : undefined}
+    >
       <div
         ref={stageRef}
         className={`relative overflow-hidden rounded-xl ${className ?? ""}`}
-        style={{ width: "100%", aspectRatio: `${ratio}`, maxWidth, maxHeight: cap }}
+        style={fit}
       >
         {children}
       </div>
