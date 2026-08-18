@@ -842,13 +842,13 @@
   height: 20px;
   width: 20px;
   border-radius: 9999px;
-  border: 2px solid var(--volt);
+  border: 2px solid var(--slider-accent, var(--volt));
   background: var(--background);
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.35);
   transition: border-color 150ms ease;
 }
 .cg-slider span[role="slider"]:focus-visible {
-  outline: 2px solid var(--ring);
+  outline: 2px solid var(--slider-accent, var(--ring));
   outline-offset: 1px;
 }
 .cg-slider[data-disabled] span[role="slider"] {
