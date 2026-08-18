@@ -60,7 +60,7 @@ export function CollapsibleSection({
         )}
       </div>
       {open && (
-        <div id={`cg-group-${id}`} className="min-w-0 space-y-2 px-2 pb-2">
+        <div id={`cg-group-${id}`} className="min-w-0 space-y-3 px-2 pb-3">
           {children}
         </div>
       )}
