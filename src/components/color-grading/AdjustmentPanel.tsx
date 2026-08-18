@@ -96,14 +96,6 @@ const GROUPS: {
   },
 ];
 
-/** Low-opacity companion token for each accent, used for the filled block. */
-const ACCENT_DIM: Record<SliderVariant, string> = {
-  volt: "var(--volt-dim)",
-  primary: "var(--volt-dim)",
-  sky: "var(--sky-dim)",
-  plasma: "var(--plasma-dim)",
-};
-
 export function AdjustmentPanel({
   values,
   enabled,
@@ -123,79 +115,53 @@ export function AdjustmentPanel({
     const value = values[spec.key];
     const changed = value !== NEUTRAL[spec.key];
     const on = enabled[spec.key];
-    const bipolar = spec.min < 0;
-    const pct = ((value - spec.min) / (spec.max - spec.min)) * 100;
-    const originPct = bipolar ? 50 : 0;
-    const fillLeft = Math.min(originPct, pct);
-    const fillWidth = Math.abs(pct - originPct);
     return (
-      <div key={spec.key} className="flex min-w-0 items-center gap-1.5">
-        <Switch
-          checked={on}
-          disabled={disabled}
-          onCheckedChange={(next) => onToggle(spec.key, next)}
-          aria-label={`${on ? "Disable" : "Enable"} ${label}`}
-          className="cg-switch"
-        />
-        <div
-          className={`relative h-10 min-w-0 flex-1 overflow-hidden rounded-lg border ${on ? "" : "opacity-60"}`}
-          style={{ borderColor: "var(--card-border)", background: "var(--tile)" }}
-        >
+      <div key={spec.key} className={`min-w-0 space-y-1.5 ${on ? "" : "opacity-60"}`}>
+        <div className="flex min-w-0 items-center gap-1.5">
+          <Switch
+            checked={on}
+            disabled={disabled}
+            onCheckedChange={(next) => onToggle(spec.key, next)}
+            aria-label={`${on ? "Disable" : "Enable"} ${label}`}
+            className="cg-switch"
+          />
           <span
-            aria-hidden
-            className="pointer-events-none absolute inset-y-0"
-            style={{
-              left: `${fillLeft}%`,
-              width: `${fillWidth}%`,
-              background: on ? ACCENT_DIM[accent] : "var(--card-border)",
-            }}
-          />
-          {bipolar && (
-            <span
-              aria-hidden
-              className="pointer-events-none absolute inset-y-1 left-1/2 w-px -translate-x-1/2 bg-foreground/20"
-            />
-          )}
-          <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-between gap-1.5 px-2.5">
-            <span
-              className={`flex min-w-0 items-center gap-1 truncate text-[12px] font-semibold ${on ? "text-foreground" : "text-muted-foreground"}`}
-            >
-              <span className="truncate" title={label}>
-                {label}
+            className={`flex min-w-0 flex-1 items-center gap-1 text-[12px] font-semibold ${on ? "text-foreground" : "text-muted-foreground"}`}
+          >
+            <span className="truncate" title={label}>
+              {label}
+            </span>
+            {spec.hint && (
+              <span title={spec.hint} aria-hidden className="shrink-0 text-muted-foreground">
+                <Info size={11} strokeWidth={2} />
               </span>
-              {spec.hint && (
-                <span title={spec.hint} aria-hidden className="shrink-0 text-muted-foreground">
-                  <Info size={11} strokeWidth={2} />
-                </span>
-              )}
-            </span>
-            <span className="font-mono shrink-0 text-[11px] font-medium tabular-nums text-muted-foreground">
-              {on ? value : "off"}
-            </span>
-          </div>
-          <Slider
-            id={`adj-${spec.key}`}
-            aria-label={`${label}${spec.hint ? `: ${spec.hint}` : ""}`}
-            aria-valuetext={`${value}`}
-            disabled={disabled || !on}
-            min={spec.min}
-            max={spec.max}
-            step={spec.step}
-            value={[value]}
-            onValueChange={(v) => onChange(spec.key, v[0])}
-            variant={accent}
-            className="cg-slider"
-          />
+            )}
+          </span>
+          <span className="shrink-0 font-mono text-[11px] font-medium tabular-nums text-muted-foreground">
+            {on ? value : "off"}
+          </span>
+          <button
+            type="button"
+            aria-label={`Reset ${label}`}
+            onClick={() => onResetKey(spec.key)}
+            disabled={disabled || !changed}
+            className="cg-tray-btn flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <RotateCcw size={12} strokeWidth={2} />
+          </button>
         </div>
-        <button
-          type="button"
-          aria-label={`Reset ${label}`}
-          onClick={() => onResetKey(spec.key)}
-          disabled={disabled || !changed}
-          className="cg-tray-btn flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <RotateCcw size={12} strokeWidth={2} />
-        </button>
+        <Slider
+          id={`adj-${spec.key}`}
+          aria-label={`${label}${spec.hint ? `: ${spec.hint}` : ""}`}
+          aria-valuetext={`${value}`}
+          disabled={disabled || !on}
+          min={spec.min}
+          max={spec.max}
+          step={spec.step}
+          value={[value]}
+          onValueChange={(v) => onChange(spec.key, v[0])}
+          variant={accent}
+        />
       </div>
     );
   };
@@ -244,7 +210,7 @@ export function AdjustmentPanel({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-2">{ADJUSTMENTS.map((spec) => rowFor(spec.key))}</div>
+      <div className="grid grid-cols-1 gap-3">{ADJUSTMENTS.map((spec) => rowFor(spec.key))}</div>
     </div>
   );
 }
