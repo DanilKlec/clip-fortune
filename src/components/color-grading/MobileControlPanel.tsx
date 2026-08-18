@@ -81,7 +81,12 @@ export function MobileControlPanel({ open, onToggle, children, actions }: Props)
           <div
             id={id}
             className="min-h-0 flex-1 space-y-4 overflow-y-auto overflow-x-hidden border-t px-3 pb-4 pt-3"
-            style={{ borderColor: "var(--card-border)", overscrollBehavior: "contain" }}
+            style={{
+              borderColor: "var(--card-border)",
+              overscrollBehavior: "contain",
+              WebkitOverflowScrolling: "touch",
+              touchAction: "pan-y",
+            }}
           >
             {children}
           </div>
