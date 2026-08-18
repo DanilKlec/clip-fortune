@@ -1,5 +1,6 @@
 import { Info, RotateCcw } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import type { SliderVariant } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { CollapsibleSection } from "./CollapsibleSection";
 import {
@@ -31,6 +32,8 @@ const GROUPS: {
   id: string;
   label: string;
   keys: AdjustmentKey[];
+  /** Design-system accent used for the fill, thumb ring and focus ring. */
+  accent: SliderVariant;
   /** Effect groups get a master switch in the header. */
   effect?: boolean;
   /** Short in-group labels, e.g. "Amount" instead of "Bloom". */
@@ -39,6 +42,7 @@ const GROUPS: {
   {
     id: "color",
     label: "Color Correct",
+    accent: "volt",
     keys: [
       "temperature",
       "tint",
@@ -51,15 +55,17 @@ const GROUPS: {
       "splitTone",
     ],
   },
-  { id: "exposure", label: "Exposure", keys: ["exposure", "gamma", "fade"] },
+  { id: "exposure", label: "Exposure", accent: "sky", keys: ["exposure", "gamma", "fade"] },
   {
     id: "details",
     label: "Soften Details",
+    accent: "plasma",
     keys: ["sharpness", "clarity", "soften", "texture"],
   },
   {
     id: "bloom",
     label: "Bloom",
+    accent: "plasma",
     effect: true,
     keys: ["bloom", "bloomThreshold", "bloomRadius"],
     labels: { bloom: "Amount" },
@@ -67,6 +73,7 @@ const GROUPS: {
   {
     id: "halation",
     label: "Halation",
+    accent: "volt",
     effect: true,
     keys: ["halation", "halationRadius", "halationWarmth"],
     labels: { halation: "Amount" },
@@ -74,6 +81,7 @@ const GROUPS: {
   {
     id: "haze",
     label: "Lens Haze",
+    accent: "sky",
     effect: true,
     keys: ["lensHaze", "hazeDensity", "hazeTint"],
     labels: { lensHaze: "Amount" },
@@ -81,11 +89,20 @@ const GROUPS: {
   {
     id: "grain",
     label: "Film Grain",
+    accent: "volt",
     effect: true,
     keys: ["grain", "grainSize", "grainRoughness"],
     labels: { grain: "Amount" },
   },
 ];
+
+/** Low-opacity companion token for each accent, used for the filled block. */
+const ACCENT_DIM: Record<SliderVariant, string> = {
+  volt: "var(--volt-dim)",
+  primary: "var(--volt-dim)",
+  sky: "var(--sky-dim)",
+  plasma: "var(--plasma-dim)",
+};
 
 export function AdjustmentPanel({
   values,
@@ -100,7 +117,7 @@ export function AdjustmentPanel({
   openGroups,
   onToggleGroup,
 }: Props) {
-  const rowFor = (key: AdjustmentKey, labelOverride?: string) => {
+  const rowFor = (key: AdjustmentKey, labelOverride?: string, accent: SliderVariant = "volt") => {
     const spec = ADJUSTMENTS.find((s) => s.key === key)!;
     const label = labelOverride ?? spec.label;
     const value = values[spec.key];
@@ -130,7 +147,7 @@ export function AdjustmentPanel({
             style={{
               left: `${fillLeft}%`,
               width: `${fillWidth}%`,
-              background: on ? "var(--volt-dim)" : "var(--card-border)",
+              background: on ? ACCENT_DIM[accent] : "var(--card-border)",
             }}
           />
           {bipolar && (
@@ -166,6 +183,7 @@ export function AdjustmentPanel({
             step={spec.step}
             value={[value]}
             onValueChange={(v) => onChange(spec.key, v[0])}
+            variant={accent}
             className="cg-slider"
           />
         </div>
@@ -201,7 +219,7 @@ export function AdjustmentPanel({
                 group.effect ? (next) => group.keys.forEach((k) => onToggle(k, next)) : undefined
               }
             >
-              {group.keys.map((k) => rowFor(k, group.labels?.[k]))}
+              {group.keys.map((k) => rowFor(k, group.labels?.[k], group.accent))}
             </CollapsibleSection>
           );
         })}
