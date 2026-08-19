@@ -1,12 +1,9 @@
 import { buildLayers, type Adjustments } from "./grading";
-import { buildGradePrompt } from "./prompt";
 
-/** Single integration point — swap the mock for Fal.ai without UI changes. */
+/** AI request — images and the user prompt only. Manual settings never travel. */
 export interface ColorGradeRequest {
   images: File[];
   prompt: string;
-  presetId: string | null;
-  adjustments: Adjustments;
 }
 
 export interface ColorGradeResult {
@@ -15,6 +12,18 @@ export interface ColorGradeResult {
 }
 
 export type ColorGradeAdapter = (req: ColorGradeRequest) => Promise<ColorGradeResult>;
+
+const SYSTEM = `Apply professional color grading to image 1.
+
+Preserve the original composition, crop, camera angle, subject identity, facial features, body proportions, objects, background structure, logos and readable text. Do not add, remove or replace people or objects. Do not redesign the scene.
+
+Change only the color palette, white balance, exposure, contrast, saturation, highlights, sharpness, tonal response and film grain.`;
+
+/** The AI prompt is built from the user's text alone. */
+export function buildGradePrompt(userPrompt: string) {
+  const look = userPrompt.trim();
+  return look ? `${SYSTEM}\n\nRequested look: ${look}` : SYSTEM;
+}
 
 function loadImage(src: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
@@ -27,13 +36,10 @@ function loadImage(src: string) {
 }
 
 /**
- * Local stand-in for the future hosted grading API. Renders the current
- * adjustments onto a canvas and returns an object URL. Swapping this adapter
- * for a real API call requires no UI changes.
+ * Manual render — bakes the local live-preview adjustments into a JPEG in the
+ * browser. Used for downloading a manual result; never touches the AI API.
  */
-export const generateColorGradeMock: ColorGradeAdapter = async ({ images, adjustments }) => {
-  const file = images[0];
-  if (!file) throw new Error("No image selected");
+export async function renderManualGrade(file: File, adjustments: Adjustments): Promise<Blob> {
   const src = URL.createObjectURL(file);
   let img: HTMLImageElement;
   try {
@@ -41,7 +47,7 @@ export const generateColorGradeMock: ColorGradeAdapter = async ({ images, adjust
   } finally {
     URL.revokeObjectURL(src);
   }
-  const maxSide = 1600;
+  const maxSide = 2400;
   const scale = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
   const w = Math.max(1, Math.round(img.naturalWidth * scale));
   const h = Math.max(1, Math.round(img.naturalHeight * scale));
@@ -83,31 +89,23 @@ export const generateColorGradeMock: ColorGradeAdapter = async ({ images, adjust
     ctx.globalCompositeOperation = "source-over";
   }
 
-  // Simulated round-trip latency so the UI states are exercised realistically.
-  await new Promise((r) => setTimeout(r, 1200));
-
   const blob = await new Promise<Blob | null>((resolve) =>
     canvas.toBlob(resolve, "image/jpeg", 0.92),
   );
   if (!blob) throw new Error("Could not render the graded image");
-  return { imageUrl: URL.createObjectURL(blob) };
-};
+  return blob;
+}
 
 /**
- * Real generation: the browser posts the images and the composed prompt to the
+ * Real generation: the browser posts the original images and the prompt to the
  * server endpoint, which owns the Fal.ai credentials.
  */
-export const generateColorGradeFal: ColorGradeAdapter = async ({
-  images,
-  prompt,
-  presetId,
-  adjustments,
-}) => {
+export const generateColorGradeFal: ColorGradeAdapter = async ({ images, prompt }) => {
   const files = images.slice(0, 9);
   if (files.length === 0) throw new Error("No image selected");
 
   const form = new FormData();
-  form.append("prompt", buildGradePrompt(prompt, presetId, adjustments));
+  form.append("prompt", buildGradePrompt(prompt));
   for (const file of files) form.append("images", file, file.name);
 
   let res: Response;
