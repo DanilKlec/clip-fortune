@@ -56,7 +56,7 @@ export function ImageTray({
             Main
           </span>
         )}
-        <div className="absolute -bottom-1 left-0 right-0 flex justify-between px-0.5">
+        <div className="pointer-events-none absolute inset-x-1 bottom-1 flex justify-between">
           <button
             type="button"
             aria-label={`Replace image ${i + 1}`}
@@ -64,7 +64,7 @@ export function ImageTray({
               replacingId.current = img.id;
               replaceRef.current?.click();
             }}
-            className="cg-tray-btn flex h-[22px] w-[22px] items-center justify-center rounded-full border bg-background text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="cg-tray-btn pointer-events-auto flex h-[22px] w-[22px] items-center justify-center rounded-full border bg-background/90 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             style={{ borderColor: "var(--card-border)" }}
           >
             <RefreshCw size={11} strokeWidth={2} />
@@ -73,7 +73,7 @@ export function ImageTray({
             type="button"
             aria-label={`Remove image ${i + 1}`}
             onClick={() => onRemove(img.id)}
-            className="cg-tray-btn flex h-[22px] w-[22px] items-center justify-center rounded-full border bg-background text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="cg-tray-btn pointer-events-auto flex h-[22px] w-[22px] items-center justify-center rounded-full border bg-background/90 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             style={{ borderColor: "var(--card-border)" }}
           >
             <X size={11} strokeWidth={2} />
