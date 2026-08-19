@@ -83,6 +83,7 @@ export function ColorGradingPage() {
   const [panelOpen, setPanelOpen] = useState(false);
   // Sections start collapsed — sliders appear only when a section is expanded.
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({ color: false });
+  const [activeGroup, setActiveGroup] = useState("color");
 
   useEffect(() => {
     const mql = window.matchMedia("(min-width: 1024px)");
@@ -415,6 +416,9 @@ export function ColorGradingPage() {
       onResetAll={resetAll}
       grouped
       hideResetAll
+      tabbed={!isDesktop}
+      activeGroup={activeGroup}
+      onSelectGroup={setActiveGroup}
       openGroups={openGroups}
       onToggleGroup={(gid) => setOpenGroups((prev) => ({ ...prev, [gid]: !prev[gid] }))}
     />
@@ -822,6 +826,12 @@ export function ColorGradingPage() {
 
             {previewCard}
 
+            {!isDesktop && mode === "manual" && (
+              <div className="order-3 min-w-0 lg:hidden">
+                <MobilePresetStrip activeId={st.presetId} custom={custom} onPick={pickPreset} />
+              </div>
+            )}
+
             {isDesktop ? (
               <aside
                 className="glass order-3 flex min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl lg:order-none lg:h-full"
@@ -853,7 +863,7 @@ export function ColorGradingPage() {
                 )}
               </aside>
             ) : (
-              <div className="order-3 min-w-0">
+              <div className="order-4 min-w-0">
                 <MobileControlPanel
                   open={panelOpen}
                   onToggle={() => setPanelOpen((v) => !v)}
@@ -862,14 +872,7 @@ export function ColorGradingPage() {
                 >
                   {modeSwitch}
                   {mode === "manual" ? (
-                    <div className="min-w-0 space-y-3">
-                      <MobilePresetStrip
-                        activeId={st.presetId}
-                        custom={custom}
-                        onPick={pickPreset}
-                      />
-                      {adjustmentsNode}
-                    </div>
+                    <div className="min-w-0 space-y-3">{adjustmentsNode}</div>
                   ) : (
                     <div className="min-w-0">{aiPanel}</div>
                   )}

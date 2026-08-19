@@ -20,8 +20,8 @@ export function MobilePresetStrip({ activeId, onPick, custom = false }: Props) {
 
   return (
     <div
-      className="scrollbar-hide -mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1"
-      style={{ overscrollBehaviorX: "contain" }}
+      className="scrollbar-hide -mx-1 flex gap-2 overflow-x-auto px-1 pb-1"
+      style={{ scrollSnapType: "x proximity", touchAction: "pan-x pan-y" }}
       role="group"
       aria-label="Presets"
     >
@@ -29,7 +29,12 @@ export function MobilePresetStrip({ activeId, onPick, custom = false }: Props) {
         type="button"
         onClick={() => onPick(none)}
         aria-pressed={noneActive}
-        className="flex w-[68px] shrink-0 snap-start flex-col items-center gap-1 focus-visible:outline-none"
+        ref={(el) => {
+          if (noneActive && el)
+            el.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+        }}
+        style={{ scrollSnapAlign: "start" }}
+        className="flex w-[68px] shrink-0 flex-col items-center gap-1 focus-visible:outline-none"
       >
         <span
           className="flex h-[52px] w-full items-center justify-center rounded-lg border-2 transition-colors"
@@ -60,7 +65,12 @@ export function MobilePresetStrip({ activeId, onPick, custom = false }: Props) {
             type="button"
             onClick={() => onPick(preset)}
             aria-pressed={active}
-            className="flex w-[68px] shrink-0 snap-start flex-col items-center gap-1 focus-visible:outline-none"
+            ref={(el) => {
+              if (active && el)
+                el.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+            }}
+            style={{ scrollSnapAlign: "start" }}
+            className="flex w-[68px] shrink-0 flex-col items-center gap-1 focus-visible:outline-none"
           >
             <span
               className="block h-[52px] w-full overflow-hidden rounded-lg border-2 transition-colors"
