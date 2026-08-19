@@ -59,7 +59,12 @@ export function ImageStage({ ratio, children, stageRef, className, maxHeight }: 
           return { width: `${w}px`, height: `${w / ratio}px` };
         })()
       : // Pre-measure / auto-height parents: fall back to a ratio box.
-        { width: "100%", aspectRatio: `${ratio}`, maxWidth: "100%", maxHeight: maxHeight ?? "100%" };
+        {
+          width: "100%",
+          aspectRatio: `${ratio}`,
+          maxWidth: "100%",
+          maxHeight: maxHeight ?? "100%",
+        };
 
   return (
     <div
