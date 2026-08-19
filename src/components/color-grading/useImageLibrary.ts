@@ -11,10 +11,9 @@ export type GradingStatus = "ready" | "generating" | "success" | "error";
 
 export interface GradeRequestSnapshot {
   prompt: string;
-  presetId: string | null;
-  adjustments: Adjustments;
-  enabled: EffectToggles;
 }
+
+export type GradingMode = "manual" | "ai";
 
 /** Everything the editor remembers per uploaded image. */
 export interface ImageState {
@@ -22,10 +21,14 @@ export interface ImageState {
   presetId: string | null;
   adjustments: Adjustments;
   enabled: EffectToggles;
+  /** Active editing mode; kept per image so switching never resets state. */
+  mode: GradingMode;
   status: GradingStatus;
   error: string | null;
   /** Every successful AI result for this image, in generation order. */
   results: string[];
+  /** Display name of each AI result, derived locally from the prompt. */
+  resultNames: string[];
   /** Index into results; -1 means the live local grade is shown. */
   resultIndex: number;
   comparePos: number;
@@ -46,9 +49,11 @@ export function createImageState(): ImageState {
     presetId: DEFAULT_PRESET_ID,
     adjustments: { ...NEUTRAL },
     enabled: { ...DEFAULT_ENABLED },
+    mode: "manual",
     status: "ready",
     error: null,
     results: [],
+    resultNames: [],
     resultIndex: -1,
     comparePos: 50,
     lastRequest: null,
