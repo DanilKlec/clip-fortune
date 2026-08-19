@@ -26,6 +26,7 @@ import { ImageTray } from "./ImageTray";
 import { AdjustmentPanel } from "./AdjustmentPanel";
 import { PresetPicker } from "./PresetPicker";
 import { MobilePresetStrip } from "./MobilePresetStrip";
+import { MobileControlPanel } from "./MobileControlPanel";
 import { CollapsibleSection } from "./CollapsibleSection";
 import { GradingHistory } from "./GradingHistory";
 import { useGradingHistory, type HistoryItem } from "./history-store";
@@ -850,18 +851,28 @@ export function ColorGradingPage() {
                 )}
               </aside>
             ) : (
-              <>
-                <div className="order-3 min-w-0">{modeSwitch}</div>
-                {mode === "manual" ? (
-                  <div className="order-4 min-w-0 space-y-3">
-                    <MobilePresetStrip activeId={st.presetId} custom={custom} onPick={pickPreset} />
-                    {adjustmentsNode}
-                    {manualActions}
-                  </div>
-                ) : (
-                  <div className="order-4 min-w-0">{aiPanel}</div>
-                )}
-              </>
+              <div className="order-3 min-w-0">
+                <MobileControlPanel
+                  open={panelOpen}
+                  onToggle={() => setPanelOpen((v) => !v)}
+                  subtitle={mode === "manual" ? "Manual" : "AI"}
+                  actions={mode === "manual" ? manualActions : undefined}
+                >
+                  {modeSwitch}
+                  {mode === "manual" ? (
+                    <div className="min-w-0 space-y-3">
+                      <MobilePresetStrip
+                        activeId={st.presetId}
+                        custom={custom}
+                        onPick={pickPreset}
+                      />
+                      {adjustmentsNode}
+                    </div>
+                  ) : (
+                    <div className="min-w-0">{aiPanel}</div>
+                  )}
+                </MobileControlPanel>
+              </div>
             )}
           </div>
 
