@@ -52,7 +52,10 @@ function tx<T>(mode: IDBTransactionMode, run: (store: IDBObjectStore) => IDBRequ
 }
 
 async function readAll(): Promise<HistoryRecord[]> {
-  const all = await tx<HistoryRecord[]>("readonly", (s) => s.getAll() as IDBRequest<HistoryRecord[]>);
+  const all = await tx<HistoryRecord[]>(
+    "readonly",
+    (s) => s.getAll() as IDBRequest<HistoryRecord[]>,
+  );
   return all.sort((a, b) => b.createdAt - a.createdAt);
 }
 

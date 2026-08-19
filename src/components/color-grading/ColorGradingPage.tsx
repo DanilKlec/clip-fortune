@@ -115,7 +115,8 @@ export function ColorGradingPage() {
   const resultNames = activeState?.resultNames ?? [];
   /** Selected AI version, or null when the live manual grade is shown. */
   const aiUrl = activeState && st.resultIndex >= 0 ? (results[st.resultIndex] ?? null) : null;
-  const aiName = activeState && st.resultIndex >= 0 ? (resultNames[st.resultIndex] ?? "AI Color Grade") : null;
+  const aiName =
+    activeState && st.resultIndex >= 0 ? (resultNames[st.resultIndex] ?? "AI Color Grade") : null;
   const canCompare = Boolean(aiUrl) || !isNeutral(effective);
   const showOriginal = st.view === "original";
   const comparing = st.compare && canCompare && !showOriginal;
@@ -168,6 +169,7 @@ export function ColorGradingPage() {
   const acceptFiles = (list: FileList | null) => {
     if (!list || list.length === 0) return;
     const files = Array.from(list);
+    console.log("DBG accept", files.length, files.map(f=>f.type+":"+f.size));
     const typed = files.filter(isAccepted);
     if (typed.length < files.length) {
       toast.error(`Only ${ACCEPTED_LABEL} images are supported`);
@@ -194,6 +196,7 @@ export function ColorGradingPage() {
     if (unique.length > room) {
       toast.error(`Only ${MAX_IMAGES} images can be used — extras were skipped`);
     }
+    console.log("DBG stages", {typed:typed.length,sized:sized.length,unique:unique.length,room});
     const ok = unique.slice(0, room);
     if (ok.length === 0) return;
     add(
@@ -378,12 +381,10 @@ export function ColorGradingPage() {
       className="flex w-full min-w-0 gap-1 rounded-full p-1"
       style={{ background: "var(--tile)" }}
     >
-      {(
-        [
-          { id: "manual" as const, label: "Manual", Icon: SlidersHorizontal },
-          { id: "ai" as const, label: "AI", Icon: Sparkles },
-        ]
-      ).map(({ id, label, Icon }) => {
+      {[
+        { id: "manual" as const, label: "Manual", Icon: SlidersHorizontal },
+        { id: "ai" as const, label: "AI", Icon: Sparkles },
+      ].map(({ id, label, Icon }) => {
         const on = mode === id;
         return (
           <button

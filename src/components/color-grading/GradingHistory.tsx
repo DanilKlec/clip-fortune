@@ -68,7 +68,10 @@ export function GradingHistory({ items, onUse, onDownload, onRemove, onClear }: 
                   ) : (
                     <SlidersHorizontal size={12} strokeWidth={2} className="shrink-0 text-sky" />
                   )}
-                  <span className="truncate text-[12px] font-semibold text-foreground" title={item.name}>
+                  <span
+                    className="truncate text-[12px] font-semibold text-foreground"
+                    title={item.name}
+                  >
                     {item.name}
                   </span>
                 </div>
