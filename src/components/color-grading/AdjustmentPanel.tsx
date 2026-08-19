@@ -73,7 +73,7 @@ const GROUPS: {
   {
     id: "halation",
     label: "Halation",
-    accent: "volt",
+    accent: "plasma",
     effect: true,
     keys: ["halation", "halationRadius", "halationWarmth"],
     labels: { halation: "Amount" },
