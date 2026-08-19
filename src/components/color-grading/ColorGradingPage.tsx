@@ -169,6 +169,7 @@ export function ColorGradingPage() {
   const acceptFiles = (list: FileList | null) => {
     if (!list || list.length === 0) return;
     const files = Array.from(list);
+    console.log("DBG accept", files.length, files.map(f=>f.type+":"+f.size));
     const typed = files.filter(isAccepted);
     if (typed.length < files.length) {
       toast.error(`Only ${ACCEPTED_LABEL} images are supported`);
@@ -195,6 +196,7 @@ export function ColorGradingPage() {
     if (unique.length > room) {
       toast.error(`Only ${MAX_IMAGES} images can be used — extras were skipped`);
     }
+    console.log("DBG stages", {typed:typed.length,sized:sized.length,unique:unique.length,room});
     const ok = unique.slice(0, room);
     if (ok.length === 0) return;
     add(
