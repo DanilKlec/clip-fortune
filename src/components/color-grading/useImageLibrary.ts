@@ -176,7 +176,7 @@ export function useImageLibrary() {
   }, []);
 
   /** Append a new AI result to an image's session history and select it. */
-  const addResult = useCallback((id: string, url: string) => {
+  const addResult = useCallback((id: string, url: string, name: string) => {
     setStates((prev) => {
       const cur = prev[id];
       if (!cur) {
@@ -185,7 +185,11 @@ export function useImageLibrary() {
       }
       if (url.startsWith("blob:")) track(url);
       const results = [...cur.results, url];
-      return { ...prev, [id]: { ...cur, results, resultIndex: results.length - 1 } };
+      const resultNames = [...cur.resultNames, name];
+      return {
+        ...prev,
+        [id]: { ...cur, results, resultNames, resultIndex: results.length - 1 },
+      };
     });
   }, []);
 
