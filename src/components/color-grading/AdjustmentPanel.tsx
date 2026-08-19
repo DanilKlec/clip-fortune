@@ -96,6 +96,14 @@ const GROUPS: {
   },
 ];
 
+/** Same tokens the shared Slider/Switch use — keeps every accent in sync. */
+const ACCENT_VAR: Record<SliderVariant, string> = {
+  volt: "var(--volt)",
+  primary: "var(--volt)",
+  sky: "var(--sky)",
+  plasma: "var(--plasma)",
+};
+
 export function AdjustmentPanel({
   values,
   enabled,
@@ -140,7 +148,7 @@ export function AdjustmentPanel({
             )}
           </span>
           <span className="shrink-0 font-mono text-[11px] font-medium tabular-nums text-muted-foreground">
-            <span style={changed && on ? { color: "var(--slider-accent-label)" } : undefined}>
+            <span style={changed && on ? { color: ACCENT_VAR[accent] } : undefined}>
               {on ? value : "off"}
             </span>
           </span>
