@@ -25,6 +25,10 @@ interface Props {
   hideResetAll?: boolean;
   openGroups?: Record<string, boolean>;
   onToggleGroup?: (id: string) => void;
+  /** Mobile mode: one horizontal category row + only the active category's sliders. */
+  tabbed?: boolean;
+  activeGroup?: string;
+  onSelectGroup?: (id: string) => void;
 }
 
 /** Purpose-based groups — every parameter appears exactly once. */
@@ -116,6 +120,9 @@ export function AdjustmentPanel({
   hideResetAll = false,
   openGroups,
   onToggleGroup,
+  tabbed = false,
+  activeGroup,
+  onSelectGroup,
 }: Props) {
   const rowFor = (key: AdjustmentKey, labelOverride?: string, accent: SliderVariant = "volt") => {
     const spec = ADJUSTMENTS.find((s) => s.key === key)!;
@@ -179,6 +186,89 @@ export function AdjustmentPanel({
   };
 
   if (grouped) {
+    if (tabbed) {
+      const current = GROUPS.find((g) => g.id === activeGroup) ?? GROUPS[0];
+      const accentVar = ACCENT_VAR[current.accent];
+      const effectOn = current.effect ? current.keys.some((k) => enabled[k]) : undefined;
+      const sectionChanged = current.keys.some((k) => values[k] !== NEUTRAL[k]);
+      return (
+        <div className="min-w-0 space-y-3">
+          <div className="relative min-w-0">
+            <div
+              role="tablist"
+              aria-label="Adjustment categories"
+              className="scrollbar-hide -mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1"
+              style={{ scrollSnapType: "x proximity", touchAction: "pan-x pan-y" }}
+            >
+              {GROUPS.map((group) => {
+                const on = group.id === current.id;
+                return (
+                  <button
+                    key={group.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={on}
+                    ref={(el) => {
+                      if (on && el)
+                        el.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+                    }}
+                    onClick={() => onSelectGroup?.(group.id)}
+                    className="flex h-11 shrink-0 items-center whitespace-nowrap rounded-full border px-3.5 text-[12px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    style={{
+                      scrollSnapAlign: "start",
+                      borderColor: on ? ACCENT_VAR[group.accent] : "var(--card-border)",
+                      background: on ? "var(--tile)" : "transparent",
+                      color: on ? ACCENT_VAR[group.accent] : undefined,
+                    }}
+                  >
+                    {group.label}
+                  </button>
+                );
+              })}
+            </div>
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-y-0 right-0 w-8"
+              style={{ background: "linear-gradient(to left, var(--tile), transparent)" }}
+            />
+          </div>
+
+          <div
+            className="min-w-0 space-y-3 rounded-xl border p-2.5"
+            style={{ borderColor: "var(--card-border)", background: "var(--tile)" }}
+          >
+            <div className="flex min-w-0 items-center gap-2">
+              <span
+                className="font-display min-w-0 flex-1 truncate text-[12px] font-extrabold uppercase tracking-[0.14em]"
+                style={{ color: accentVar }}
+              >
+                {current.label}
+              </span>
+              {typeof effectOn === "boolean" && (
+                <Switch
+                  checked={effectOn}
+                  disabled={disabled}
+                  onCheckedChange={(next) => current.keys.forEach((k) => onToggle(k, next))}
+                  aria-label={`${effectOn ? "Disable" : "Enable"} ${current.label}`}
+                  variant={current.accent}
+                  className="cg-switch shrink-0"
+                />
+              )}
+              <button
+                type="button"
+                onClick={() => current.keys.forEach((k) => onResetKey(k))}
+                disabled={disabled || !sectionChanged}
+                className="cg-tray-btn flex h-8 shrink-0 items-center gap-1 rounded-full px-2 text-[11px] font-semibold text-muted-foreground transition-colors hover:text-foreground disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <RotateCcw size={12} strokeWidth={2} />
+                Reset section
+              </button>
+            </div>
+            {current.keys.map((k) => rowFor(k, current.labels?.[k], current.accent))}
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="space-y-2">
         {GROUPS.map((group) => {
