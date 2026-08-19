@@ -117,12 +117,14 @@ export function AdjustmentPanel({
     const on = enabled[spec.key];
     return (
       <div key={spec.key} className={`min-w-0 space-y-1.5 ${on ? "" : "opacity-60"}`}>
+        {/* The changed-value indicator uses the same accent as the slider. */}
         <div className="flex min-w-0 items-center gap-1.5">
           <Switch
             checked={on}
             disabled={disabled}
             onCheckedChange={(next) => onToggle(spec.key, next)}
             aria-label={`${on ? "Disable" : "Enable"} ${label}`}
+            variant={accent}
             className="cg-switch"
           />
           <span
@@ -138,7 +140,9 @@ export function AdjustmentPanel({
             )}
           </span>
           <span className="shrink-0 font-mono text-[11px] font-medium tabular-nums text-muted-foreground">
-            {on ? value : "off"}
+            <span style={changed && on ? { color: "var(--slider-accent-label)" } : undefined}>
+              {on ? value : "off"}
+            </span>
           </span>
           <button
             type="button"
