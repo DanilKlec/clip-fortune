@@ -79,6 +79,8 @@ export function ColorGradingPage() {
   const [dragOver, setDragOver] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   const [presetsOpen, setPresetsOpen] = useState(true);
+  // Mobile-only collapsible controls card; closed by default.
+  const [panelOpen, setPanelOpen] = useState(false);
   // Sections start collapsed — sliders appear only when a section is expanded.
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({ color: false });
 
