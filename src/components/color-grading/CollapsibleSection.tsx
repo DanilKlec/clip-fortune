@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import type { SliderVariant } from "@/components/ui/slider";
 
 interface Props {
   id: string;
@@ -12,6 +13,8 @@ interface Props {
   effectOn?: boolean;
   onEffectToggle?: (on: boolean) => void;
   disabled?: boolean;
+  /** Accent shared with the group's sliders. */
+  accent?: SliderVariant;
 }
 
 /** Shared collapsible block used by the presets and every adjustment group. */
@@ -24,6 +27,7 @@ export function CollapsibleSection({
   effectOn,
   onEffectToggle,
   disabled = false,
+  accent = "volt",
 }: Props) {
   const hasSwitch = typeof effectOn === "boolean" && Boolean(onEffectToggle);
   return (
@@ -55,6 +59,7 @@ export function CollapsibleSection({
             disabled={disabled}
             onCheckedChange={(next) => onEffectToggle?.(next)}
             aria-label={`${effectOn ? "Disable" : "Enable"} ${label}`}
+            variant={accent}
             className="cg-switch shrink-0"
           />
         )}
