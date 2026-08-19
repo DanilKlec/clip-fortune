@@ -193,6 +193,7 @@ export function AdjustmentPanel({
               onToggle={() => onToggleGroup?.(group.id)}
               disabled={disabled}
               effectOn={effectOn}
+              accent={group.accent}
               onEffectToggle={
                 group.effect ? (next) => group.keys.forEach((k) => onToggle(k, next)) : undefined
               }
