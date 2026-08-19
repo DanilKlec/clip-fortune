@@ -258,10 +258,10 @@ export function AdjustmentPanel({
                 type="button"
                 onClick={() => current.keys.forEach((k) => onResetKey(k))}
                 disabled={disabled || !sectionChanged}
-                className="cg-tray-btn flex h-8 shrink-0 items-center gap-1 rounded-full px-2 text-[11px] font-semibold text-muted-foreground transition-colors hover:text-foreground disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="cg-tray-btn flex h-8 shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-2 text-[11px] font-semibold text-muted-foreground transition-colors hover:text-foreground disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <RotateCcw size={12} strokeWidth={2} />
-                Reset section
+                Reset
               </button>
             </div>
             {current.keys.map((k) => rowFor(k, current.labels?.[k], current.accent))}
