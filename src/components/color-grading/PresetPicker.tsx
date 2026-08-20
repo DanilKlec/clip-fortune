@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import { PRESETS, type Preset } from "./grading";
 import { PRESET_IMAGES } from "./preset-images";
 
@@ -35,12 +36,21 @@ export function PresetPicker({ activeId, onPick, custom = false, hideHeading = f
               type="button"
               onClick={() => onPick(preset)}
               aria-pressed={active}
-              className="group min-w-0 overflow-hidden rounded-xl border text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="group relative min-w-0 overflow-hidden rounded-xl border text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               style={{
                 borderColor: active ? "var(--volt)" : "var(--card-border)",
                 background: active ? "var(--volt-dim)" : "var(--tile)",
               }}
             >
+              {active && (
+                <span
+                  aria-hidden
+                  className="absolute right-1.5 top-1.5 z-10 flex h-4 w-4 items-center justify-center rounded-full"
+                  style={{ background: "var(--volt)" }}
+                >
+                  <Check size={11} strokeWidth={3} className="text-background" />
+                </span>
+              )}
               <img
                 src={PRESET_IMAGES[preset.id]}
                 alt={`${preset.name} preview`}
