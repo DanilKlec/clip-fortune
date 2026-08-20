@@ -78,6 +78,50 @@ export function fileKey(f: File) {
   return `${f.name}:${f.size}:${f.lastModified}`;
 }
 
+export interface ValidationResult {
+  /** Files that passed every rule, already trimmed to the remaining room. */
+  accepted: File[];
+  /** Human readable problems to surface with a toast. */
+  errors: string[];
+}
+
+/**
+ * One validation path for both adding and replacing images: type, size,
+ * duplicates and the total limit. Callers only apply `accepted`, so a rejected
+ * file never removes a previously valid one.
+ */
+export function validateFiles(
+  files: File[],
+  existing: File[],
+  options: { room?: number } = {},
+): ValidationResult {
+  const errors: string[] = [];
+  const typed = files.filter(isAccepted);
+  if (typed.length < files.length) errors.push(`Only ${ACCEPTED_LABEL} images are supported`);
+
+  const sized = typed.filter((f) => f.size <= MAX_BYTES);
+  if (sized.length < typed.length) errors.push("Some files are larger than 20MB and were skipped");
+
+  const seen = new Set(existing.map(fileKey));
+  const unique = sized.filter((f) => {
+    const k = fileKey(f);
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+  if (unique.length < sized.length) errors.push("Duplicate images were skipped");
+
+  const room = options.room ?? MAX_IMAGES - existing.length;
+  if (room <= 0) {
+    errors.push(`You can work with up to ${MAX_IMAGES} images`);
+    return { accepted: [], errors };
+  }
+  if (unique.length > room) {
+    errors.push(`Only ${MAX_IMAGES} images can be used — extras were skipped`);
+  }
+  return { accepted: unique.slice(0, room), errors };
+}
+
 let seq = 0;
 const nextId = () => `img-${++seq}-${Date.now()}`;
 
