@@ -27,18 +27,17 @@ import { AdjustmentPanel } from "./AdjustmentPanel";
 import { PresetPicker } from "./PresetPicker";
 import { MobilePresetStrip } from "./MobilePresetStrip";
 import { MobileControlPanel } from "./MobileControlPanel";
+import { GenerateAction } from "./GenerateAction";
 import { CollapsibleSection } from "./CollapsibleSection";
 import { GradingHistory } from "./GradingHistory";
 import { useGradingHistory, type HistoryItem } from "./history-store";
 import { gradeFileName, uniqueGradeName } from "./grade-name";
 import {
   ACCEPTED_LABEL,
-  MAX_BYTES,
   MAX_IMAGES,
   createImageState,
-  fileKey,
-  isAccepted,
   useImageLibrary,
+  validateFiles,
   type GradingMode,
   type ImageState,
 } from "./useImageLibrary";
@@ -168,36 +167,11 @@ export function ColorGradingPage() {
 
   const acceptFiles = (list: FileList | null) => {
     if (!list || list.length === 0) return;
-    const files = Array.from(list);
-    console.log("DBG accept", files.length, files.map(f=>f.type+":"+f.size));
-    const typed = files.filter(isAccepted);
-    if (typed.length < files.length) {
-      toast.error(`Only ${ACCEPTED_LABEL} images are supported`);
-    }
-    const sized = typed.filter((f) => f.size <= MAX_BYTES);
-    if (sized.length < typed.length) {
-      toast.error("Some files are larger than 20MB and were skipped");
-    }
-    const seen = new Set(images.map((i) => fileKey(i.file)));
-    const unique = sized.filter((f) => {
-      const k = fileKey(f);
-      if (seen.has(k)) return false;
-      seen.add(k);
-      return true;
-    });
-    if (unique.length < sized.length) {
-      toast("Duplicate images were skipped");
-    }
-    const room = MAX_IMAGES - images.length;
-    if (room <= 0) {
-      toast.error(`You can work with up to ${MAX_IMAGES} images`);
-      return;
-    }
-    if (unique.length > room) {
-      toast.error(`Only ${MAX_IMAGES} images can be used — extras were skipped`);
-    }
-    console.log("DBG stages", {typed:typed.length,sized:sized.length,unique:unique.length,room});
-    const ok = unique.slice(0, room);
+    const { accepted: ok, errors } = validateFiles(
+      Array.from(list),
+      images.map((i) => i.file),
+    );
+    errors.forEach((m) => toast.error(m));
     if (ok.length === 0) return;
     add(
       ok,
@@ -211,6 +185,21 @@ export function ColorGradingPage() {
           }
         : undefined,
     );
+  };
+
+  /**
+   * Replacement uses the very same validation. A rejected file leaves the
+   * previously loaded image untouched.
+   */
+  const replaceFile = (id: string, file: File) => {
+    const { accepted, errors } = validateFiles(
+      [file],
+      images.filter((i) => i.id !== id).map((i) => i.file),
+      { room: 1 },
+    );
+    errors.forEach((m) => toast.error(m));
+    if (accepted.length === 0) return;
+    replace(id, accepted[0]);
   };
 
   const onDrop = (e: DragEvent<HTMLDivElement>) => {
