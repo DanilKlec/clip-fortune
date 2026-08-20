@@ -7,6 +7,8 @@ interface Props {
   children: ReactNode;
   /** Short caption, e.g. the active mode ("Manual" / "AI"). */
   subtitle: string;
+  /** The single mobile Generate CTA — visible open or closed. */
+  cta?: ReactNode;
   /** Optional action row rendered at the bottom of the open panel. */
   actions?: ReactNode;
 }
@@ -16,7 +18,7 @@ interface Props {
  * icon, title, active-mode caption and a chevron. Open it expands in the normal
  * page flow — no internal scroll container.
  */
-export function MobileControlPanel({ open, onToggle, children, subtitle, actions }: Props) {
+export function MobileControlPanel({ open, onToggle, children, subtitle, cta, actions }: Props) {
   const id = useId();
   const btnRef = useRef<HTMLButtonElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -24,11 +26,6 @@ export function MobileControlPanel({ open, onToggle, children, subtitle, actions
 
   useEffect(() => {
     if (wasOpen.current && !open) btnRef.current?.focus();
-    if (!wasOpen.current && open) {
-      requestAnimationFrame(() =>
-        rootRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }),
-      );
-    }
     wasOpen.current = open;
   }, [open]);
 
@@ -75,6 +72,8 @@ export function MobileControlPanel({ open, onToggle, children, subtitle, actions
           className={`shrink-0 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`}
         />
       </button>
+
+      {cta && <div className="px-3 pb-3">{cta}</div>}
 
       {open && (
         <>
