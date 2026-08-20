@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { readAuthSession } from "@/lib/auth-session.server";
 
 const ACCEPTED = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
 const MAX_FILES = 9;
@@ -6,6 +7,16 @@ const MAX_BYTES = 20 * 1024 * 1024;
 
 function err(message: string, status: number) {
   return Response.json({ error: message }, { status });
+}
+
+/** The endpoint is usable only from an unlocked project session. */
+async function isAuthorized() {
+  try {
+    const session = await readAuthSession();
+    return Boolean(session.data.email && session.data.unlockedAt);
+  } catch {
+    return false;
+  }
 }
 
 export const Route = createFileRoute("/api/color-grade")({
@@ -37,6 +48,7 @@ export const Route = createFileRoute("/api/color-grade")({
       },
 
       POST: async ({ request }) => {
+        if (!(await isAuthorized())) return err("Please sign in to use AI grading.", 401);
         const key = process.env["FAL_KEY"];
         if (!key) return err("AI generation is not configured yet.", 503);
 

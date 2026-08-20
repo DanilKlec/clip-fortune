@@ -208,15 +208,14 @@ export function AdjustmentPanel({
                     type="button"
                     role="tab"
                     aria-selected={on}
-                    ref={(el) => {
-                      if (on && el)
-                        el.scrollIntoView({
-                          block: "nearest",
-                          inline: "nearest",
-                          behavior: "smooth",
-                        });
+                    onClick={(e) => {
+                      onSelectGroup?.(group.id);
+                      e.currentTarget.scrollIntoView({
+                        block: "nearest",
+                        inline: "nearest",
+                        behavior: "smooth",
+                      });
                     }}
-                    onClick={() => onSelectGroup?.(group.id)}
                     className="flex h-11 shrink-0 items-center whitespace-nowrap rounded-full border px-3.5 text-[12px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     style={{
                       scrollSnapAlign: "start",
