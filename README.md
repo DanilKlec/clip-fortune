@@ -110,6 +110,42 @@ DESIGN SYSTEM (match exactly, this is an existing product's design language):
 
 - Mobile-first responsive layout, cards stack vertically on mobile
 
+## AI Color Grading
+
+The project's main working surface is an **AI Color Grading** studio — a three-column desktop workspace (images · preview · controls) with a single-screen mobile layout. It replaces the Virality Predictor landing page at `/`.
+
+### Manual grading vs. AI grading
+
+Two modes run side by side and never share state:
+
+- **Manual grading** — live CSS-filter preview baked into a JPEG in the browser (`renderManualGrade`). 24 presets (the first is "None") plus 8 collapsible adjustment groups: Color Correct (Temperature, Tint), Exposure (Exposure, Gamma, Fade, Contrast, Saturation, Highlights, Shadows, Whites, Blacks, Split Tone), Soften Details (Sharpness, Clarity, Soften, Texture), Bloom (Bloom + threshold/radius), Halation (Halation + radius/warmth), Lens Haze (Lens Haze + density/tint) and Film Grain (Grain + size/roughness). Every slider has an individual Reset; presets update sliders and editing a slider drops the preset back to "Custom". Download is instant — no network call.
+- **AI grading** — sends the original files and a text prompt to the server endpoint; manual adjustments never travel over the network. The server returns a URL, which is proxied through the same origin so the browser can save a real file. After generation, a Before/After compare is shown.
+
+### Running it locally
+
+```sh
+npm i
+npm run dev
+```
+
+Open the app at the local dev URL. Manual grading works out of the box. AI generation needs a Fal.ai key:
+
+1. Create a key at fal.ai and add it as a secret named `FAL_KEY`.
+2. Sign in — the `/api/color-grade` endpoint rejects requests without an active auth session.
+3. Upload an image, switch to the AI tab, write a look (or pick a preset) and hit **Generate**.
+
+### Server endpoint — `POST /api/color-grade`
+
+- **Auth:** requires an active session (`readAuthSession`); returns 401 otherwise.
+- **Model:** `fal-ai/flux-2-pro/edit` via `@fal-ai/client`. The first uploaded file is the primary image; up to 9 files are uploaded as references.
+- **Input limits:** PNG/JPG/WebP only, max 9 images, max 20MB each, prompt capped at 4000 chars. Safety checker is on.
+- **Errors:** maps Fal.ai status codes to friendly messages — 402 (out of credits), 429 (rate limit), 401/403 (key missing), 5xx (service unavailable).
+- **GET `/api/color-grade?url=...`** proxies the generated image through the same origin so the browser download saves a real file; only `fal.media` / `fal.ai` / `fal.run` hosts are allowed.
+
+### Generation history
+
+Results (manual downloads and AI generations) are stored locally in **IndexedDB** (`cg-history` database, `results` store), not on a backend. The store keeps the newest **30** records and exposes them as a thumbnail strip under the preview. History survives reloads and switching between uploaded images; it is best-effort and silently stays empty in private mode. Use the strip to restore a previous result into the preview.
+
 This project was built with [Lovable](https://lovable.dev).
 
 ## Build with Lovable
