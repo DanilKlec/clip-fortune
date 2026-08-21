@@ -485,7 +485,28 @@ export function ColorGradingPage() {
     </div>
   );
 
-  const aiPanel = (
+  /** Primary mobile action: always visible, no need to open the settings panel. */
+  const mobileCta =
+    mode === "manual" ? (
+      <button
+        type="button"
+        onClick={() => void downloadManual()}
+        disabled={!active}
+        className="button-cta flex h-12 w-full items-center justify-center gap-2 rounded-full text-[14px] font-semibold disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <Download size={18} strokeWidth={2} />
+        Download
+      </button>
+    ) : (
+      <GenerateAction
+        mode="ai"
+        busy={busy}
+        disabled={!active}
+        onGenerate={() => void generate(activeId)}
+      />
+    );
+
+  const aiPanel = (showGenerate: boolean) => (
     <div className="min-w-0 space-y-3">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
