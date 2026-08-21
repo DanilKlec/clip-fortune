@@ -485,7 +485,28 @@ export function ColorGradingPage() {
     </div>
   );
 
-  const aiPanel = (
+  /** Primary mobile action: always visible, no need to open the settings panel. */
+  const mobileCta =
+    mode === "manual" ? (
+      <button
+        type="button"
+        onClick={() => void downloadManual()}
+        disabled={!active}
+        className="button-cta flex h-12 w-full items-center justify-center gap-2 rounded-full text-[14px] font-semibold disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <Download size={18} strokeWidth={2} />
+        Download
+      </button>
+    ) : (
+      <GenerateAction
+        mode="ai"
+        busy={busy}
+        disabled={!active}
+        onGenerate={() => void generate(activeId)}
+      />
+    );
+
+  const aiPanel = (showGenerate: boolean) => (
     <div className="min-w-0 space-y-3">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
@@ -512,7 +533,7 @@ export function ColorGradingPage() {
             : "The AI works from your original files and this prompt only — manual presets and sliders are not sent."}
         </p>
       </div>
-      {generateButton}
+      {showGenerate && generateButton}
       {errorBlock}
       {results.length > 0 && (
         <>
@@ -840,7 +861,7 @@ export function ColorGradingPage() {
                       {adjustmentsNode}
                     </>
                   ) : (
-                    aiPanel
+                    aiPanel(true)
                   )}
                 </div>
                 {mode === "manual" && (
@@ -857,14 +878,15 @@ export function ColorGradingPage() {
                 <MobileControlPanel
                   open={panelOpen}
                   onToggle={() => setPanelOpen((v) => !v)}
-                  subtitle={mode === "manual" ? "Manual" : "AI"}
+                  subtitle={mode === "manual" ? "Manual grading" : "AI color grading"}
+                  cta={mobileCta}
                   actions={mode === "manual" ? manualActions : undefined}
                 >
                   {modeSwitch}
                   {mode === "manual" ? (
                     <div className="min-w-0 space-y-3">{adjustmentsNode}</div>
                   ) : (
-                    <div className="min-w-0">{aiPanel}</div>
+                    <div className="min-w-0">{aiPanel(false)}</div>
                   )}
                 </MobileControlPanel>
               </div>
