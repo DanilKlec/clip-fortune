@@ -533,7 +533,7 @@ export function ColorGradingPage() {
             : "The AI works from your original files and this prompt only — manual presets and sliders are not sent."}
         </p>
       </div>
-      {generateButton}
+      {showGenerate && generateButton}
       {errorBlock}
       {results.length > 0 && (
         <>
@@ -861,7 +861,7 @@ export function ColorGradingPage() {
                       {adjustmentsNode}
                     </>
                   ) : (
-                    aiPanel
+                    aiPanel(true)
                   )}
                 </div>
                 {mode === "manual" && (
@@ -878,14 +878,15 @@ export function ColorGradingPage() {
                 <MobileControlPanel
                   open={panelOpen}
                   onToggle={() => setPanelOpen((v) => !v)}
-                  subtitle={mode === "manual" ? "Manual" : "AI"}
+                  subtitle={mode === "manual" ? "Manual grading" : "AI color grading"}
+                  cta={mobileCta}
                   actions={mode === "manual" ? manualActions : undefined}
                 >
                   {modeSwitch}
                   {mode === "manual" ? (
                     <div className="min-w-0 space-y-3">{adjustmentsNode}</div>
                   ) : (
-                    <div className="min-w-0">{aiPanel}</div>
+                    <div className="min-w-0">{aiPanel(false)}</div>
                   )}
                 </MobileControlPanel>
               </div>
