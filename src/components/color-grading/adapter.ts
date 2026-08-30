@@ -110,6 +110,13 @@ export const generateColorGradeFal: ColorGradeAdapter = async ({ images, prompt 
   form.append("prompt", buildGradePrompt(prompt));
   for (const file of files) form.append("images", file, file.name);
 
+  // The output frame is defined by the MAIN image only; references never resize it.
+  const size = await readImageSize(files[0]);
+  if (size) {
+    form.append("width", String(size.width));
+    form.append("height", String(size.height));
+  }
+
   let res: Response;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 180_000);
