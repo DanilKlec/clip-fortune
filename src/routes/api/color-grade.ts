@@ -8,6 +8,27 @@ function err(message: string, status: number) {
   return Response.json({ error: message }, { status });
 }
 
+/** Model bounds; sides are scaled proportionally, never cropped. */
+const MIN_SIDE = 256;
+const MAX_SIDE = 4096;
+const SIDE_STEP = 16;
+
+/**
+ * Exact output frame from the MAIN image: same aspect ratio, clamped inside the
+ * model limits by proportional scaling only.
+ */
+function clampSize(w: number, h: number): { width: number; height: number } | null {
+  if (!Number.isFinite(w) || !Number.isFinite(h) || w <= 0 || h <= 0) return null;
+  let scale = Math.min(1, MAX_SIDE / Math.max(w, h));
+  if (Math.min(w, h) * scale < MIN_SIDE) {
+    scale = Math.min(scale, 1) * Math.max(1, MIN_SIDE / (Math.min(w, h) * scale));
+    scale = Math.min(scale, MAX_SIDE / Math.max(w, h));
+  }
+  const round = (v: number) =>
+    Math.min(MAX_SIDE, Math.max(MIN_SIDE, Math.round((v * scale) / SIDE_STEP) * SIDE_STEP));
+  return { width: round(w), height: round(h) };
+}
+
 
 export const Route = createFileRoute("/api/color-grade")({
   server: {
