@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { readAuthSession } from "@/lib/auth-session.server";
 
 const ACCEPTED = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
 const MAX_FILES = 9;
