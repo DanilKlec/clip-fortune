@@ -107,7 +107,6 @@ export function ColorGradingPage() {
   const custom = !allEnabled(st.enabled);
   const mode = st.mode;
 
-  const ratio = useImageAspect(active?.url);
   const effective = effectiveAdjustments(st.adjustments, st.enabled);
   /** Session history of AI results for the active image. */
   const results = activeState?.results ?? [];
@@ -119,6 +118,13 @@ export function ColorGradingPage() {
   const canCompare = Boolean(aiUrl) || !isNeutral(effective);
   const showOriginal = st.view === "original";
   const comparing = st.compare && canCompare && !showOriginal;
+  /**
+   * Stage ratio follows the image actually on screen (AI results may differ
+   * slightly from the source). Every layer uses object-contain inside this
+   * shared box, so nothing is ever cropped — different ratios only letterbox.
+   */
+  const displaySrc = active ? (showOriginal ? active.url : (aiUrl ?? active.url)) : null;
+  const ratio = useImageAspect(displaySrc);
 
   /** Mode is remembered per image; switching never resets anything. */
   const setMode = (next: GradingMode) => {

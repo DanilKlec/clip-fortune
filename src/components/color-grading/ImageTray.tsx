@@ -52,11 +52,19 @@ export function ImageTray({
           <img src={img.url} alt={img.file.name} className="h-full w-full object-cover" />
         </button>
         {active && (
-          <span className="badge-volt pointer-events-none absolute top-1 left-1/2 -translate-x-1/2">
+          <span
+            className="badge-volt pointer-events-none absolute top-1 left-1/2 z-20 -translate-x-1/2"
+            style={{
+              background: "var(--volt)",
+              color: "var(--primary-foreground)",
+              borderColor: "var(--volt)",
+              boxShadow: "0 1px 6px rgba(0, 0, 0, 0.55)",
+            }}
+          >
             Main
           </span>
         )}
-        <div className="pointer-events-none absolute inset-x-1 bottom-1 flex justify-between">
+        <div className="pointer-events-none absolute inset-x-1 bottom-1 z-20 flex justify-between">
           <button
             type="button"
             aria-label={`Replace image ${i + 1}`}
@@ -64,8 +72,7 @@ export function ImageTray({
               replacingId.current = img.id;
               replaceRef.current?.click();
             }}
-            className="cg-tray-btn pointer-events-auto flex h-[22px] w-[22px] items-center justify-center rounded-full border bg-background/90 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            style={{ borderColor: "var(--card-border)" }}
+            className="cg-tray-btn pointer-events-auto flex h-[22px] w-[22px] items-center justify-center rounded-full border border-white/25 bg-background/95 text-foreground/90 shadow-[0_1px_6px_rgba(0,0,0,0.55)] transition-all hover:border-white/50 hover:text-foreground active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <RefreshCw size={11} strokeWidth={2} />
           </button>
@@ -73,8 +80,7 @@ export function ImageTray({
             type="button"
             aria-label={`Remove image ${i + 1}`}
             onClick={() => onRemove(img.id)}
-            className="cg-tray-btn pointer-events-auto flex h-[22px] w-[22px] items-center justify-center rounded-full border bg-background/90 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            style={{ borderColor: "var(--card-border)" }}
+            className="cg-tray-btn pointer-events-auto flex h-[22px] w-[22px] items-center justify-center rounded-full border border-white/25 bg-background/95 text-foreground/90 shadow-[0_1px_6px_rgba(0,0,0,0.55)] transition-all hover:border-white/50 hover:text-foreground active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <X size={11} strokeWidth={2} />
           </button>
