@@ -72,7 +72,7 @@ export function ImageTray({
               replacingId.current = img.id;
               replaceRef.current?.click();
             }}
-            className="cg-tray-btn pointer-events-auto flex h-[22px] w-[22px] items-center justify-center rounded-full border border-white/25 bg-background/95 text-[#e2e6f4] shadow-[0_1px_6px_rgba(0,0,0,0.55)] transition-all hover:border-white/50 hover:text-foreground active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="cg-tray-btn pointer-events-auto flex h-[22px] w-[22px] items-center justify-center rounded-full border border-white/25 bg-background/95 text-foreground/90 shadow-[0_1px_6px_rgba(0,0,0,0.55)] transition-all hover:border-white/50 hover:text-foreground active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <RefreshCw size={11} strokeWidth={2} />
           </button>
@@ -80,7 +80,7 @@ export function ImageTray({
             type="button"
             aria-label={`Remove image ${i + 1}`}
             onClick={() => onRemove(img.id)}
-            className="cg-tray-btn pointer-events-auto flex h-[22px] w-[22px] items-center justify-center rounded-full border border-white/25 bg-background/95 text-[#e2e6f4] shadow-[0_1px_6px_rgba(0,0,0,0.55)] transition-all hover:border-white/50 hover:text-foreground active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="cg-tray-btn pointer-events-auto flex h-[22px] w-[22px] items-center justify-center rounded-full border border-white/25 bg-background/95 text-foreground/90 shadow-[0_1px_6px_rgba(0,0,0,0.55)] transition-all hover:border-white/50 hover:text-foreground active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <X size={11} strokeWidth={2} />
           </button>
