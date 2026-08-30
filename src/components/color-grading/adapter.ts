@@ -15,6 +15,8 @@ export type ColorGradeAdapter = (req: ColorGradeRequest) => Promise<ColorGradeRe
 
 const SYSTEM = `Apply professional color grading to image 1.
 
+Apply color grading only. Preserve the complete original frame, composition, camera framing, subject position, geometry and all image boundaries. Do not crop, zoom, resize, reframe, extend or remove any part of the source image.
+
 Preserve the original composition, crop, camera angle, subject identity, facial features, body proportions, objects, background structure, logos and readable text. Do not add, remove or replace people or objects. Do not redesign the scene.
 
 Change only the color palette, white balance, exposure, contrast, saturation, highlights, sharpness, tonal response and film grain.`;
@@ -97,6 +99,32 @@ export async function renderManualGrade(file: File, adjustments: Adjustments): P
 }
 
 /**
+ * Full pixel dimensions of the original file, EXIF orientation applied.
+ * No canvas, no downscaling — the untouched file is what gets uploaded.
+ */
+async function readImageSize(file: File): Promise<{ width: number; height: number } | null> {
+  try {
+    if (typeof createImageBitmap === "function") {
+      const bmp = await createImageBitmap(file, { imageOrientation: "from-image" });
+      const size = { width: bmp.width, height: bmp.height };
+      bmp.close?.();
+      return size;
+    }
+  } catch {
+    /* fall through to the <img> path */
+  }
+  const src = URL.createObjectURL(file);
+  try {
+    const img = await loadImage(src);
+    return { width: img.naturalWidth, height: img.naturalHeight };
+  } catch {
+    return null;
+  } finally {
+    URL.revokeObjectURL(src);
+  }
+}
+
+/**
  * Real generation: the browser posts the original images and the prompt to the
  * server endpoint, which owns the Fal.ai credentials.
  */
@@ -107,6 +135,13 @@ export const generateColorGradeFal: ColorGradeAdapter = async ({ images, prompt 
   const form = new FormData();
   form.append("prompt", buildGradePrompt(prompt));
   for (const file of files) form.append("images", file, file.name);
+
+  // The output frame is defined by the MAIN image only; references never resize it.
+  const size = await readImageSize(files[0]);
+  if (size) {
+    form.append("width", String(size.width));
+    form.append("height", String(size.height));
+  }
 
   let res: Response;
   const controller = new AbortController();

@@ -8,6 +8,25 @@ function err(message: string, status: number) {
   return Response.json({ error: message }, { status });
 }
 
+/** Model bounds; sides are scaled proportionally, never cropped. */
+const MIN_SIDE = 256;
+const MAX_SIDE = 4096;
+
+/**
+ * Exact output frame from the MAIN image: the original pixel size, scaled
+ * proportionally only when it falls outside the model limits. Never cropped.
+ */
+function clampSize(w: number, h: number): { width: number; height: number } | null {
+  if (!Number.isFinite(w) || !Number.isFinite(h) || w <= 0 || h <= 0) return null;
+  let scale = Math.min(1, MAX_SIDE / Math.max(w, h));
+  if (Math.min(w, h) * scale < MIN_SIDE) scale = MIN_SIDE / Math.min(w, h);
+  scale = Math.min(scale, MAX_SIDE / Math.max(w, h));
+  return {
+    width: Math.max(1, Math.round(w * scale)),
+    height: Math.max(1, Math.round(h * scale)),
+  };
+}
+
 
 export const Route = createFileRoute("/api/color-grade")({
   server: {
@@ -63,6 +82,8 @@ export const Route = createFileRoute("/api/color-grade")({
           }
         }
 
+        const imageSize = clampSize(Number(form.get("width")), Number(form.get("height")));
+
         try {
           const { fal } = await import("@fal-ai/client");
           fal.config({ credentials: key });
@@ -76,7 +97,7 @@ export const Route = createFileRoute("/api/color-grade")({
             input: {
               prompt,
               image_urls,
-              image_size: "auto",
+              ...(imageSize ? { image_size: imageSize } : {}),
               output_format: "jpeg",
               enable_safety_checker: true,
             },
