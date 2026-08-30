@@ -31,7 +31,7 @@ import { GenerateAction } from "./GenerateAction";
 import { CollapsibleSection } from "./CollapsibleSection";
 import { GradingHistory } from "./GradingHistory";
 import { useGradingHistory, type HistoryItem } from "./history-store";
-import { gradeFileName, uniqueGradeName } from "./grade-name";
+import { gradeFileName, promptFileName, uniqueGradeName } from "./grade-name";
 import {
   ACCEPTED_LABEL,
   MAX_IMAGES,
@@ -274,7 +274,7 @@ export function ColorGradingPage() {
         ...history.items.map((h) => h.name),
       ];
       const name = uniqueGradeName(prompt, taken);
-      addResult(id, res.imageUrl, name);
+      addResult(id, res.imageUrl, name, prompt);
       patchState(id, (s) =>
         s.run === run
           ? { ...s, status: "success", error: null, comparePos: 50, view: "edited" }
@@ -299,24 +299,32 @@ export function ColorGradingPage() {
 
   const hasAiResult = Boolean(aiUrl);
 
-  const saveBlob = (blob: Blob, name: string) => {
+  const saveBlob = (blob: Blob, fileName: string) => {
     const href = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = href;
-    a.download = gradeFileName(name);
+    a.download = fileName;
     a.click();
     setTimeout(() => URL.revokeObjectURL(href), 4000);
   };
 
   /** Download the selected AI result and remember it in the history. */
   const downloadAi = async () => {
-    if (!aiUrl || !active) return;
+    if (!active) return;
     try {
+      // Original view downloads the untouched source under its own name.
+      if (showOriginal) {
+        saveBlob(active.file, active.file.name);
+        return;
+      }
+      if (!aiUrl) return;
       const blob = await (await fetch(aiUrl)).blob();
       const name = aiName ?? "AI Color Grade";
-      saveBlob(blob, name);
+      // The file name comes from the prompt of THIS generation, not the field.
+      const prompt = activeState?.resultPrompts[st.resultIndex] ?? st.prompt;
+      saveBlob(blob, promptFileName(prompt, blob));
       await history.add(
-        { name, kind: "ai", sourceName: active.file.name, prompt: st.prompt, blob },
+        { name, kind: "ai", sourceName: active.file.name, prompt, blob },
         `ai-${activeId}-${aiUrl}`,
       );
     } catch {
@@ -331,7 +339,7 @@ export function ColorGradingPage() {
       const blob = await renderManualGrade(active.file, effective);
       const preset = PRESETS.find((p) => p.id === st.presetId);
       const name = preset ? `${preset.name} Manual` : "Manual Color Grade";
-      saveBlob(blob, name);
+      saveBlob(blob, gradeFileName(name));
       await history.add(
         {
           name,
@@ -354,7 +362,7 @@ export function ColorGradingPage() {
       toast("Upload an image to apply a saved result");
       return;
     }
-    addResult(activeId, URL.createObjectURL(item.blob), item.name);
+    addResult(activeId, URL.createObjectURL(item.blob), item.name, item.prompt ?? "");
   };
 
   const tray = (orientation: "horizontal" | "vertical") => (
@@ -902,7 +910,14 @@ export function ColorGradingPage() {
           <GradingHistory
             items={history.items}
             onUse={useHistoryItem}
-            onDownload={(item) => saveBlob(item.blob, item.name)}
+            onDownload={(item) =>
+              saveBlob(
+                item.blob,
+                item.kind === "ai"
+                  ? promptFileName(item.prompt, item.blob)
+                  : gradeFileName(item.name),
+              )
+            }
             onRemove={(id) => void history.remove(id)}
             onClear={() => void history.clear()}
           />
