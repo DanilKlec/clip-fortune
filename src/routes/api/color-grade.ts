@@ -76,7 +76,7 @@ export const Route = createFileRoute("/api/color-grade")({
             input: {
               prompt,
               image_urls,
-              image_size: "auto",
+              ...(imageSize ? { image_size: imageSize } : {}),
               output_format: "jpeg",
               enable_safety_checker: true,
             },
