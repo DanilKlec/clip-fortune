@@ -38,7 +38,6 @@ export const Route = createFileRoute("/api/color-grade")({
       },
 
       POST: async ({ request }) => {
-        if (!(await isAuthorized())) return err("Please sign in to use AI grading.", 401);
         const key = process.env["FAL_KEY"];
         if (!key) return err("AI generation is not configured yet.", 503);
 
