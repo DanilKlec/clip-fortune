@@ -84,6 +84,8 @@ export const Route = createFileRoute("/api/color-grade")({
           }
         }
 
+        const imageSize = clampSize(Number(form.get("width")), Number(form.get("height")));
+
         try {
           const { fal } = await import("@fal-ai/client");
           fal.config({ credentials: key });
