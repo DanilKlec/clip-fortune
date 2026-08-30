@@ -99,6 +99,32 @@ export async function renderManualGrade(file: File, adjustments: Adjustments): P
 }
 
 /**
+ * Full pixel dimensions of the original file, EXIF orientation applied.
+ * No canvas, no downscaling — the untouched file is what gets uploaded.
+ */
+async function readImageSize(file: File): Promise<{ width: number; height: number } | null> {
+  try {
+    if (typeof createImageBitmap === "function") {
+      const bmp = await createImageBitmap(file, { imageOrientation: "from-image" });
+      const size = { width: bmp.width, height: bmp.height };
+      bmp.close?.();
+      return size;
+    }
+  } catch {
+    /* fall through to the <img> path */
+  }
+  const src = URL.createObjectURL(file);
+  try {
+    const img = await loadImage(src);
+    return { width: img.naturalWidth, height: img.naturalHeight };
+  } catch {
+    return null;
+  } finally {
+    URL.revokeObjectURL(src);
+  }
+}
+
+/**
  * Real generation: the browser posts the original images and the prompt to the
  * server endpoint, which owns the Fal.ai credentials.
  */
