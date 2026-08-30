@@ -8,15 +8,6 @@ function err(message: string, status: number) {
   return Response.json({ error: message }, { status });
 }
 
-/** The endpoint is usable only from an unlocked project session. */
-async function isAuthorized() {
-  try {
-    const session = await readAuthSession();
-    return Boolean(session.data.email && session.data.unlockedAt);
-  } catch {
-    return false;
-  }
-}
 
 export const Route = createFileRoute("/api/color-grade")({
   server: {
