@@ -15,6 +15,8 @@ export type ColorGradeAdapter = (req: ColorGradeRequest) => Promise<ColorGradeRe
 
 const SYSTEM = `Apply professional color grading to image 1.
 
+Apply color grading only. Preserve the complete original frame, composition, camera framing, subject position, geometry and all image boundaries. Do not crop, zoom, resize, reframe, extend or remove any part of the source image.
+
 Preserve the original composition, crop, camera angle, subject identity, facial features, body proportions, objects, background structure, logos and readable text. Do not add, remove or replace people or objects. Do not redesign the scene.
 
 Change only the color palette, white balance, exposure, contrast, saturation, highlights, sharpness, tonal response and film grain.`;
