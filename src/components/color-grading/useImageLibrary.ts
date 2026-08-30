@@ -29,6 +29,8 @@ export interface ImageState {
   results: string[];
   /** Display name of each AI result, derived locally from the prompt. */
   resultNames: string[];
+  /** Prompt each AI result was generated with — used for download file names. */
+  resultPrompts: string[];
   /** Index into results; -1 means the live local grade is shown. */
   resultIndex: number;
   comparePos: number;
@@ -54,6 +56,7 @@ export function createImageState(): ImageState {
     error: null,
     results: [],
     resultNames: [],
+    resultPrompts: [],
     resultIndex: -1,
     comparePos: 50,
     lastRequest: null,
@@ -220,7 +223,7 @@ export function useImageLibrary() {
   }, []);
 
   /** Append a new AI result to an image's session history and select it. */
-  const addResult = useCallback((id: string, url: string, name: string) => {
+  const addResult = useCallback((id: string, url: string, name: string, prompt = "") => {
     setStates((prev) => {
       const cur = prev[id];
       if (!cur) {
@@ -230,9 +233,10 @@ export function useImageLibrary() {
       if (url.startsWith("blob:")) track(url);
       const results = [...cur.results, url];
       const resultNames = [...cur.resultNames, name];
+      const resultPrompts = [...cur.resultPrompts, prompt];
       return {
         ...prev,
-        [id]: { ...cur, results, resultNames, resultIndex: results.length - 1 },
+        [id]: { ...cur, results, resultNames, resultPrompts, resultIndex: results.length - 1 },
       };
     });
   }, []);
