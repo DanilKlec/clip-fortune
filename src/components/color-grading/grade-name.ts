@@ -163,9 +163,7 @@ export function promptFileSlug(prompt: string): string {
     .toLowerCase()
     .split(/\s+/)
     .filter(Boolean);
-  const significant = words
-    .filter((w) => !PROMPT_STOP.has(w) && !/^\d+$/.test(w))
-    .map(normalizeRu);
+  const significant = words.filter((w) => !PROMPT_STOP.has(w) && !/^\d+$/.test(w)).map(normalizeRu);
   const picked = (significant.length >= 3 ? significant.slice(0, 3) : words).slice(0, 5);
   let slug = "";
   let count = 0;

@@ -2,33 +2,17 @@ import {
   useEffect,
   useRef,
   useState,
-  type CSSProperties,
-  type DragEvent,
   type ChangeEvent,
+  type DragEvent,
+  type PointerEvent as ReactPointerEvent,
 } from "react";
 import { toast } from "sonner";
-import {
-  AlertTriangle,
-  Columns2,
-  Download,
-  Loader2,
-  RefreshCw,
-  RotateCcw,
-  Sparkles,
-  SlidersHorizontal,
-  UploadCloud,
-} from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
 import { GradedImage } from "./GradedImage";
 import { BeforeAfter } from "./BeforeAfter";
 import { ImageStage, useImageAspect } from "./ImageStage";
-import { ImageTray } from "./ImageTray";
-import { AdjustmentPanel } from "./AdjustmentPanel";
-import { PresetPicker } from "./PresetPicker";
-import { MobilePresetStrip } from "./MobilePresetStrip";
-import { MobileControlPanel } from "./MobileControlPanel";
-import { GenerateAction } from "./GenerateAction";
-import { CollapsibleSection } from "./CollapsibleSection";
+import { WorkRail } from "./WorkRail";
+import { ControlsPanel, type PanelTab } from "./ControlsPanel";
+import { ValueEditor } from "./ValueEditor";
 import { GradingHistory } from "./GradingHistory";
 import { useGradingHistory, type HistoryItem } from "./history-store";
 import { gradeFileName, promptFileName, uniqueGradeName } from "./grade-name";
@@ -38,7 +22,6 @@ import {
   createImageState,
   useImageLibrary,
   validateFiles,
-  type GradingMode,
   type ImageState,
 } from "./useImageLibrary";
 import { generateColorGrade, renderManualGrade } from "./adapter";
@@ -46,17 +29,25 @@ import {
   DEFAULT_ENABLED,
   NEUTRAL,
   PRESETS,
-  allEnabled,
   effectiveAdjustments,
   isNeutral,
   sameValues,
   type AdjustmentKey,
+  type Adjustments,
+  type EffectToggles,
   type Preset,
 } from "./grading";
 import { ThreeSteps } from "./sections/ThreeSteps";
 import { SeeItInAction } from "./sections/SeeItInAction";
 import { BuiltForCinematicLooks } from "./sections/BuiltForCinematicLooks";
 import { ExploreMoreApps } from "@/components/virality/landing/ExploreMoreApps";
+import "./work.css";
+
+interface Snapshot {
+  adjustments: Adjustments;
+  enabled: EffectToggles;
+  presetId: string | null;
+}
 
 export function ColorGradingPage() {
   const {
@@ -76,21 +67,17 @@ export function ColorGradingPage() {
   const history = useGradingHistory();
 
   const [dragOver, setDragOver] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
-  const [presetsOpen, setPresetsOpen] = useState(true);
-  // Mobile-only collapsible controls card; closed by default.
-  const [panelOpen, setPanelOpen] = useState(false);
-  // Sections start collapsed — sliders appear only when a section is expanded.
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({ color: false });
+  const [tab, setTab] = useState<PanelTab>("prompt");
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({
+    bloom: true,
+    halation: true,
+    haze: true,
+    grain: true,
+  });
   const [activeGroup, setActiveGroup] = useState("color");
+  const [editingKey, setEditingKey] = useState<AdjustmentKey | null>(null);
+  const editorBackup = useRef<{ value: number; enabled: boolean } | null>(null);
 
-  useEffect(() => {
-    const mql = window.matchMedia("(min-width: 1024px)");
-    const sync = () => setIsDesktop(mql.matches);
-    sync();
-    mql.addEventListener("change", sync);
-    return () => mql.removeEventListener("change", sync);
-  }, []);
   const dropRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const runSeq = useRef(0);
@@ -104,14 +91,10 @@ export function ColorGradingPage() {
   const st: ImageState = activeState ?? draft;
   const status = activeState ? activeState.status : "ready";
   const busy = status === "generating";
-  const custom = !allEnabled(st.enabled);
-  const mode = st.mode;
 
   const effective = effectiveAdjustments(st.adjustments, st.enabled);
-  /** Session history of AI results for the active image. */
   const results = activeState?.results ?? [];
   const resultNames = activeState?.resultNames ?? [];
-  /** Selected AI version, or null when the live manual grade is shown. */
   const aiUrl = activeState && st.resultIndex >= 0 ? (results[st.resultIndex] ?? null) : null;
   const aiName =
     activeState && st.resultIndex >= 0 ? (resultNames[st.resultIndex] ?? "AI Color Grade") : null;
@@ -119,23 +102,86 @@ export function ColorGradingPage() {
   const showOriginal = st.view === "original";
   const comparing = st.compare && canCompare && !showOriginal;
   /**
-   * Stage ratio follows the image actually on screen (AI results may differ
-   * slightly from the source). Every layer uses object-contain inside this
-   * shared box, so nothing is ever cropped — different ratios only letterbox.
+   * The stage follows the image actually on screen; every layer uses
+   * object-contain inside it, so nothing is ever cropped or upscaled.
    */
   const displaySrc = active ? (showOriginal ? active.url : (aiUrl ?? active.url)) : null;
   const ratio = useImageAspect(displaySrc);
 
-  /** Mode is remembered per image; switching never resets anything. */
-  const setMode = (next: GradingMode) => {
+  /* ------------------------------------------------------------------ */
+  /* undo / redo                                                         */
+  /* ------------------------------------------------------------------ */
+  const histKey = activeId ?? "draft";
+  const stacks = useRef<Record<string, { past: Snapshot[]; future: Snapshot[] }>>({});
+  const [, bumpHist] = useState(0);
+  const batching = useRef(false);
+  const stack = () => (stacks.current[histKey] ??= { past: [], future: [] });
+  const snapOf = (s: ImageState): Snapshot => ({
+    adjustments: { ...s.adjustments },
+    enabled: { ...s.enabled },
+    presetId: s.presetId,
+  });
+
+  const applyPatch = (patch: (s: ImageState) => Partial<ImageState>) => {
     if (!activeId) {
-      setDraft((s) => ({ ...s, mode: next }));
+      setDraft((s) => ({ ...s, ...patch(s) }));
       return;
     }
-    patchState(activeId, (s) => ({ ...s, mode: next }));
+    patchState(activeId, (s) => ({ ...s, ...patch(s), resultIndex: -1, view: "edited" }));
   };
 
-  /** View-only switches: they never touch the grade, result or the AI API. */
+  /** Manual edit — local preview only: no AI request, no prompt change. */
+  const editManual = (patch: (s: ImageState) => Partial<ImageState>) => {
+    if (!batching.current) {
+      const s = stack();
+      s.past.push(snapOf(st));
+      if (s.past.length > 60) s.past.shift();
+      s.future = [];
+      bumpHist((n) => n + 1);
+    }
+    applyPatch(patch);
+  };
+
+  const beginDrag = () => {
+    const s = stack();
+    s.past.push(snapOf(st));
+    s.future = [];
+    batching.current = true;
+    bumpHist((n) => n + 1);
+  };
+  const endDrag = () => {
+    batching.current = false;
+  };
+
+  const restore = (snap: Snapshot) =>
+    applyPatch(() => ({
+      adjustments: { ...snap.adjustments },
+      enabled: { ...snap.enabled },
+      presetId: snap.presetId,
+    }));
+
+  const undo = () => {
+    const s = stack();
+    const prev = s.past.pop();
+    if (!prev) return;
+    s.future.push(snapOf(st));
+    restore(prev);
+    bumpHist((n) => n + 1);
+  };
+  const redo = () => {
+    const s = stack();
+    const next = s.future.pop();
+    if (!next) return;
+    s.past.push(snapOf(st));
+    restore(next);
+    bumpHist((n) => n + 1);
+  };
+  const canUndo = (stacks.current[histKey]?.past.length ?? 0) > 0;
+  const canRedo = (stacks.current[histKey]?.future.length ?? 0) > 0;
+
+  /* ------------------------------------------------------------------ */
+  /* view state                                                          */
+  /* ------------------------------------------------------------------ */
   const setView = (view: "original" | "edited") => {
     if (!activeId) return;
     patchState(activeId, (s) => ({ ...s, view }));
@@ -144,22 +190,9 @@ export function ColorGradingPage() {
     if (!activeId) return;
     patchState(activeId, (s) => ({ ...s, compare: !s.compare, view: "edited" }));
   };
-  /** Pick a version to preview: -1 is the live manual grade, else an AI result. */
   const selectVersion = (index: number) => {
     if (!activeId) return;
     patchState(activeId, (s) => ({ ...s, resultIndex: index, view: "edited" }));
-  };
-
-  /**
-   * Manual edit — presets, sliders and switches. It only changes the local
-   * live preview: no AI request, no prompt change, no AI history change.
-   */
-  const editManual = (patch: (s: ImageState) => Partial<ImageState>) => {
-    if (!activeId) {
-      setDraft((s) => ({ ...s, ...patch(s) }));
-      return;
-    }
-    patchState(activeId, (s) => ({ ...s, ...patch(s), resultIndex: -1, view: "edited" }));
   };
 
   /** AI prompt edit — never touches manual adjustments. */
@@ -171,6 +204,9 @@ export function ColorGradingPage() {
     patchState(activeId, (s) => ({ ...s, prompt, error: null }));
   };
 
+  /* ------------------------------------------------------------------ */
+  /* files                                                               */
+  /* ------------------------------------------------------------------ */
   const acceptFiles = (list: FileList | null) => {
     if (!list || list.length === 0) return;
     const { accepted: ok, errors } = validateFiles(
@@ -193,10 +229,7 @@ export function ColorGradingPage() {
     );
   };
 
-  /**
-   * Replacement uses the very same validation. A rejected file leaves the
-   * previously loaded image untouched.
-   */
+  /** Replacement uses the same validation; a rejected file changes nothing. */
   const replaceFile = (id: string, file: File) => {
     const { accepted, errors } = validateFiles(
       [file],
@@ -214,6 +247,9 @@ export function ColorGradingPage() {
     acceptFiles(e.dataTransfer.files);
   };
 
+  /* ------------------------------------------------------------------ */
+  /* manual grading                                                      */
+  /* ------------------------------------------------------------------ */
   const updateAdjustment = (key: AdjustmentKey, value: number) => {
     editManual((s) => {
       const adjustments = { ...s.adjustments, [key]: value };
@@ -221,26 +257,21 @@ export function ColorGradingPage() {
       return { adjustments, presetId: match?.id ?? null };
     });
   };
-
-  const toggleEffect = (key: AdjustmentKey, on: boolean) => {
+  const toggleEffect = (key: AdjustmentKey, on: boolean) =>
     editManual((s) => ({ enabled: { ...s.enabled, [key]: on } }));
-  };
-
   const resetKey = (key: AdjustmentKey) => updateAdjustment(key, NEUTRAL[key]);
-
-  const resetAll = () => {
+  const resetAll = () =>
     editManual(() => ({
       adjustments: { ...NEUTRAL },
       enabled: { ...DEFAULT_ENABLED },
       presetId: PRESETS[0].id,
     }));
-  };
-
-  const pickPreset = (preset: Preset) => {
+  const pickPreset = (preset: Preset) =>
     editManual(() => ({ adjustments: { ...preset.values }, presetId: preset.id }));
-  };
 
-  /** AI generation — original files plus the prompt, nothing else. */
+  /* ------------------------------------------------------------------ */
+  /* AI generation — original files plus the prompt, nothing else        */
+  /* ------------------------------------------------------------------ */
   const generate = async (id: string | null, promptOverride?: string) => {
     if (!id) return;
     const img = images.find((i) => i.id === id);
@@ -260,11 +291,7 @@ export function ColorGradingPage() {
     try {
       // The selected image is primary; the others travel as reference frames.
       const ordered = [img.file, ...images.filter((i) => i.id !== id).map((i) => i.file)];
-      const res = await generateColorGrade({
-        images: ordered.slice(0, MAX_IMAGES),
-        prompt,
-      });
-      // Discard responses that belong to a superseded request or a deleted image.
+      const res = await generateColorGrade({ images: ordered.slice(0, MAX_IMAGES), prompt });
       if (statesRef.current[id]?.run !== run) {
         if (res.imageUrl.startsWith("blob:")) URL.revokeObjectURL(res.imageUrl);
         return;
@@ -280,7 +307,6 @@ export function ColorGradingPage() {
           ? { ...s, status: "success", error: null, comparePos: 50, view: "edited" }
           : s,
       );
-      // Persist to the local history right away.
       try {
         const blob = await (await fetch(res.imageUrl)).blob();
         await history.add(
@@ -297,8 +323,9 @@ export function ColorGradingPage() {
     }
   };
 
-  const hasAiResult = Boolean(aiUrl);
-
+  /* ------------------------------------------------------------------ */
+  /* downloads                                                           */
+  /* ------------------------------------------------------------------ */
   const saveBlob = (blob: Blob, fileName: string) => {
     const href = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -308,11 +335,9 @@ export function ColorGradingPage() {
     setTimeout(() => URL.revokeObjectURL(href), 4000);
   };
 
-  /** Download the selected AI result and remember it in the history. */
   const downloadAi = async () => {
     if (!active) return;
     try {
-      // Original view downloads the untouched source under its own name.
       if (showOriginal) {
         saveBlob(active.file, active.file.name);
         return;
@@ -332,7 +357,6 @@ export function ColorGradingPage() {
     }
   };
 
-  /** Download the manual grade rendered locally from the original file. */
   const downloadManual = async () => {
     if (!active) return;
     try {
@@ -356,7 +380,20 @@ export function ColorGradingPage() {
     }
   };
 
-  /** Open a stored result as the active version of the current image. */
+  /** Toolbar download: the AI result when one is shown, otherwise the manual grade. */
+  const download = () => {
+    if (!active) return;
+    if (showOriginal) {
+      saveBlob(active.file, active.file.name);
+      return;
+    }
+    if (aiUrl) {
+      void downloadAi();
+      return;
+    }
+    void downloadManual();
+  };
+
   const useHistoryItem = (item: HistoryItem) => {
     if (!activeId) {
       toast("Upload an image to apply a saved result");
@@ -365,437 +402,39 @@ export function ColorGradingPage() {
     addResult(activeId, URL.createObjectURL(item.blob), item.name, item.prompt ?? "");
   };
 
-  const tray = (orientation: "horizontal" | "vertical") => (
-    <ImageTray
-      orientation={orientation}
-      images={images}
-      activeId={activeId}
-      onSelect={setActiveId}
-      onRemove={remove}
-      onReplace={replace}
-      onAdd={acceptFiles}
-    />
-  );
+  /* ------------------------------------------------------------------ */
+  /* mobile parameter editor                                             */
+  /* ------------------------------------------------------------------ */
+  const openParam = (key: AdjustmentKey) => {
+    editorBackup.current = { value: st.adjustments[key], enabled: st.enabled[key] };
+    setEditingKey(key);
+  };
+  const closeEditor = () => {
+    editorBackup.current = null;
+    setEditingKey(null);
+  };
+  const cancelEditor = () => {
+    const backup = editorBackup.current;
+    if (editingKey && backup) {
+      applyPatch((s) => ({
+        adjustments: { ...s.adjustments, [editingKey]: backup.value },
+        enabled: { ...s.enabled, [editingKey]: backup.enabled },
+      }));
+    }
+    closeEditor();
+  };
 
-  const modeSwitch = (
-    <div
-      role="tablist"
-      aria-label="Grading mode"
-      className="flex w-full min-w-0 gap-1 rounded-full p-1"
-      style={{ background: "var(--tile)" }}
-    >
-      {[
-        { id: "manual" as const, label: "Manual", Icon: SlidersHorizontal },
-        { id: "ai" as const, label: "AI", Icon: Sparkles },
-      ].map(({ id, label, Icon }) => {
-        const on = mode === id;
-        return (
-          <button
-            key={id}
-            type="button"
-            role="tab"
-            aria-selected={on}
-            onClick={() => setMode(id)}
-            className="flex h-9 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full text-[12px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:text-[13px]"
-            style={{
-              background: on ? "var(--volt-dim)" : "transparent",
-              color: on ? "var(--volt)" : undefined,
-            }}
-          >
-            <Icon size={14} strokeWidth={2} />
-            {label}
-          </button>
-        );
-      })}
-    </div>
-  );
+  const openFilePicker = () => fileRef.current?.click();
 
-  const adjustmentsNode = (
-    <AdjustmentPanel
-      values={st.adjustments}
-      enabled={st.enabled}
-      onChange={updateAdjustment}
-      onToggle={toggleEffect}
-      onResetKey={resetKey}
-      onResetAll={resetAll}
-      grouped
-      hideResetAll
-      tabbed={!isDesktop}
-      activeGroup={activeGroup}
-      onSelectGroup={setActiveGroup}
-      openGroups={openGroups}
-      onToggleGroup={(gid) => setOpenGroups((prev) => ({ ...prev, [gid]: !prev[gid] }))}
-    />
-  );
+  const stageKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (active) return;
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openFilePicker();
+    }
+  };
 
-  const presetsNode = (
-    <CollapsibleSection
-      id="presets"
-      label="Presets"
-      open={presetsOpen}
-      onToggle={() => setPresetsOpen((v) => !v)}
-    >
-      <PresetPicker activeId={st.presetId} custom={custom} onPick={pickPreset} hideHeading />
-    </CollapsibleSection>
-  );
-
-  const manualActions = (
-    <div className="flex min-w-0 items-center gap-2">
-      <button
-        type="button"
-        onClick={resetAll}
-        className="button-utility flex h-11 shrink-0 items-center justify-center gap-2 rounded-full px-4 text-[13px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <RotateCcw size={15} strokeWidth={2} />
-        Reset
-      </button>
-      <button
-        type="button"
-        onClick={() => void downloadManual()}
-        disabled={!active}
-        className="button-cta flex h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-full px-4 text-[14px] font-semibold disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <Download size={16} strokeWidth={2} />
-        Download
-      </button>
-    </div>
-  );
-
-  const generateButton = (
-    <button
-      type="button"
-      disabled={!active || busy}
-      onClick={() => void generate(activeId)}
-      className="button-cta flex h-12 w-full items-center justify-center gap-2 rounded-full text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-45"
-    >
-      {busy ? (
-        <Loader2 size={18} strokeWidth={2} className="animate-spin" />
-      ) : (
-        <Sparkles size={18} strokeWidth={2} />
-      )}
-      {busy ? "Generating…" : "Generate"}
-    </button>
-  );
-
-  const errorBlock = status === "error" && (
-    <div
-      className="grid min-w-0 gap-3 rounded-xl border p-3"
-      style={{ borderColor: "var(--coral-bdr)", background: "var(--coral-dim)" }}
-    >
-      <div className="flex min-w-0 items-start gap-2">
-        <AlertTriangle size={16} strokeWidth={2} className="mt-0.5 shrink-0 text-destructive" />
-        <p className="min-w-0 flex-1 text-[13px] font-medium text-foreground">
-          {st.error ?? "Generation failed"}
-        </p>
-      </div>
-      <button
-        type="button"
-        onClick={() => void generate(activeId, st.lastRequest?.prompt)}
-        className="button-utility flex h-11 w-full items-center justify-center gap-2 rounded-full px-4 text-[13px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <RefreshCw size={15} strokeWidth={2} />
-        Retry
-      </button>
-    </div>
-  );
-
-  /** Primary mobile action: always visible, no need to open the settings panel. */
-  const mobileCta =
-    mode === "manual" ? (
-      <button
-        type="button"
-        onClick={() => void downloadManual()}
-        disabled={!active}
-        className="button-cta flex h-12 w-full items-center justify-center gap-2 rounded-full text-[14px] font-semibold disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <Download size={18} strokeWidth={2} />
-        Download
-      </button>
-    ) : (
-      <GenerateAction
-        mode="ai"
-        busy={busy}
-        disabled={!active}
-        onGenerate={() => void generate(activeId)}
-      />
-    );
-
-  const aiPanel = (showGenerate: boolean) => (
-    <div className="min-w-0 space-y-3">
-      <div className="min-w-0">
-        <div className="flex items-center gap-2">
-          <label
-            htmlFor="grade-prompt"
-            className="font-display text-[13px] font-extrabold uppercase tracking-[0.16em] text-muted-foreground"
-          >
-            Describe your look
-          </label>
-          <span className="badge-sky">AI</span>
-        </div>
-        <Textarea
-          id="grade-prompt"
-          value={st.prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Describe the color grade you want…"
-          rows={3}
-          className="mt-3 w-full rounded-xl border text-[16px] placeholder:text-muted-foreground focus-visible:ring-2 sm:text-[15px]"
-          style={{ background: "var(--tile)", borderColor: "var(--card-border)" }}
-        />
-        <p className="mt-2 text-[12px] font-medium text-muted-foreground">
-          {!active
-            ? "Add an image to unlock AI grading."
-            : "The AI works from your original files and this prompt only — manual presets and sliders are not sent."}
-        </p>
-      </div>
-      {showGenerate && generateButton}
-      {errorBlock}
-      {results.length > 0 && (
-        <>
-          <div className="grid min-w-0 gap-2">
-            <button
-              type="button"
-              onClick={() => void downloadAi()}
-              disabled={!hasAiResult}
-              className="button-cta flex h-11 w-full items-center justify-center gap-2 rounded-full px-4 text-[14px] font-semibold disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <Download size={16} strokeWidth={2} />
-              Download {aiName ?? "result"}
-            </button>
-            <button
-              type="button"
-              onClick={() => void generate(activeId, st.lastRequest?.prompt)}
-              className="button-utility flex h-11 w-full items-center justify-center gap-2 rounded-full px-5 text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <RefreshCw size={16} strokeWidth={2} />
-              Generate again
-            </button>
-          </div>
-          <div className="scrollbar-hide -mx-1 flex gap-2 overflow-x-auto px-1">
-            {results.map((url, i) => {
-              const picked = st.resultIndex === i && !showOriginal;
-              return (
-                <button
-                  key={url}
-                  type="button"
-                  onClick={() => selectVersion(i)}
-                  aria-pressed={picked}
-                  className="flex w-[74px] shrink-0 flex-col items-center gap-1 focus-visible:outline-none"
-                >
-                  <span
-                    className="block h-14 w-full overflow-hidden rounded-lg border-2 transition-colors"
-                    style={{ borderColor: picked ? "var(--volt)" : "var(--card-border)" }}
-                  >
-                    <img
-                      src={url}
-                      alt={resultNames[i] ?? `AI result ${i + 1}`}
-                      draggable={false}
-                      className="h-full w-full object-cover"
-                    />
-                  </span>
-                  <span
-                    className="w-full truncate text-center text-[10px] font-semibold"
-                    title={resultNames[i]}
-                    style={{ color: picked ? "var(--volt)" : undefined }}
-                  >
-                    {resultNames[i] ?? `AI ${i + 1}`}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </>
-      )}
-    </div>
-  );
-
-  const previewCard = (
-    <div
-      className={`glass order-2 flex min-h-0 min-w-0 flex-col rounded-2xl p-2 sm:p-4 lg:order-none lg:h-full ${
-        !isDesktop && mode === "manual" ? "sticky top-[68px] z-20" : ""
-      }`}
-      style={{ boxShadow: "var(--shadow-card)" }}
-    >
-      <div
-        ref={dropRef}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragOver(true);
-        }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={onDrop}
-        onClick={active ? undefined : () => fileRef.current?.click()}
-        onKeyDown={
-          active
-            ? undefined
-            : (e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  fileRef.current?.click();
-                }
-              }
-        }
-        role={active ? undefined : "button"}
-        tabIndex={active ? undefined : 0}
-        aria-label={active ? undefined : "Drop images or click to upload"}
-        className={`cg-dropzone relative flex h-[40dvh] w-full min-w-0 items-center justify-center overflow-hidden sm:h-auto sm:min-h-[320px] lg:flex-1 lg:min-h-0 ${
-          active ? "" : "cg-dropzone-interactive cursor-pointer"
-        } ${dragOver ? "cg-dropzone-active" : ""}`}
-        style={{ backgroundColor: "var(--tile)" }}
-      >
-        <input
-          ref={fileRef}
-          type="file"
-          multiple
-          accept="image/png,image/jpeg,image/webp"
-          className="hidden"
-          onChange={(e: ChangeEvent<HTMLInputElement>) => {
-            acceptFiles(e.target.files);
-            e.target.value = "";
-          }}
-        />
-
-        {!active && (
-          <div className="flex h-full w-full flex-col items-center justify-center px-4 py-6 text-center sm:px-6 sm:py-10">
-            <div
-              className="mx-auto flex h-12 w-12 items-center justify-center rounded-full"
-              style={{ background: "var(--tile)" }}
-            >
-              <UploadCloud size={24} strokeWidth={1.5} className="text-volt" />
-            </div>
-            <div className="mt-4 text-[13px] font-medium text-foreground">
-              Drop images or click to upload
-            </div>
-            <div className="font-mono mt-1 text-[11px] font-medium text-muted-foreground">
-              {ACCEPTED_LABEL} · up to {MAX_IMAGES} files · max 20MB
-            </div>
-          </div>
-        )}
-
-        {active && showOriginal && (
-          <ImageStage ratio={ratio} maxHeight="100%">
-            <img
-              src={active.url}
-              alt="Original image"
-              draggable={false}
-              className="absolute inset-0 h-full w-full object-contain object-center"
-            />
-          </ImageStage>
-        )}
-
-        {active && !showOriginal && !comparing && (
-          <ImageStage ratio={ratio} maxHeight="100%">
-            <GradedImage
-              src={aiUrl ?? active.url}
-              alt={active.file.name}
-              adjustments={aiUrl ? NEUTRAL : effective}
-              className="absolute inset-0 h-full w-full"
-              imgClassName="h-full w-full object-contain object-center"
-            />
-          </ImageStage>
-        )}
-
-        {active && comparing && (
-          <BeforeAfter
-            label="Compare original and graded image"
-            ratio={ratio}
-            maxHeight="100%"
-            position={st.comparePos}
-            onPositionChange={(pos) =>
-              activeId && patchState(activeId, (s) => ({ ...s, comparePos: pos }))
-            }
-            before={
-              <img
-                src={active.url}
-                alt="Original"
-                draggable={false}
-                className="absolute inset-0 h-full w-full object-contain object-center"
-              />
-            }
-            after={
-              aiUrl ? (
-                <img
-                  src={aiUrl}
-                  alt="Graded result"
-                  draggable={false}
-                  className="absolute inset-0 h-full w-full object-contain object-center"
-                />
-              ) : (
-                <GradedImage
-                  src={active.url}
-                  alt="Local preview"
-                  adjustments={effective}
-                  className="absolute inset-0 h-full w-full"
-                  imgClassName="h-full w-full object-contain object-center"
-                />
-              )
-            }
-          />
-        )}
-
-        {busy && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background/70 px-6 text-center backdrop-blur-sm">
-            <Loader2 size={26} strokeWidth={2} className="animate-spin text-volt" />
-            <p className="text-[14px] font-semibold text-foreground">Applying your grade…</p>
-            <p className="text-[13px] font-medium text-muted-foreground">
-              Rendering tone, colour and grain. This takes a moment.
-            </p>
-          </div>
-        )}
-      </div>
-
-      {active && (
-        <div className="mt-2 flex w-full min-w-0 flex-wrap items-center justify-between gap-2 sm:mt-3">
-          <button
-            type="button"
-            role="switch"
-            aria-checked={comparing}
-            disabled={!canCompare}
-            onClick={toggleCompare}
-            className="flex h-9 items-center gap-1.5 rounded-full border px-2.5 text-[12px] font-semibold transition-colors disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-10 sm:gap-2 sm:px-3 sm:text-[13px]"
-            style={{
-              borderColor: comparing ? "var(--volt)" : "var(--card-border)",
-              background: comparing ? "var(--volt-dim)" : "var(--tile)",
-              color: comparing ? "var(--volt)" : undefined,
-            }}
-          >
-            <Columns2 size={15} strokeWidth={2} />
-            Compare
-          </button>
-
-          <div className="flex min-w-0 items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setView("original")}
-              aria-pressed={showOriginal}
-              className="flex h-9 items-center rounded-full border px-3 text-[12px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-10 sm:text-[13px]"
-              style={{
-                borderColor: showOriginal ? "var(--volt)" : "var(--card-border)",
-                background: showOriginal ? "var(--volt-dim)" : "var(--tile)",
-                color: showOriginal ? "var(--volt)" : undefined,
-              }}
-            >
-              Original
-            </button>
-            <button
-              type="button"
-              onClick={() => selectVersion(-1)}
-              aria-pressed={!showOriginal && st.resultIndex === -1}
-              className="flex h-9 items-center rounded-full border px-3 text-[12px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-10 sm:text-[13px]"
-              style={{
-                borderColor:
-                  !showOriginal && st.resultIndex === -1 ? "var(--volt)" : "var(--card-border)",
-                background:
-                  !showOriginal && st.resultIndex === -1 ? "var(--volt-dim)" : "var(--tile)",
-                color: !showOriginal && st.resultIndex === -1 ? "var(--volt)" : undefined,
-              }}
-            >
-              Edited
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+  const stopStageDrag = (e: ReactPointerEvent<HTMLDivElement>) => e.stopPropagation();
 
   return (
     <div className="w-full">
@@ -811,7 +450,6 @@ export function ColorGradingPage() {
           <span className="text-foreground">AI Color Grading</span>
         </nav>
 
-        {/* One card holds the feature title, its description and the workspace. */}
         <div
           className="glass min-w-0 rounded-2xl p-3 sm:p-5 lg:p-6"
           style={{ boxShadow: "var(--shadow-card)" }}
@@ -827,83 +465,368 @@ export function ColorGradingPage() {
             the AI grade the original file. Manual and AI stay independent.
           </p>
 
-          {/* The shared parent owns the workspace height; every column stretches to it. */}
+          {/* ---------------- workspace ---------------- */}
           <div
-            className="mt-2 grid w-full min-w-0 grid-cols-1 items-start gap-2 sm:mt-6 sm:gap-4 lg:h-[var(--cg-workspace-h)] lg:min-h-[var(--cg-workspace-min-h)] lg:max-h-[900px] lg:items-stretch lg:grid-cols-[120px_minmax(0,1fr)_320px] xl:grid-cols-[140px_minmax(0,1fr)_340px]"
-            style={
-              {
-                "--cg-workspace-h": "clamp(560px, calc(100dvh - 260px), 900px)",
-                "--cg-workspace-min-h": "min(720px, calc(100dvh - 180px))",
-              } as CSSProperties
-            }
+            className={`cg-work${active ? "" : " cg-no-image"}${editingKey ? " cg-editing" : ""}`}
           >
-            <aside
-              aria-label="Uploaded images"
-              className="order-1 flex h-[96px] min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl p-2 sm:h-[112px] sm:p-3 lg:order-none lg:h-full"
-              style={{ background: "var(--tile)" }}
-            >
-              <h2 className="button-meta mb-2 hidden px-1 text-muted-foreground lg:block">
-                Images
-              </h2>
-              <div className="min-w-0 lg:hidden">{tray("horizontal")}</div>
-              <div className="hidden min-h-0 flex-1 lg:flex lg:flex-col">{tray("vertical")}</div>
-            </aside>
+            <WorkRail
+              images={images}
+              activeId={activeId}
+              onSelect={setActiveId}
+              onRemove={remove}
+              onReplace={replaceFile}
+              onAdd={acceptFiles}
+            />
 
-            {previewCard}
-
-            {!isDesktop && mode === "manual" && (
-              <div className="order-3 min-w-0 lg:hidden">
-                <MobilePresetStrip activeId={st.presetId} custom={custom} onPick={pickPreset} />
-              </div>
-            )}
-
-            {isDesktop ? (
-              <aside
-                className="glass order-3 flex min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl lg:order-none lg:h-full"
-                style={{ boxShadow: "var(--shadow-card)" }}
-              >
-                <div
-                  className="shrink-0 border-b p-3 sm:p-4"
-                  style={{ borderColor: "var(--card-border)" }}
+            <section className="cg-canvas-card" aria-label="Preview">
+              <div className="cg-toolbar">
+                <button
+                  type="button"
+                  className={`cg-pill cg-cmp cg-btn-compare${comparing ? " cg-on" : ""}`}
+                  role="switch"
+                  aria-checked={comparing}
+                  disabled={!canCompare}
+                  onClick={toggleCompare}
                 >
-                  {modeSwitch}
-                </div>
-                <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overflow-x-hidden p-4 sm:p-5">
-                  {mode === "manual" ? (
-                    <>
-                      {presetsNode}
-                      {adjustmentsNode}
-                    </>
-                  ) : (
-                    aiPanel(true)
-                  )}
-                </div>
-                {mode === "manual" && (
-                  <div
-                    className="shrink-0 border-t px-4 py-3 sm:px-5"
-                    style={{ borderColor: "var(--card-border)", background: "var(--tile)" }}
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="14"
+                    height="14"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden
                   >
-                    {manualActions}
+                    <path d="M8 3 4 7l4 4" />
+                    <path d="M4 7h16" />
+                    <path d="m16 21 4-4-4-4" />
+                    <path d="M20 17H4" />
+                  </svg>
+                  <span className="cg-lbl">Compare</span>
+                </button>
+
+                <div className="cg-tool-mid">
+                  <button
+                    type="button"
+                    className="cg-pill cg-icon"
+                    title="Undo"
+                    aria-label="Undo"
+                    disabled={!canUndo}
+                    onClick={undo}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="14"
+                      height="14"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden
+                    >
+                      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                      <path d="M3 3v5h5" />
+                    </svg>
+                  </button>
+                  <button type="button" className="cg-pill" onClick={resetAll} disabled={!active}>
+                    Reset
+                  </button>
+                  <button
+                    type="button"
+                    className="cg-pill cg-icon"
+                    title="Redo"
+                    aria-label="Redo"
+                    disabled={!canRedo}
+                    onClick={redo}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="14"
+                      height="14"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden
+                    >
+                      <path d="M21 12a9 9 0 1 1-9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                      <path d="M21 3v5h-5" />
+                    </svg>
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  className="cg-pill cg-solid cg-btn-download"
+                  disabled={!active || busy}
+                  onClick={download}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="14"
+                    height="14"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden
+                  >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <path d="m7 10 5 5 5-5" />
+                    <path d="M12 15V3" />
+                  </svg>
+                  <span className="cg-lbl">Download</span>
+                </button>
+              </div>
+
+              <div
+                ref={dropRef}
+                className={`cg-stage${active ? "" : " cg-empty"}${dragOver ? " cg-drag" : ""}`}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setDragOver(true);
+                }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={onDrop}
+                onClick={active ? undefined : openFilePicker}
+                onKeyDown={stageKeyDown}
+                role={active ? undefined : "button"}
+                tabIndex={active ? undefined : 0}
+                aria-label={active ? undefined : "Drop images or click to upload"}
+              >
+                <input
+                  ref={fileRef}
+                  type="file"
+                  multiple
+                  accept="image/png,image/jpeg,image/webp"
+                  hidden
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    acceptFiles(e.target.files);
+                    e.target.value = "";
+                  }}
+                />
+
+                {!active && (
+                  <div className="cg-drop">
+                    <span className="cg-circle">
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        aria-hidden
+                      >
+                        <path d="M5 12h14" />
+                        <path d="M12 5v14" />
+                      </svg>
+                    </span>
+                    <h2>
+                      Drop your images
+                      <br />
+                      to start color grading
+                    </h2>
+                    <p>
+                      Upload from device · {ACCEPTED_LABEL} · up to {MAX_IMAGES} files
+                    </p>
                   </div>
                 )}
-              </aside>
-            ) : (
-              <div className="order-4 min-w-0">
-                <MobileControlPanel
-                  open={panelOpen}
-                  onToggle={() => setPanelOpen((v) => !v)}
-                  subtitle={mode === "manual" ? "Manual grading" : "AI color grading"}
-                  cta={mobileCta}
-                  actions={mode === "manual" ? manualActions : undefined}
-                >
-                  {modeSwitch}
-                  {mode === "manual" ? (
-                    <div className="min-w-0 space-y-3">{adjustmentsNode}</div>
-                  ) : (
-                    <div className="min-w-0">{aiPanel(false)}</div>
-                  )}
-                </MobileControlPanel>
+
+                {active && (
+                  <div className="cg-viewer" onPointerDown={stopStageDrag}>
+                    {showOriginal && (
+                      <ImageStage ratio={ratio} maxHeight="100%">
+                        <img
+                          src={active.url}
+                          alt="Original image"
+                          draggable={false}
+                          className="absolute inset-0 h-full w-full object-contain object-center"
+                        />
+                      </ImageStage>
+                    )}
+
+                    {!showOriginal && !comparing && (
+                      <ImageStage ratio={ratio} maxHeight="100%">
+                        <GradedImage
+                          src={aiUrl ?? active.url}
+                          alt={active.file.name}
+                          adjustments={aiUrl ? NEUTRAL : effective}
+                          className="absolute inset-0 h-full w-full"
+                          imgClassName="h-full w-full object-contain object-center"
+                        />
+                      </ImageStage>
+                    )}
+
+                    {comparing && (
+                      <BeforeAfter
+                        label="Compare original and graded image"
+                        ratio={ratio}
+                        maxHeight="100%"
+                        position={st.comparePos}
+                        onPositionChange={(pos) =>
+                          activeId && patchState(activeId, (s) => ({ ...s, comparePos: pos }))
+                        }
+                        before={
+                          <img
+                            src={active.url}
+                            alt="Original"
+                            draggable={false}
+                            className="absolute inset-0 h-full w-full object-contain object-center"
+                          />
+                        }
+                        after={
+                          aiUrl ? (
+                            <img
+                              src={aiUrl}
+                              alt="Graded result"
+                              draggable={false}
+                              className="absolute inset-0 h-full w-full object-contain object-center"
+                            />
+                          ) : (
+                            <GradedImage
+                              src={active.url}
+                              alt="Local preview"
+                              adjustments={effective}
+                              className="absolute inset-0 h-full w-full"
+                              imgClassName="h-full w-full object-contain object-center"
+                            />
+                          )
+                        }
+                      />
+                    )}
+                  </div>
+                )}
+
+                {busy && (
+                  <div className="cg-busy" role="status" aria-live="polite">
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="26"
+                      height="26"
+                      fill="none"
+                      stroke="var(--volt)"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      className="animate-spin"
+                      aria-hidden
+                    >
+                      <path d="M21 12a9 9 0 1 1-6.22-8.56" />
+                    </svg>
+                    <p>Applying your grade…</p>
+                    <p className="cg-sub">Rendering tone, colour and grain. This takes a moment.</p>
+                  </div>
+                )}
               </div>
+
+              {active && (
+                <div className="cg-strip">
+                  <div className="cg-shots">
+                    <button
+                      type="button"
+                      className="cg-shot"
+                      aria-pressed={showOriginal}
+                      onClick={() => setView("original")}
+                    >
+                      <img src={active.url} alt="" draggable={false} />
+                      <span>Original</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="cg-shot"
+                      aria-pressed={!showOriginal && st.resultIndex === -1}
+                      onClick={() => selectVersion(-1)}
+                    >
+                      <img src={active.url} alt="" draggable={false} />
+                      <span>Graded</span>
+                    </button>
+                    {results.map((url, i) => (
+                      <button
+                        key={url}
+                        type="button"
+                        className="cg-shot"
+                        aria-pressed={!showOriginal && st.resultIndex === i}
+                        onClick={() => selectVersion(i)}
+                        title={resultNames[i]}
+                      >
+                        <img src={url} alt="" draggable={false} />
+                        <span>{resultNames[i] ?? `AI ${i + 1}`}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    className="cg-dl-fab"
+                    aria-label="Download"
+                    disabled={busy}
+                    onClick={download}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="20"
+                      height="20"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <path d="m7 10 5 5 5-5" />
+                      <path d="M12 15V3" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </section>
+
+            <ControlsPanel
+              tab={tab}
+              onTab={setTab}
+              hasImage={Boolean(active)}
+              prompt={st.prompt}
+              onPrompt={setPrompt}
+              onGenerate={() => void generate(activeId)}
+              busy={busy}
+              error={status === "error" ? (st.error ?? "Generation failed") : null}
+              onRetry={() => void generate(activeId, st.lastRequest?.prompt)}
+              presetId={st.presetId}
+              onPickPreset={pickPreset}
+              values={st.adjustments}
+              enabled={st.enabled}
+              onChange={updateAdjustment}
+              onToggle={toggleEffect}
+              onResetKey={resetKey}
+              onResetAll={resetAll}
+              collapsed={collapsed}
+              onToggleGroup={(id) => setCollapsed((c) => ({ ...c, [id]: !c[id] }))}
+              activeGroup={activeGroup}
+              onSelectGroup={setActiveGroup}
+              onOpenParam={openParam}
+              onDragStart={beginDrag}
+              onDragEnd={endDrag}
+            />
+
+            {editingKey && (
+              <ValueEditor
+                paramKey={editingKey}
+                value={st.adjustments[editingKey]}
+                enabled={st.enabled[editingKey]}
+                onChange={(v) => updateAdjustment(editingKey, v)}
+                onToggle={(on) => toggleEffect(editingKey, on)}
+                onReset={() => resetKey(editingKey)}
+                onCancel={cancelEditor}
+                onApply={closeEditor}
+                onDragStart={beginDrag}
+                onDragEnd={endDrag}
+              />
             )}
           </div>
 
