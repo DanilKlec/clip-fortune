@@ -12,8 +12,10 @@ const ICONS: Record<string, string> = {
     '<rect x="4.8" y="4.8" width="14.4" height="14.4" rx="3"/><path d="M12 6.2h4.2a1.8 1.8 0 0 1 1.8 1.8v8a1.8 1.8 0 0 1-1.8 1.8H12Z" fill="currentColor" stroke="none"/>',
   shadows:
     '<rect x="4.8" y="4.8" width="14.4" height="14.4" rx="3"/><path d="M8.4 8.6h7.2"/><path d="M8.4 12h7.2"/><path d="M8.4 15.4h7.2"/>',
-  whites: '<path d="M5 16v-2.5"/><path d="M12 16v-5.5"/><path d="M19 16V6.5"/><path d="M4 19.5h16"/>',
-  blacks: '<path d="M5 16V6.5"/><path d="M12 16v-5.5"/><path d="M19 16v-2.5"/><path d="M4 19.5h16"/>',
+  whites:
+    '<path d="M5 16v-2.5"/><path d="M12 16v-5.5"/><path d="M19 16V6.5"/><path d="M4 19.5h16"/>',
+  blacks:
+    '<path d="M5 16V6.5"/><path d="M12 16v-5.5"/><path d="M19 16v-2.5"/><path d="M4 19.5h16"/>',
   splittone: '<circle cx="9.5" cy="12" r="5.5"/><circle cx="14.5" cy="12" r="5.5"/>',
   exposure:
     '<circle cx="12" cy="12" r="4"/><path d="M12 3.6v2"/><path d="M12 18.4v2"/><path d="M3.6 12h2"/><path d="M18.4 12h2"/><path d="m6.1 6.1 1.4 1.4"/><path d="m16.5 16.5 1.4 1.4"/><path d="m17.9 6.1-1.4 1.4"/><path d="m7.5 16.5-1.4 1.4"/>',
@@ -21,8 +23,7 @@ const ICONS: Record<string, string> = {
   fade: '<path d="M12 4.8a7.2 7.2 0 0 1 0 14.4Z" fill="currentColor" stroke="none"/><path d="M7.6 8.4v7.2"/><path d="M5 10v4"/><circle cx="12" cy="12" r="7.2"/>',
   sharpness: '<path d="M12 5 19.5 18.5h-15Z"/>',
   clarity: '<circle cx="12" cy="12" r="7"/><path d="M6.9 17.1 17.1 6.9"/>',
-  soften:
-    '<circle cx="12" cy="12" r="7" stroke-dasharray="2 2.6"/><circle cx="12" cy="12" r="3"/>',
+  soften: '<circle cx="12" cy="12" r="7" stroke-dasharray="2 2.6"/><circle cx="12" cy="12" r="3"/>',
   texture:
     '<path d="M4.5 9.5h15"/><path d="M4.5 14.5h15"/><path d="M9.5 4.5v15"/><path d="M14.5 4.5v15"/>',
   bloom:

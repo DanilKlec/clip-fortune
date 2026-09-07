@@ -112,7 +112,12 @@ export function WorkRail({ images, activeId, onSelect, onRemove, onReplace, onAd
         );
       })}
 
-      <button type="button" className="cg-add" aria-label="Add images" onClick={() => addRef.current?.click()}>
+      <button
+        type="button"
+        className="cg-add"
+        aria-label="Add images"
+        onClick={() => addRef.current?.click()}
+      >
         <svg
           viewBox="0 0 24 24"
           width="20"
