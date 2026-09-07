@@ -24,7 +24,11 @@ export function useImageAspect(src?: string | null) {
     // Cached sources resolve synchronously: apply at once so a source swap
     // never renders one frame with the previous image's ratio.
     if (img.complete) apply();
-    else void img.decode?.().then(apply).catch(() => undefined);
+    else
+      void img
+        .decode?.()
+        .then(apply)
+        .catch(() => undefined);
     return () => {
       alive = false;
     };
