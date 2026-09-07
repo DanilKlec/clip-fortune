@@ -1,4 +1,11 @@
-import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from "react";
 
 /** Reads the natural aspect ratio (w/h) of a source image. */
 export function useImageAspect(src?: string | null) {
@@ -7,12 +14,17 @@ export function useImageAspect(src?: string | null) {
     if (!src) return;
     let alive = true;
     const img = new Image();
-    img.onload = () => {
+    const apply = () => {
       if (alive && img.naturalWidth && img.naturalHeight) {
         setRatio(img.naturalWidth / img.naturalHeight);
       }
     };
+    img.onload = apply;
     img.src = src;
+    // Cached sources resolve synchronously: apply at once so a source swap
+    // never renders one frame with the previous image's ratio.
+    if (img.complete) apply();
+    else void img.decode?.().then(apply).catch(() => undefined);
     return () => {
       alive = false;
     };
@@ -42,41 +54,50 @@ export function ImageStage({ ratio, children, stageRef, className, maxHeight }: 
   const boxRef = useRef<HTMLDivElement>(null);
   const [box, setBox] = useState({ w: 0, h: 0 });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = boxRef.current;
     if (!el) return;
-    const read = () => setBox({ w: el.clientWidth, h: el.clientHeight });
+    const read = () => {
+      const w = el.clientWidth;
+      const h = el.clientHeight;
+      setBox((prev) => (prev.w === w && prev.h === h ? prev : { w, h }));
+    };
     read();
     const ro = new ResizeObserver(read);
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
 
-  const fit =
-    box.w > 0 && box.h > 0
-      ? (() => {
-          const w = Math.min(box.w, box.h * ratio);
-          return { width: `${w}px`, height: `${w / ratio}px` };
-        })()
-      : // Pre-measure / auto-height parents: fall back to a ratio box.
-        {
-          width: "100%",
-          aspectRatio: `${ratio}`,
-          maxWidth: "100%",
-          maxHeight: maxHeight ?? "100%",
-        };
+  // Measured mode: the inner box is absolutely positioned, so its size can
+  // never feed back into the parent — swapping original/graded/AI sources
+  // keeps the preview area byte-for-byte identical.
+  const measured = box.w > 0 && box.h > 0;
+  const fitW = measured ? Math.min(box.w, box.h * ratio) : 0;
+  const fit: React.CSSProperties = measured
+    ? {
+        position: "absolute",
+        left: "50%",
+        top: "50%",
+        transform: "translate(-50%, -50%)",
+        width: `${fitW}px`,
+        height: `${fitW / ratio}px`,
+      }
+    : // Pre-measure / auto-height parents: fall back to a ratio box.
+      {
+        position: "relative",
+        width: "100%",
+        aspectRatio: `${ratio}`,
+        maxWidth: "100%",
+        maxHeight: maxHeight ?? "100%",
+      };
 
   return (
     <div
       ref={boxRef}
-      className="flex h-full w-full min-w-0 items-center justify-center"
+      className="relative flex h-full min-h-0 w-full min-w-0 items-center justify-center overflow-hidden"
       style={maxHeight && maxHeight !== "100%" ? { maxHeight } : undefined}
     >
-      <div
-        ref={stageRef}
-        className={`relative overflow-hidden rounded-xl ${className ?? ""}`}
-        style={fit}
-      >
+      <div ref={stageRef} className={`overflow-hidden rounded-xl ${className ?? ""}`} style={fit}>
         {children}
       </div>
     </div>
