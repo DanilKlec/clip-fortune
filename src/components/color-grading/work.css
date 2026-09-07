@@ -583,7 +583,7 @@
 }
 
 .cg-chips {
-  display: flex;
+  display: none;
   gap: 6px;
   align-items: center;
   flex-wrap: nowrap;
@@ -1141,6 +1141,7 @@
     );
   }
   .cg-chips {
+    display: flex;
     overflow-x: auto;
   }
   .cg-presets {
