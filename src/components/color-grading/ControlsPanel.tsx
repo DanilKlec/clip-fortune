@@ -1,8 +1,8 @@
 import { useRef } from "react";
-import { AdjustmentIcon, EyeIcon, ParamIcon, ResetIcon } from "./param-icons";
+import { AdjustmentIcon, EyeIcon, ResetIcon } from "./param-icons";
 import { TrackSlider } from "./TrackSlider";
+import { GradedImage } from "./GradedImage";
 import { ADJUST_GROUPS } from "./groups";
-import { PRESET_IMAGES } from "./preset-images";
 import {
   ADJUSTMENTS,
   NEUTRAL,
@@ -19,6 +19,8 @@ interface Props {
   tab: PanelTab;
   onTab: (tab: PanelTab) => void;
   hasImage: boolean;
+  /** Currently selected source image — every preset card previews this photo. */
+  sourceUrl: string | null;
 
   /** AI pane */
   prompt: string;
@@ -57,6 +59,7 @@ export function ControlsPanel(props: Props) {
     tab,
     onTab,
     hasImage,
+    sourceUrl,
     prompt,
     onPrompt,
     onGenerate,
@@ -216,7 +219,6 @@ export function ControlsPanel(props: Props) {
             <div className="cg-presets">
               {PRESETS.map((preset, i) => {
                 const on = preset.id === presetId;
-                const image = PRESET_IMAGES[preset.id];
                 return (
                   <button
                     key={preset.id}
@@ -225,12 +227,33 @@ export function ControlsPanel(props: Props) {
                     aria-pressed={on}
                     onClick={() => onPickPreset(preset)}
                   >
-                    {i === 0 || !image ? (
+                    {i === 0 || !sourceUrl ? (
                       <span className="cg-none">
-                        <ParamIcon name="contrast" size={30} />
+                        {i === 0 && (
+                          <svg
+                            viewBox="0 0 24 24"
+                            width="30"
+                            height="30"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.4"
+                            strokeLinecap="round"
+                            aria-hidden
+                          >
+                            <circle cx="12" cy="12" r="8.4" />
+                            <path d="m6.1 17.9 11.8-11.8" />
+                          </svg>
+                        )}
                       </span>
                     ) : (
-                      <img src={image} alt="" loading="lazy" draggable={false} />
+                      <GradedImage
+                        key={sourceUrl}
+                        src={sourceUrl}
+                        alt=""
+                        adjustments={preset.values}
+                        className="cg-preset-shot"
+                        imgClassName=""
+                      />
                     )}
                     <span title={preset.name}>{preset.name}</span>
                   </button>
