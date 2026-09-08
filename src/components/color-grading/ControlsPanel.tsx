@@ -187,11 +187,6 @@ export function ControlsPanel(props: Props) {
             >
               {busy ? "Generating…" : "Generate"}
             </button>
-            <p className="cg-hint" aria-live="polite">
-              {!hasImage
-                ? "Add an image to unlock AI grading."
-                : "The AI works from your original files and this prompt only — manual presets and sliders are not sent."}
-            </p>
             {error && (
               <div className="cg-error" role="alert">
                 <p>{error}</p>

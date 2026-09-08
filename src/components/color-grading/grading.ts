@@ -316,7 +316,7 @@ const p = (v: Partial<Adjustments>): Adjustments => ({ ...NEUTRAL, ...v });
 
 /** 24 working presets — names and values are meant to be easy to replace. */
 export const PRESETS: Preset[] = [
-  { id: "natural", name: "Natural", values: p({}) },
+  { id: "natural", name: "None", values: p({}) },
   {
     id: "split-tone",
     name: "Split Tone",
