@@ -41,11 +41,7 @@ export function GradingHistory({ items, onUse, onDownload, onRemove, onClear }: 
         )}
       </div>
 
-      {items.length === 0 ? (
-        <p className="text-[12px] font-medium text-muted-foreground">
-          Generated and downloaded results appear here — stored on this device only.
-        </p>
-      ) : (
+      {items.length === 0 ? null : (
         <ul className="scrollbar-hide -mx-1 flex gap-3 overflow-x-auto px-1 pb-1">
           {items.map((item) => (
             <li
