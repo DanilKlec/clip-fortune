@@ -1,4 +1,4 @@
-import { useRef, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type CSSProperties } from "react";
 import type { GradingImage } from "./useImageLibrary";
 
 interface Props {
@@ -14,7 +14,41 @@ interface Props {
 export function WorkRail({ images, activeId, onSelect, onRemove, onReplace, onAdd }: Props) {
   const addRef = useRef<HTMLInputElement>(null);
   const replaceRef = useRef<HTMLInputElement>(null);
+  const railRef = useRef<HTMLDivElement>(null);
   const replacingId = useRef<string | null>(null);
+  const [tileSize, setTileSize] = useState<number | null>(null);
+
+  /* Mirrors the reference's rail sizing: every square fits the fixed desktop
+     height, while mobile lets the responsive grid determine its size. */
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail) return;
+
+    const sizeRail = () => {
+      if (window.matchMedia("(max-width: 900px)").matches) {
+        setTileSize(null);
+        return;
+      }
+      const count = images.length + (images.length < 9 ? 1 : 0);
+      const base = window.matchMedia("(max-width: 1180px)").matches ? 78 : 90;
+      if (count === 0) {
+        setTileSize(base);
+        return;
+      }
+      const available = rail.clientHeight || rail.parentElement?.clientHeight || 660;
+      const fitted = Math.floor(Math.min(base, (available - 8 * (count - 1)) / count));
+      setTileSize(Math.max(40, Math.min(base, fitted)));
+    };
+
+    sizeRail();
+    const observer = new ResizeObserver(sizeRail);
+    observer.observe(rail);
+    window.addEventListener("resize", sizeRail);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", sizeRail);
+    };
+  }, [images.length]);
 
   const onReplacePicked = (e: ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -23,7 +57,12 @@ export function WorkRail({ images, activeId, onSelect, onRemove, onReplace, onAd
   };
 
   return (
-    <div className="cg-rail" id="rail">
+    <div
+      ref={railRef}
+      className="cg-rail"
+      id="rail"
+      style={tileSize ? ({ "--cg-tsz": `${tileSize}px` } as CSSProperties) : undefined}
+    >
       {images.map((img, i) => {
         const active = img.id === activeId;
         return (
