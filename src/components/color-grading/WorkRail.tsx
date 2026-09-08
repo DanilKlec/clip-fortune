@@ -107,14 +107,15 @@ export function WorkRail({ images, activeId, onSelect, onRemove, onReplace, onAd
                   height="11"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="2"
+                  strokeWidth="2.2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   aria-hidden
                 >
-                  <path d="M21 12a9 9 0 1 1-3-6.7L21 8" />
-                  <path d="M21 3v5h-5" />
+                  <path d="M3 8h13l-3.5-3.5" />
+                  <path d="M21 16H8l3.5 3.5" />
                 </svg>
+
               </span>
               <span
                 role="button"
