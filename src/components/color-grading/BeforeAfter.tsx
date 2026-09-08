@@ -89,12 +89,13 @@ export function BeforeAfter({
           {after}
         </div>
 
-        <div
-          aria-hidden
-          className="pointer-events-none absolute top-0 bottom-0 z-20 w-px bg-volt"
-          style={{ left: `${pos}%`, transform: "translateX(-50%)" }}
-        />
-        <div
+        <span className="cg-tag cg-tag-a">Before</span>
+        <span className="cg-tag cg-tag-b">After</span>
+
+        <div aria-hidden className="cg-cmp-line" style={{ left: `${pos}%` }} />
+        <button
+          type="button"
+          className="cg-cmp-knob"
           role="slider"
           aria-label={label}
           aria-valuemin={0}
@@ -105,14 +106,23 @@ export function BeforeAfter({
             if (e.key === "ArrowLeft") setPos((v) => v - 2);
             if (e.key === "ArrowRight") setPos((v) => v + 2);
           }}
-          className="absolute top-1/2 z-30 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize items-center justify-center rounded-full border bg-background/80 text-[11px] font-bold text-volt backdrop-blur focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          style={{ left: `${pos}%`, borderColor: "var(--volt-bdr)" }}
+          style={{ left: `${pos}%` }}
         >
-          ⇆
-        </div>
-
-        <span className="badge-sky pointer-events-none absolute left-3 top-3 z-30">Before</span>
-        <span className="badge-volt pointer-events-none absolute right-3 top-3 z-30">After</span>
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+          >
+            <path d="m9 6-4 6 4 6" />
+            <path d="m15 6 4 6-4 6" />
+          </svg>
+        </button>
       </div>
     </ImageStage>
   );
