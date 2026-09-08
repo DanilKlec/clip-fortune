@@ -260,6 +260,18 @@ export function ColorGradingPage() {
   const toggleEffect = (key: AdjustmentKey, on: boolean) =>
     editManual((s) => ({ enabled: { ...s.enabled, [key]: on } }));
   const resetKey = (key: AdjustmentKey) => updateAdjustment(key, NEUTRAL[key]);
+  /** Group reset restores neutral values and re-enables every parameter in it. */
+  const resetGroup = (keys: AdjustmentKey[]) =>
+    editManual((s) => {
+      const adjustments = { ...s.adjustments };
+      const nextEnabled = { ...s.enabled };
+      keys.forEach((k) => {
+        adjustments[k] = NEUTRAL[k];
+        nextEnabled[k] = true;
+      });
+      const match = PRESETS.find((p) => sameValues(p.values, adjustments));
+      return { adjustments, enabled: nextEnabled, presetId: match?.id ?? null };
+    });
   const resetAll = () =>
     editManual(() => ({
       adjustments: { ...NEUTRAL },
