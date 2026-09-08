@@ -19,6 +19,8 @@ interface Props {
   tab: PanelTab;
   onTab: (tab: PanelTab) => void;
   hasImage: boolean;
+  /** Currently selected source image — every preset card previews this photo. */
+  sourceUrl: string | null;
 
   /** AI pane */
   prompt: string;

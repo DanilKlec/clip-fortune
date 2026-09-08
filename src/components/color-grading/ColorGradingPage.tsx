@@ -800,6 +800,7 @@ export function ColorGradingPage() {
               tab={tab}
               onTab={setTab}
               hasImage={Boolean(active)}
+              sourceUrl={active?.url ?? null}
               prompt={st.prompt}
               onPrompt={setPrompt}
               onGenerate={() => void generate(activeId)}
