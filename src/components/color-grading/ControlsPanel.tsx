@@ -329,7 +329,6 @@ export function ControlsPanel(props: Props) {
                   </div>
                 );
               })}
-
             </div>
 
             {/* mobile compact tiles */}

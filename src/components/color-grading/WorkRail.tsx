@@ -115,7 +115,6 @@ export function WorkRail({ images, activeId, onSelect, onRemove, onReplace, onAd
                   <path d="M3 8h13l-3.5-3.5" />
                   <path d="M21 16H8l3.5 3.5" />
                 </svg>
-
               </span>
               <span
                 role="button"
