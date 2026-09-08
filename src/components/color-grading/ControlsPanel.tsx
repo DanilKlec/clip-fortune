@@ -1,8 +1,8 @@
 import { useRef } from "react";
-import { AdjustmentIcon, EyeIcon, ParamIcon, ResetIcon } from "./param-icons";
+import { AdjustmentIcon, EyeIcon, ResetIcon } from "./param-icons";
 import { TrackSlider } from "./TrackSlider";
+import { GradedImage } from "./GradedImage";
 import { ADJUST_GROUPS } from "./groups";
-import { PRESET_IMAGES } from "./preset-images";
 import {
   ADJUSTMENTS,
   NEUTRAL,
@@ -59,6 +59,7 @@ export function ControlsPanel(props: Props) {
     tab,
     onTab,
     hasImage,
+    sourceUrl,
     prompt,
     onPrompt,
     onGenerate,
