@@ -70,6 +70,7 @@ export function ControlsPanel(props: Props) {
     onChange,
     onToggle,
     onResetKey,
+    onResetGroup,
     onResetAll,
     collapsed,
     onToggleGroup,
