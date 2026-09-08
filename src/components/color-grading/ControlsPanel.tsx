@@ -260,41 +260,26 @@ export function ControlsPanel(props: Props) {
 
             {/* mobile category nav */}
             <div className="cg-chips cg-scroll-x">
-              {ADJUST_GROUPS.map((group) => {
-                const groupOn = group.keys.some((k) => enabled[k]);
-                return (
-                  <span key={group.id} className="contents">
-                    <button
-                      type="button"
-                      className="cg-chip"
-                      data-seg={group.id}
-                      aria-pressed={group.id === activeGroup}
-                      onClick={() => scrollToGroup(group.id)}
-                    >
-                      <AdjustmentIcon paramKey={group.keys[0]} size={13} />
-                      {group.label}
-                    </button>
-                    {group.effect && (
-                      <button
-                        type="button"
-                        className="cg-eye-chip"
-                        aria-pressed={groupOn}
-                        aria-label={`${groupOn ? "Disable" : "Enable"} ${group.label}`}
-                        onClick={() => group.keys.forEach((k) => onToggle(k, !groupOn))}
-                      >
-                        <EyeIcon on={groupOn} size={13} />
-                      </button>
-                    )}
-                  </span>
-                );
-              })}
+              {ADJUST_GROUPS.map((group) => (
+                <button
+                  key={group.id}
+                  type="button"
+                  className="cg-chip"
+                  data-seg={group.id}
+                  aria-pressed={group.id === activeGroup}
+                  onClick={() => scrollToGroup(group.id)}
+                >
+                  <AdjustmentIcon paramKey={group.keys[0]} size={13} />
+                  {group.label}
+                </button>
+              ))}
             </div>
 
             {/* desktop full sliders */}
             <div className="cg-full cg-groups">
               {ADJUST_GROUPS.map((group) => {
                 const isClosed = collapsed[group.id] ?? false;
-                const groupOn = group.keys.some((k) => enabled[k]);
+                const dirty = group.keys.some((k) => values[k] !== NEUTRAL[k] || !enabled[k]);
                 return (
                   <div
                     key={group.id}
@@ -320,22 +305,21 @@ export function ControlsPanel(props: Props) {
                             strokeLinejoin="round"
                             aria-hidden
                           >
-                            <path d="m6 9 6 6 6-6" />
+                            <path d="m18 15-6-6-6 6" />
                           </svg>
                         </span>
                         {group.label}
                       </button>
-                      {group.effect && (
-                        <button
-                          type="button"
-                          className="cg-eye-chip"
-                          aria-pressed={groupOn}
-                          aria-label={`${groupOn ? "Disable" : "Enable"} ${group.label}`}
-                          onClick={() => group.keys.forEach((k) => onToggle(k, !groupOn))}
-                        >
-                          <EyeIcon on={groupOn} size={13} />
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        className="cg-link"
+                        onClick={() => onResetGroup(group.keys)}
+                        disabled={!dirty}
+                        aria-disabled={!dirty}
+                        aria-label={`Reset ${group.label}`}
+                      >
+                        reset
+                      </button>
                     </div>
                     <div className="cg-rows">
                       {group.keys.map((k) => row(k, group.labels?.[k]))}
@@ -343,6 +327,7 @@ export function ControlsPanel(props: Props) {
                   </div>
                 );
               })}
+
             </div>
 
             {/* mobile compact tiles */}
