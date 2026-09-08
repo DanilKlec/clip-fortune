@@ -38,6 +38,7 @@ interface Props {
   onChange: (key: AdjustmentKey, value: number) => void;
   onToggle: (key: AdjustmentKey, on: boolean) => void;
   onResetKey: (key: AdjustmentKey) => void;
+  onResetGroup: (keys: AdjustmentKey[]) => void;
   onResetAll: () => void;
   collapsed: Record<string, boolean>;
   onToggleGroup: (id: string) => void;
