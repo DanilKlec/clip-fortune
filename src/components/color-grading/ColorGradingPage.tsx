@@ -813,6 +813,7 @@ export function ColorGradingPage() {
               onChange={updateAdjustment}
               onToggle={toggleEffect}
               onResetKey={resetKey}
+              onResetGroup={resetGroup}
               onResetAll={resetAll}
               collapsed={collapsed}
               onToggleGroup={(id) => setCollapsed((c) => ({ ...c, [id]: !c[id] }))}
