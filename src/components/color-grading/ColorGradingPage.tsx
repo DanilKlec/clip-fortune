@@ -458,8 +458,8 @@ export function ColorGradingPage() {
             </span>
           </h1>
           <p className="mt-3 hidden max-w-2xl text-[14px] font-medium leading-relaxed text-muted-foreground sm:block sm:text-[15px]">
-            Drop your stills, dial in the look with live manual controls, or describe a look and let
-            the AI grade the original file. Manual and AI stay independent.
+            Drop your stills, dial in the look with live controls, and export a cinematic grade.
+            Every change previews instantly — nothing is uploaded until you generate.
           </p>
 
           {/* ---------------- workspace ---------------- */}
