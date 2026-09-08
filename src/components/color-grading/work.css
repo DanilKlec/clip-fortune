@@ -1,7 +1,19 @@
-/**
- * Color Grading workspace styles — every rule is scoped under `.cg-work`
- * so nothing here can leak into the header, footer or any other page.
- */
+/** Color Grading page and workspace styles. */
+
+.cg-shell {
+  width: 100%;
+  max-width: 1596px;
+  margin: 0 auto;
+  padding: 40px 48px 64px;
+}
+
+.cg-page-content {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+}
 
 .cg-work {
   --cg-card: hsl(232 16% 14%);
@@ -26,10 +38,7 @@
 
   display: grid;
   grid-template-columns: 90px minmax(0, 1fr) 364px;
-  width: min(calc(100vw - 96px), 1500px);
-  position: relative;
-  left: 50%;
-  transform: translateX(-50%);
+  width: 100%;
   gap: 16px;
   margin-top: 28px;
   height: 660px;
@@ -1054,18 +1063,23 @@
 
 /* ---------- responsive ---------- */
 @media (max-width: 1180px) {
+  .cg-shell {
+    padding: 32px 24px 56px;
+  }
   .cg-work {
     grid-template-columns: 78px minmax(0, 1fr) 330px;
-    width: calc(100vw - 48px);
     height: 600px;
     --cg-tsz: 78px;
   }
 }
 @media (max-width: 900px) {
+  .cg-shell {
+    padding: 20px 16px calc(108px + env(safe-area-inset-bottom));
+  }
   .cg-work {
     display: flex;
     flex-direction: column;
-    width: calc(100vw - 32px);
+    width: 100%;
     height: auto;
     gap: 12px;
     margin-top: 20px;
@@ -1215,6 +1229,28 @@
   }
   .cg-work.cg-editing .cg-panel {
     display: none;
+  }
+
+  /* Mobile panels grow with their content; the page is the sole vertical scroller. */
+  .cg-work .cg-panel,
+  .cg-work .cg-panel-body,
+  .cg-work .cg-pane,
+  .cg-work #cg-pane-prompt,
+  .cg-work .cg-prompt-pane {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    overflow-y: visible;
+  }
+  .cg-work .cg-panel,
+  .cg-work .cg-panel-body,
+  .cg-work .cg-prompt-pane {
+    flex: none;
+  }
+  .cg-work .cg-sec-head,
+  .cg-work .cg-group-head {
+    position: static;
+    top: auto;
   }
 }
 @media (max-width: 560px) {

@@ -438,7 +438,7 @@ export function ColorGradingPage() {
 
   return (
     <div className="w-full">
-      <section className="page-shell mx-auto w-full max-w-[1600px] pt-2 sm:pt-8 md:pt-10">
+      <section className="cg-shell">
         <nav
           aria-label="Breadcrumb"
           className="mb-3 hidden items-center gap-2 text-[13px] font-medium text-muted-foreground sm:mb-6 sm:flex"
@@ -450,10 +450,7 @@ export function ColorGradingPage() {
           <span className="text-foreground">AI Color Grading</span>
         </nav>
 
-        <div
-          className="glass min-w-0 rounded-2xl p-3 sm:p-5 lg:p-6"
-          style={{ boxShadow: "var(--shadow-card)" }}
-        >
+        <div className="cg-page-content min-w-0">
           <h1 className="font-display text-[clamp(1.35rem,5.5vw,2.75rem)] font-extrabold uppercase leading-[0.95] tracking-[-0.02em] text-foreground [text-wrap:balance]">
             AI Color{" "}
             <span className="bg-gradient-to-b from-volt to-volt/60 bg-clip-text text-transparent">
