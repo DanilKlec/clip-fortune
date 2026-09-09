@@ -86,6 +86,13 @@ export function ColorGradingPage() {
     statesRef.current = states;
   }, [states]);
 
+  /** Without an image nothing is selectable — no preset, no active category. */
+  useEffect(() => {
+    if (images.length === 0) setActiveGroup(null);
+  }, [images.length]);
+
+
+
   /** Settings are editable before any upload; they carry over to the first image. */
   const [draft, setDraft] = useState<ImageState>(() => createImageState());
   const st: ImageState = activeState ?? draft;
