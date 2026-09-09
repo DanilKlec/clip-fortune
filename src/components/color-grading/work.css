@@ -1310,7 +1310,6 @@
     position: static;
     top: auto;
   }
-
 }
 @media (max-width: 560px) {
   .cg-toolbar {

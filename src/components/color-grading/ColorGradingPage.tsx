@@ -91,8 +91,6 @@ export function ColorGradingPage() {
     if (images.length === 0) setActiveGroup(null);
   }, [images.length]);
 
-
-
   /** Settings are editable before any upload; they carry over to the first image. */
   const [draft, setDraft] = useState<ImageState>(() => createImageState());
   const st: ImageState = activeState ?? draft;
@@ -480,7 +478,6 @@ export function ColorGradingPage() {
             Drop your stills, dial in the look with live controls, and export a cinematic grade.
             Every change previews instantly — nothing is uploaded until you generate.
           </p>
-
 
           {/* ---------------- workspace ---------------- */}
           <div
