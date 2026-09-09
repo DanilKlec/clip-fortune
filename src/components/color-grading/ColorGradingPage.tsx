@@ -808,7 +808,7 @@ export function ColorGradingPage() {
               busy={busy}
               error={status === "error" ? (st.error ?? "Generation failed") : null}
               onRetry={() => void generate(activeId, st.lastRequest?.prompt)}
-              presetId={st.presetId}
+              presetId={active ? st.presetId : null}
               onPickPreset={pickPreset}
               values={st.adjustments}
               enabled={st.enabled}
