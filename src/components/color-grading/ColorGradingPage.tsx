@@ -819,7 +819,7 @@ export function ColorGradingPage() {
               onResetAll={resetAll}
               collapsed={collapsed}
               onToggleGroup={(id) => setCollapsed((c) => ({ ...c, [id]: !c[id] }))}
-              activeGroup={activeGroup}
+              activeGroup={active ? activeGroup : null}
               onSelectGroup={setActiveGroup}
               onOpenParam={openParam}
               onDragStart={beginDrag}
