@@ -1304,27 +1304,13 @@
     display: none;
   }
 
-  /* Mobile panels grow with their content; the page is the sole vertical scroller. */
-  .cg-work .cg-panel,
-  .cg-work .cg-panel-body,
-  .cg-work .cg-pane,
-  .cg-work #cg-pane-prompt,
-  .cg-work .cg-prompt-pane {
-    height: auto;
-    min-height: 0;
-    max-height: none;
-    overflow-y: visible;
-  }
-  .cg-work .cg-panel,
-  .cg-work .cg-panel-body,
-  .cg-work .cg-prompt-pane {
-    flex: none;
-  }
+  /* Panel keeps the HTML mobile height; no nested vertical scrolling. */
   .cg-work .cg-sec-head,
   .cg-work .cg-group-head {
     position: static;
     top: auto;
   }
+
 }
 @media (max-width: 560px) {
   .cg-toolbar {
