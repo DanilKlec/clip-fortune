@@ -48,7 +48,7 @@ export const DEFAULT_PRESET_ID = PRESETS[0].id;
 export function createImageState(): ImageState {
   return {
     prompt: "",
-    presetId: DEFAULT_PRESET_ID,
+    presetId: null,
     adjustments: { ...NEUTRAL },
     enabled: { ...DEFAULT_ENABLED },
     mode: "manual",

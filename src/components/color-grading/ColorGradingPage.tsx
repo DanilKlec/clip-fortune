@@ -74,7 +74,7 @@ export function ColorGradingPage() {
     haze: true,
     grain: true,
   });
-  const [activeGroup, setActiveGroup] = useState("color");
+  const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [editingKey, setEditingKey] = useState<AdjustmentKey | null>(null);
   const editorBackup = useRef<{ value: number; enabled: boolean } | null>(null);
 
@@ -85,6 +85,11 @@ export function ColorGradingPage() {
   useEffect(() => {
     statesRef.current = states;
   }, [states]);
+
+  /** Without an image nothing is selectable — no preset, no active category. */
+  useEffect(() => {
+    if (images.length === 0) setActiveGroup(null);
+  }, [images.length]);
 
   /** Settings are editable before any upload; they carry over to the first image. */
   const [draft, setDraft] = useState<ImageState>(() => createImageState());
@@ -453,7 +458,7 @@ export function ColorGradingPage() {
       <section className="cg-shell">
         <nav
           aria-label="Breadcrumb"
-          className="mb-3 hidden items-center gap-2 text-[13px] font-medium text-muted-foreground sm:mb-6 sm:flex"
+          className="mb-3 flex items-center gap-2 text-[13px] font-medium text-muted-foreground sm:mb-6"
         >
           <a href="#explore-apps" className="transition-colors hover:text-foreground">
             Apps
@@ -463,13 +468,13 @@ export function ColorGradingPage() {
         </nav>
 
         <div className="cg-page-content min-w-0">
-          <h1 className="font-display text-[clamp(1.35rem,5.5vw,2.75rem)] font-extrabold uppercase leading-[0.95] tracking-[-0.02em] text-foreground [text-wrap:balance]">
+          <h1 className="font-display text-[44px] font-extrabold uppercase leading-[1.1] tracking-[-0.02em] text-foreground [text-wrap:balance] max-[900px]:text-[28px]">
             AI Color{" "}
             <span className="bg-gradient-to-b from-volt to-volt/60 bg-clip-text text-transparent">
               Grading
             </span>
           </h1>
-          <p className="mt-3 hidden max-w-2xl text-[14px] font-medium leading-relaxed text-muted-foreground sm:block sm:text-[15px]">
+          <p className="mt-[10px] max-w-[60ch] text-[15px] font-medium leading-relaxed text-muted-foreground max-[900px]:text-[13px]">
             Drop your stills, dial in the look with live controls, and export a cinematic grade.
             Every change previews instantly — nothing is uploaded until you generate.
           </p>
@@ -807,7 +812,7 @@ export function ColorGradingPage() {
               busy={busy}
               error={status === "error" ? (st.error ?? "Generation failed") : null}
               onRetry={() => void generate(activeId, st.lastRequest?.prompt)}
-              presetId={st.presetId}
+              presetId={active ? st.presetId : null}
               onPickPreset={pickPreset}
               values={st.adjustments}
               enabled={st.enabled}
@@ -818,7 +823,7 @@ export function ColorGradingPage() {
               onResetAll={resetAll}
               collapsed={collapsed}
               onToggleGroup={(id) => setCollapsed((c) => ({ ...c, [id]: !c[id] }))}
-              activeGroup={activeGroup}
+              activeGroup={active ? activeGroup : null}
               onSelectGroup={setActiveGroup}
               onOpenParam={openParam}
               onDragStart={beginDrag}
