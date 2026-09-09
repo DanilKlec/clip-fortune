@@ -74,7 +74,7 @@ export function ColorGradingPage() {
     haze: true,
     grain: true,
   });
-  const [activeGroup, setActiveGroup] = useState("color");
+  const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [editingKey, setEditingKey] = useState<AdjustmentKey | null>(null);
   const editorBackup = useRef<{ value: number; enabled: boolean } | null>(null);
 
