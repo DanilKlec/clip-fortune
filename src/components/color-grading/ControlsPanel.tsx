@@ -44,7 +44,7 @@ interface Props {
   onResetAll: () => void;
   collapsed: Record<string, boolean>;
   onToggleGroup: (id: string) => void;
-  activeGroup: string;
+  activeGroup: string | null;
   onSelectGroup: (id: string) => void;
   /** Mobile: open the single-parameter editor. */
   onOpenParam: (key: AdjustmentKey) => void;
@@ -224,7 +224,8 @@ export function ControlsPanel(props: Props) {
                     key={preset.id}
                     type="button"
                     className="cg-preset"
-                    aria-pressed={on}
+                    aria-pressed={hasImage && on}
+                    disabled={!hasImage}
                     onClick={() => onPickPreset(preset)}
                   >
                     {i === 0 || !sourceUrl ? (
@@ -291,7 +292,8 @@ export function ControlsPanel(props: Props) {
                   type="button"
                   className="cg-chip"
                   data-seg={group.id}
-                  aria-pressed={group.id === activeGroup}
+                  aria-pressed={hasImage && group.id === activeGroup}
+                  disabled={!hasImage}
                   onClick={() => scrollToGroup(group.id)}
                 >
                   <AdjustmentIcon paramKey={group.keys[0]} size={13} />
@@ -371,6 +373,7 @@ export function ControlsPanel(props: Props) {
                           className={`cg-tile${moved ? " cg-moved" : ""}`}
                           data-seg={ki === 0 ? group.id : undefined}
                           aria-pressed={false}
+                          disabled={!hasImage}
                           aria-label={`Edit ${group.label} · ${label}`}
                           onClick={() => {
                             onSelectGroup(group.id);
