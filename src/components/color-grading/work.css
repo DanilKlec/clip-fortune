@@ -1331,3 +1331,55 @@
     animation-duration: 0.01ms !important;
   }
 }
+
+/* ---- Mobile: no page-level horizontal overflow ---------------------------
+   Only the presets / chips / tiles rails may scroll horizontally; every
+   container above them stays exactly as wide as the viewport. */
+@media (max-width: 900px) {
+  .cg-shell,
+  .cg-page-content,
+  .cg-work,
+  .cg-canvas-card,
+  .cg-panel,
+  .cg-panel-body,
+  .cg-pane,
+  .cg-stage,
+  .cg-viewer,
+  .cg-history {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  /* flex/grid children must be allowed to shrink */
+  .cg-work > *,
+  .cg-canvas-card > *,
+  .cg-panel > *,
+  .cg-panel-body > *,
+  .cg-pane > *,
+  .cg-compact > *,
+  .cg-row > *,
+  .cg-toolbar > * {
+    min-width: 0;
+  }
+
+  /* the edge-to-edge rails keep their negative margins visually,
+     but the panes clip them instead of widening the document */
+  .cg-panel-body,
+  .cg-pane,
+  .cg-compact {
+    overflow-x: clip;
+  }
+
+  .cg-presets,
+  .cg-chips,
+  .cg-tiles {
+    width: auto;
+    max-width: none;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+  }
+}
